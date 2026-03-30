@@ -48,6 +48,12 @@
   <script>
     const BACKEND_URL = 'https://apibedasrun.hirumi.app';
 
+    function confirmPay(url) {
+      if (confirm('Anda akan diarahkan ke halaman pembayaran. Lanjutkan?')) {
+        window.location.href = url;
+      }
+    }
+
     const STATUS_CONFIG = {
       success:   { label: 'Berhasil',   bg: 'bg-green-100',  text: 'text-green-700',  icon: '✅' },
       pending:   { label: 'Menunggu',   bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '⏳' },
@@ -82,12 +88,11 @@
         }
 
         const trx    = data.transaction;
-        const status = STATUS_CONFIG[trx.status] || { label: trx.status, bg: 'bg-gray-100', text: 'text-gray-700', icon: '❓' };
-
-        // Data dari iPaymu jika ada
-        const ipaymuStatus = data.ipaymu?.Data?.Status ?? null;
-        const ipaymuAmount = data.ipaymu?.Data?.Amount ?? null;
-        const ipaymuName   = data.ipaymu?.Data?.BuyerName ?? null;
+        const status     = STATUS_CONFIG[trx.status] || { label: trx.status, bg: 'bg-gray-100', text: 'text-gray-700', icon: '❓' };
+        const iStatus    = data.ipaymu?.Data?.Status ?? null;
+        const isPaid     = [1, 6, 7].includes(iStatus);
+        const isUnpaid   = iStatus === 0;
+        const ipaymuUrl  = trx.ipaymu_url || null;
 
         result.innerHTML = `
           <div class="border border-gray-200 rounded-xl overflow-hidden">
@@ -95,7 +100,7 @@
               <span class="text-lg">${status.icon}</span>
               <div>
                 <p class="font-semibold ${status.text}">${status.label}</p>
-                <p class="text-xs text-gray-500">Status Transaksi</p>
+                <p class="text-xs text-gray-500">${data.ipaymu?.Data?.StatusDesc || 'Status Transaksi'}</p>
               </div>
             </div>
             <div class="p-4 space-y-2 text-sm text-gray-700">
@@ -130,11 +135,16 @@
                 <span class="font-medium">${new Date(trx.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
               </div>
             </div>
-            ${trx.status === 'pending' && trx.ipaymu_url ? `
-            <div class="px-4 pb-4">
-              <a href="${trx.ipaymu_url}" class="block text-center bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 rounded-xl transition text-sm">
-                Lanjutkan Pembayaran
-              </a>
+            ${isPaid ? `
+            <div class="px-4 pb-4 bg-green-50 border-t border-green-100 py-3 text-center text-sm text-green-700 font-medium">
+              🎉 Pembayaran telah dikonfirmasi. Sampai jumpa di event!
+            </div>` : ''}
+            ${isUnpaid && ipaymuUrl ? `
+            <div class="px-4 pb-4 pt-2" id="pay-prompt">
+              <p class="text-sm text-gray-600 mb-3 text-center">Pembayaran Anda belum selesai. Ingin melanjutkan sekarang?</p>
+              <button onclick="confirmPay('${ipaymuUrl}')" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 rounded-xl transition text-sm">
+                Ya, Bayar Sekarang
+              </button>
             </div>` : ''}
           </div>`;
 

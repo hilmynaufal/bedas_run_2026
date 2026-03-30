@@ -26,7 +26,7 @@ const supabase = createClient(
 );
 
 // Base URL server ini (untuk notifyUrl callback dari iPaymu)
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -302,6 +302,34 @@ app.get('/check-transaction', async (req, res) => {
 
     const ipaymuData = await ipaymuRes.json();
     console.log('[check-transaction] iPaymu response:', JSON.stringify(ipaymuData));
+
+    // Sync status ke Supabase berdasarkan iPaymu Status
+    // Status 1, 6, 7 = berhasil/paid
+    if (ipaymuData.Status === 200 && ipaymuData.Data) {
+      const iStatus    = ipaymuData.Data.Status;
+      const newStatus  = [1, 6, 7].includes(iStatus) ? 'success' : iStatus === 0 ? 'pending' : 'cancelled';
+
+      await supabase
+        .from('transactions')
+        .update({
+          status:          newStatus,
+          trx_id:          String(ipaymuData.Data.TransactionId),
+          tipe:            ipaymuData.Data.TypeDesc            || null,
+          payment_method:  ipaymuData.Data.PaymentMethod       || null,
+          payment_channel: ipaymuData.Data.PaymentChannel      || null,
+          updated_at:      new Date().toISOString(),
+        })
+        .eq('reference_id', trx.reference_id);
+
+      // Refresh data transaksi dari DB setelah update
+      const { data: updated } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('reference_id', trx.reference_id)
+        .single();
+
+      return res.json({ source: 'ipaymu', transaction: updated || trx, ipaymu: ipaymuData });
+    }
 
     res.json({ source: 'ipaymu', transaction: trx, ipaymu: ipaymuData });
   } catch (err) {
