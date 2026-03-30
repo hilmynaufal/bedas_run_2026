@@ -49,7 +49,7 @@ app.post('/payment', async (req, res) => {
   const PRICE = ['1000'];
   const AMOUNT = '1000';
 
-  const txReferenceId = referenceId || `ORDER-${Date.now()}`;
+  const txReferenceId = referenceId || `ID${Date.now()}`;
 
   const fd = formData || {};
 
@@ -91,6 +91,7 @@ app.post('/payment', async (req, res) => {
     returnUrl: returnUrl || `${BASE_URL}/success.html`,
     cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
     notifyUrl: `${BASE_URL}/callback`,
+    paymentMethod: 'qris',
     referenceId: txReferenceId,
   };
 

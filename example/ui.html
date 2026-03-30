@@ -982,7 +982,7 @@
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            referenceId: `ORDER-${responseData?.data?.id || Date.now()}`,
+                            referenceId: `ID${responseData?.data?.id || Date.now()}`,
                             buyerName,
                             buyerPhone,
                             buyerEmail,
