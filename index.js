@@ -94,7 +94,7 @@ app.post('/payment', async (req, res) => {
     paymentMethod: 'qris',
     //test
     // referenceId: txReferenceId,
-    referenceId: "ID1234"
+    referenceId: 'ID1234'
   };
 
   console.log('[payment] notifyUrl:', body.notifyUrl);
@@ -142,6 +142,7 @@ app.post('/payment', async (req, res) => {
         .eq('reference_id', txReferenceId);
     }
 
+    console.log('[payment] data:', data);
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
