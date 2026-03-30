@@ -135,7 +135,7 @@ app.post('/payment', async (req, res) => {
       await supabase
         .from('transactions')
         .update({
-          ipaymu_session_id: data.Data.SessionId || null,
+          ipaymu_session_id: data.Data.SessionID || null,
           ipaymu_url: data.Data.Url || null,
           updated_at: new Date().toISOString(),
         })
