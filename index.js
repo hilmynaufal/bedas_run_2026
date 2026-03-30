@@ -141,6 +141,8 @@ app.post('/payment', async (req, res) => {
 
 // Callback dari iPaymu setelah user bayar
 app.post('/payment/callback', async (req, res) => {
+  console.log('[callback] Payload diterima:', JSON.stringify(req.body, null, 2));
+
   const payload = { ...req.body };
 
   // 1. Verifikasi signature (secret key = VA number)
@@ -158,12 +160,13 @@ app.post('/payment/callback', async (req, res) => {
     .digest('hex');
 
   if (calculatedSignature !== receivedSignature) {
-    console.error('Callback signature tidak valid');
+    console.error('[callback] Signature tidak valid — received:', receivedSignature, '| calculated:', calculatedSignature);
     return res.status(400).send('Invalid Signature');
   }
 
   const referenceId = payload.reference_id || payload.referenceId;
   const trxStatus = (payload.status || '').toLowerCase();
+  console.log(`[callback] reference_id: ${referenceId} | status: ${trxStatus}`);
 
   if (!referenceId) {
     return res.status(400).json({ error: 'reference_id tidak ditemukan' });
@@ -183,9 +186,11 @@ app.post('/payment/callback', async (req, res) => {
     .eq('reference_id', referenceId);
 
   if (error) {
+    console.error('[callback] Gagal update Supabase:', error.message);
     return res.status(500).json({ error: 'Gagal update status', detail: error.message });
   }
 
+  console.log(`[callback] Status transaksi ${referenceId} diupdate ke: ${newStatus}`);
   res.status(200).json({ ok: true });
 });
 
