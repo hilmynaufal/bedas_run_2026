@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'example')));
 // iPaymu config
 const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY;
 const IPAYMU_VA = process.env.IPAYMU_VA;
-const IPAYMU_URL = 'https://sandbox.ipaymu.com/api/v2/payment';
+const IPAYMU_URL = 'https://my.ipaymu.com/api/v2/payment';
 
 // Supabase config
 const supabase = createClient(
