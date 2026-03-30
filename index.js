@@ -92,7 +92,9 @@ app.post('/payment', async (req, res) => {
     cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
     notifyUrl: `${BASE_URL}/callback`,
     paymentMethod: 'qris',
-    referenceId: txReferenceId,
+    //test
+    // referenceId: txReferenceId,
+    referenceId: "ID1234"
   };
 
   console.log('[payment] notifyUrl:', body.notifyUrl);
