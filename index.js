@@ -49,7 +49,7 @@ app.post('/payment', async (req, res) => {
   const PRICE = ['1000'];
   const AMOUNT = '1000';
 
-  const txReferenceId = 'ID1234' || `ID${Date.now()}`;
+  const txReferenceId = referenceId || `ID${Date.now()}`;
 
   const fd = formData || {};
 
@@ -96,8 +96,8 @@ app.post('/payment', async (req, res) => {
     buyerPhone: buyerPhone || fd['Nomor Whatsapp Aktif'] || null,
     buyerEmail: buyerEmail || fd['Email'] || null,
     //test
-    // referenceId: txReferenceId,
-    referenceId: 'ID1234'
+    referenceId: txReferenceId,
+    // referenceId: 'ID1234'
   };
 
   console.log('[payment] notifyUrl:', body.notifyUrl);
