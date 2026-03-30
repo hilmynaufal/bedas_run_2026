@@ -49,7 +49,7 @@ app.post('/payment', async (req, res) => {
   const PRICE = ['1000'];
   const AMOUNT = '1000';
 
-  const txReferenceId = referenceId || `ID${Date.now()}`;
+  const txReferenceId = 'ID1234' || `ID${Date.now()}`;
 
   const fd = formData || {};
 
