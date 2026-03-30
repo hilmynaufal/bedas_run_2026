@@ -999,7 +999,7 @@
 
                     // Redirect apabila API sukses
                     if (payData.Status === 200 && payData.Data && payData.Data.Url) {
-                        window.open(payData.Data.Url, '_blank');
+                        window.location.href = payData.Data.Url;
                     } else {
                         throw new Error(payData.Message || "Gagal mendapatkan tautan dari layanan pembayaran.");
                     }
