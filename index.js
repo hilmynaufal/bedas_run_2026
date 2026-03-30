@@ -92,6 +92,9 @@ app.post('/payment', async (req, res) => {
     cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
     notifyUrl: `${BASE_URL}/callback`,
     paymentMethod: 'qris',
+    buyerName: buyerName || fd['Nama Lengkap'] || null,
+    buyerPhone: buyerPhone || fd['Nomor Whatsapp Aktif'] || null,
+    buyerEmail: buyerEmail || fd['Email'] || null,
     //test
     // referenceId: txReferenceId,
     referenceId: 'ID1234'
