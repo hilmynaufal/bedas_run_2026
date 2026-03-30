@@ -94,6 +94,10 @@ app.post('/payment', async (req, res) => {
     referenceId: txReferenceId,
   };
 
+  console.log('[payment] notifyUrl:', body.notifyUrl);
+  console.log('[payment] returnUrl:', body.returnUrl);
+  console.log('[payment] cancelUrl:', body.cancelUrl);
+
   if (buyerName) body.buyerName = buyerName;
   if (buyerPhone) body.buyerPhone = buyerPhone;
   if (buyerEmail) body.buyerEmail = buyerEmail;
