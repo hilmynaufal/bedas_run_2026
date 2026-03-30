@@ -97,6 +97,8 @@ app.post('/payment', async (req, res) => {
   console.log('[payment] notifyUrl:', body.notifyUrl);
   console.log('[payment] returnUrl:', body.returnUrl);
   console.log('[payment] cancelUrl:', body.cancelUrl);
+  console.log('[payment] referenceId:', body.referenceId);
+  console.log('[payment] body:', body);
 
   if (buyerName) body.buyerName = buyerName;
   if (buyerPhone) body.buyerPhone = buyerPhone;
