@@ -8,8 +8,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // iPaymu config
-const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY || 'FF12A60E-1CCA-4938-9027-A1E7E6CB2EAD';
-const IPAYMU_VA = process.env.IPAYMU_VA || '1179005861608938';
+const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY;
+const IPAYMU_VA = process.env.IPAYMU_VA;
 const IPAYMU_URL = 'https://my.ipaymu.com/api/v2/payment';
 
 app.get('/health', (req, res) => {
