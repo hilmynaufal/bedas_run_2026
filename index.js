@@ -88,8 +88,8 @@ app.post('/payment', async (req, res) => {
     qty: QTY,
     price: PRICE,
     amount: AMOUNT,
-    returnUrl: returnUrl || `${BASE_URL}/payment/return`,
-    cancelUrl: cancelUrl || `${BASE_URL}/payment/cancel`,
+    returnUrl: returnUrl || `${BASE_URL}/success.html`,
+    cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
     notifyUrl: `${BASE_URL}/payment/callback`,
     referenceId: txReferenceId,
   };
