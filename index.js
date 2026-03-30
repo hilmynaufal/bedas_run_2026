@@ -90,7 +90,7 @@ app.post('/payment', async (req, res) => {
     amount: AMOUNT,
     returnUrl: returnUrl || `${BASE_URL}/success.html`,
     cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
-    notifyUrl: `${BASE_URL}/payment/callback`,
+    notifyUrl: `${BASE_URL}/callback`,
     referenceId: txReferenceId,
   };
 
@@ -144,7 +144,7 @@ app.post('/payment', async (req, res) => {
 });
 
 // Callback dari iPaymu setelah user bayar
-app.post('/payment/callback', async (req, res) => {
+app.post('/callback', async (req, res) => {
   console.log('[callback] Payload diterima:', JSON.stringify(req.body, null, 2));
 
   const payload = { ...req.body };
