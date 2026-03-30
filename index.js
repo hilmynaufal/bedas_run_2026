@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'example')));
 // iPaymu config
 const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY;
 const IPAYMU_VA = process.env.IPAYMU_VA;
-const IPAYMU_URL = 'https://my.ipaymu.com/api/v2/payment';
+const IPAYMU_URL = 'https://sandbox.ipaymu.com/api/v2/payment';
 
 // Supabase config
 const supabase = createClient(
@@ -224,12 +224,12 @@ app.get('/payment/return', async (req, res) => {
   const { error } = await supabase
     .from('transactions')
     .update({
-      status:         newStatus,
-      trx_id:         trx_id         || null,
-      tipe:           tipe           || null,
+      status: newStatus,
+      trx_id: trx_id || null,
+      tipe: tipe || null,
       payment_method: payment_method || null,
       payment_channel: payment_channel || null,
-      updated_at:     new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq('ipaymu_session_id', sid);
 
@@ -275,15 +275,15 @@ app.get('/check-transaction', async (req, res) => {
   // 3. Cek ke iPaymu menggunakan trx_id
   const body = {
     transactionId: trx.trx_id,
-    account:       IPAYMU_VA,
+    account: IPAYMU_VA,
   };
 
   // Signature untuk formdata: hash dari JSON body
-  const bodyJson     = JSON.stringify(body);
-  const bodyHash     = crypto.createHash('sha256').update(bodyJson).digest('hex');
+  const bodyJson = JSON.stringify(body);
+  const bodyHash = crypto.createHash('sha256').update(bodyJson).digest('hex');
   const stringToSign = `POST:${IPAYMU_VA}:${bodyHash}:${IPAYMU_API_KEY}`;
-  const signature    = crypto.createHmac('sha256', IPAYMU_API_KEY).update(stringToSign).digest('hex');
-  const timestamp    = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+  const signature = crypto.createHmac('sha256', IPAYMU_API_KEY).update(stringToSign).digest('hex');
+  const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
 
   // Kirim sebagai formdata
   const formBody = new URLSearchParams(body).toString();
@@ -293,9 +293,9 @@ app.get('/check-transaction', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        va:             IPAYMU_VA,
-        signature:      signature,
-        timestamp:      timestamp,
+        va: IPAYMU_VA,
+        signature: signature,
+        timestamp: timestamp,
       },
       body: formBody,
     });
@@ -306,18 +306,18 @@ app.get('/check-transaction', async (req, res) => {
     // Sync status ke Supabase berdasarkan iPaymu Status
     // Status 1, 6, 7 = berhasil/paid
     if (ipaymuData.Status === 200 && ipaymuData.Data) {
-      const iStatus    = ipaymuData.Data.Status;
-      const newStatus  = [1, 6, 7].includes(iStatus) ? 'success' : iStatus === 0 ? 'pending' : 'cancelled';
+      const iStatus = ipaymuData.Data.Status;
+      const newStatus = [1, 6, 7].includes(iStatus) ? 'success' : iStatus === 0 ? 'pending' : 'cancelled';
 
       await supabase
         .from('transactions')
         .update({
-          status:          newStatus,
-          trx_id:          String(ipaymuData.Data.TransactionId),
-          tipe:            ipaymuData.Data.TypeDesc            || null,
-          payment_method:  ipaymuData.Data.PaymentMethod       || null,
-          payment_channel: ipaymuData.Data.PaymentChannel      || null,
-          updated_at:      new Date().toISOString(),
+          status: newStatus,
+          trx_id: String(ipaymuData.Data.TransactionId),
+          tipe: ipaymuData.Data.TypeDesc || null,
+          payment_method: ipaymuData.Data.PaymentMethod || null,
+          payment_channel: ipaymuData.Data.PaymentChannel || null,
+          updated_at: new Date().toISOString(),
         })
         .eq('reference_id', trx.reference_id);
 
