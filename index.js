@@ -88,7 +88,7 @@ app.post('/payment', async (req, res) => {
     qty: QTY,
     price: PRICE,
     amount: AMOUNT,
-    returnUrl: returnUrl || `${BASE_URL}/success.html`,
+    returnUrl: returnUrl || `${BASE_URL}/payment/return`,
     cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
     notifyUrl: `${BASE_URL}/callback`,
     paymentMethod: 'qris',
@@ -205,6 +205,109 @@ app.post('/callback', async (req, res) => {
 
   console.log(`[callback] Status transaksi ${referenceId} diupdate ke: ${newStatus}`);
   res.status(200).json({ ok: true });
+});
+
+// Return URL dari iPaymu setelah pembayaran — update DB lalu redirect ke success.html
+app.get('/payment/return', async (req, res) => {
+  const { sid, trx_id, status, tipe, payment_method, payment_channel } = req.query;
+
+  console.log('[return] Query params:', req.query);
+
+  if (!sid) {
+    console.warn('[return] sid tidak ditemukan, langsung redirect ke success.html');
+    return res.redirect('/success.html');
+  }
+
+  const trxStatus = (status || '').toLowerCase();
+  const newStatus = trxStatus === 'berhasil' ? 'success' : trxStatus === 'batal' ? 'cancelled' : 'pending';
+
+  const { error } = await supabase
+    .from('transactions')
+    .update({
+      status:         newStatus,
+      trx_id:         trx_id         || null,
+      tipe:           tipe           || null,
+      payment_method: payment_method || null,
+      payment_channel: payment_channel || null,
+      updated_at:     new Date().toISOString(),
+    })
+    .eq('ipaymu_session_id', sid);
+
+  if (error) {
+    console.error('[return] Gagal update Supabase:', error.message);
+  } else {
+    console.log(`[return] Transaksi sid:${sid} diupdate ke status: ${newStatus}`);
+  }
+
+  res.redirect('/success.html');
+});
+
+// Cek status transaksi berdasarkan nomor HP
+app.get('/check-transaction', async (req, res) => {
+  const { phone } = req.query;
+
+  if (!phone) {
+    return res.status(400).json({ error: 'Parameter phone diperlukan' });
+  }
+
+  // 1. Ambil data transaksi dari Supabase berdasarkan nomor HP
+  const { data: transactions, error: dbError } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('buyer_phone', phone)
+    .order('created_at', { ascending: false });
+
+  if (dbError) {
+    return res.status(500).json({ error: 'Gagal mengambil data transaksi', detail: dbError.message });
+  }
+
+  if (!transactions || transactions.length === 0) {
+    return res.status(404).json({ error: 'Transaksi tidak ditemukan untuk nomor HP ini' });
+  }
+
+  const trx = transactions[0];
+
+  // 2. Jika tidak ada trx_id, kembalikan data dari DB saja
+  if (!trx.trx_id) {
+    return res.json({ source: 'db', transaction: trx });
+  }
+
+  // 3. Cek ke iPaymu menggunakan trx_id
+  const body = {
+    transactionId: trx.trx_id,
+    account:       IPAYMU_VA,
+  };
+
+  // Signature untuk formdata: hash dari JSON body
+  const bodyJson     = JSON.stringify(body);
+  const bodyHash     = crypto.createHash('sha256').update(bodyJson).digest('hex');
+  const stringToSign = `POST:${IPAYMU_VA}:${bodyHash}:${IPAYMU_API_KEY}`;
+  const signature    = crypto.createHmac('sha256', IPAYMU_API_KEY).update(stringToSign).digest('hex');
+  const timestamp    = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+
+  // Kirim sebagai formdata
+  const formBody = new URLSearchParams(body).toString();
+
+  try {
+    const ipaymuRes = await fetch('https://my.ipaymu.com/api/v2/transaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        va:             IPAYMU_VA,
+        signature:      signature,
+        timestamp:      timestamp,
+      },
+      body: formBody,
+    });
+
+    const ipaymuData = await ipaymuRes.json();
+    console.log('[check-transaction] iPaymu response:', JSON.stringify(ipaymuData));
+
+    res.json({ source: 'ipaymu', transaction: trx, ipaymu: ipaymuData });
+  } catch (err) {
+    console.error('[check-transaction] Gagal hit iPaymu:', err.message);
+    res.json({ source: 'db', transaction: trx, error: 'Gagal menghubungi iPaymu' });
+  }
 });
 
 app.listen(PORT, () => {

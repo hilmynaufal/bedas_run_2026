@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cek Status Transaksi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-teal-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800">Cek Status Transaksi</h1>
+      <p class="text-gray-500 text-sm mt-1">Masukkan nomor WhatsApp yang digunakan saat pendaftaran</p>
+    </div>
+
+    <form id="check-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp</label>
+        <input
+          type="tel"
+          id="phone-input"
+          placeholder="Contoh: 081234567890"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+        />
+      </div>
+      <button
+        type="submit"
+        id="submit-btn"
+        class="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-3 rounded-xl transition text-sm"
+      >
+        Cek Status
+      </button>
+    </form>
+
+    <!-- Result -->
+    <div id="result" class="mt-6 hidden"></div>
+
+    <div class="text-center mt-6">
+      <a href="/ui.html" class="text-teal-500 text-sm hover:underline">← Kembali ke Pendaftaran</a>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND_URL = 'https://apibedasrun.hirumi.app';
+
+    const STATUS_CONFIG = {
+      success:   { label: 'Berhasil',   bg: 'bg-green-100',  text: 'text-green-700',  icon: '✅' },
+      pending:   { label: 'Menunggu',   bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '⏳' },
+      cancelled: { label: 'Dibatalkan', bg: 'bg-red-100',    text: 'text-red-700',    icon: '❌' },
+    };
+
+    document.getElementById('check-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const phone     = document.getElementById('phone-input').value.trim();
+      const submitBtn = document.getElementById('submit-btn');
+      const result    = document.getElementById('result');
+
+      if (!phone) return;
+
+      submitBtn.disabled    = true;
+      submitBtn.textContent = 'Mengecek...';
+      result.classList.add('hidden');
+      result.innerHTML = '';
+
+      try {
+        const res  = await fetch(`${BACKEND_URL}/check-transaction?phone=${encodeURIComponent(phone)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          result.innerHTML = `
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+              <p class="text-red-600 font-medium">❌ ${data.error || 'Transaksi tidak ditemukan'}</p>
+            </div>`;
+          result.classList.remove('hidden');
+          return;
+        }
+
+        const trx    = data.transaction;
+        const status = STATUS_CONFIG[trx.status] || { label: trx.status, bg: 'bg-gray-100', text: 'text-gray-700', icon: '❓' };
+
+        // Data dari iPaymu jika ada
+        const ipaymuStatus = data.ipaymu?.Data?.Status ?? null;
+        const ipaymuAmount = data.ipaymu?.Data?.Amount ?? null;
+        const ipaymuName   = data.ipaymu?.Data?.BuyerName ?? null;
+
+        result.innerHTML = `
+          <div class="border border-gray-200 rounded-xl overflow-hidden">
+            <div class="${status.bg} px-4 py-3 flex items-center gap-2">
+              <span class="text-lg">${status.icon}</span>
+              <div>
+                <p class="font-semibold ${status.text}">${status.label}</p>
+                <p class="text-xs text-gray-500">Status Transaksi</p>
+              </div>
+            </div>
+            <div class="p-4 space-y-2 text-sm text-gray-700">
+              <div class="flex justify-between">
+                <span class="text-gray-500">Nama</span>
+                <span class="font-medium">${trx.buyer_name || '-'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Kategori</span>
+                <span class="font-medium">${trx.kategori_lari || '-'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Nominal</span>
+                <span class="font-medium">Rp ${Number(trx.amount).toLocaleString('id-ID')}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Referensi</span>
+                <span class="font-mono text-xs">${trx.reference_id}</span>
+              </div>
+              ${trx.trx_id ? `
+              <div class="flex justify-between">
+                <span class="text-gray-500">ID Transaksi</span>
+                <span class="font-mono text-xs">${trx.trx_id}</span>
+              </div>` : ''}
+              ${trx.payment_method ? `
+              <div class="flex justify-between">
+                <span class="text-gray-500">Metode</span>
+                <span class="font-medium">${trx.payment_method}</span>
+              </div>` : ''}
+              <div class="flex justify-between">
+                <span class="text-gray-500">Tanggal Daftar</span>
+                <span class="font-medium">${new Date(trx.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              </div>
+            </div>
+            ${trx.status === 'pending' && trx.ipaymu_url ? `
+            <div class="px-4 pb-4">
+              <a href="${trx.ipaymu_url}" class="block text-center bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 rounded-xl transition text-sm">
+                Lanjutkan Pembayaran
+              </a>
+            </div>` : ''}
+          </div>`;
+
+        result.classList.remove('hidden');
+      } catch (err) {
+        result.innerHTML = `
+          <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+            <p class="text-red-600 font-medium">❌ Gagal menghubungi server</p>
+          </div>`;
+        result.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled    = false;
+        submitBtn.textContent = 'Cek Status';
+      }
+    });
+  </script>
+</body>
+</html>
