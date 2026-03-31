@@ -994,8 +994,24 @@
 
                     loaderBar.style.transition = 'width 0.3s ease-in-out';
                     loaderBar.style.width = '100%';
-
                     setTimeout(() => { topLoader.classList.add('hidden'); }, 400);
+
+                    // Nomor HP sudah terdaftar
+                    if (payRes.status === 409) {
+                        document.getElementById('form-container').innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-center py-12">
+                                <i data-lucide="circle-alert" class="w-14 h-14 text-red-500 mb-4"></i>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">Nomor HP Sudah Terdaftar</h2>
+                                <p class="text-[var(--text-secondary)] mt-2">${payData.detail || payData.error}</p>
+                                <a href="/check.html" class="mt-6 px-6 py-3 bg-[var(--primary-500)] text-white rounded-xl font-semibold hover:opacity-90 transition">
+                                    Cek Status Pendaftaran
+                                </a>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                        mobileNav.classList.add('hidden');
+                        return;
+                    }
 
                     // Redirect apabila API sukses
                     if (payData.Status === 200 && payData.Data && payData.Data.Url) {

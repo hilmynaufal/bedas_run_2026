@@ -55,6 +55,24 @@ app.post('/payment', async (req, res) => {
 
   const fd = formData || {};
 
+  // 0. Cek duplikat nomor HP — tolak jika sudah ada transaksi pending/success
+  const phoneToCheck = buyerPhone || fd['Nomor Whatsapp Aktif'] || null;
+  if (phoneToCheck) {
+    const { data: existing } = await supabase
+      .from('transactions')
+      .select('id, status')
+      .eq('buyer_phone', phoneToCheck)
+      .in('status', ['pending', 'success'])
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      return res.status(409).json({
+        error: 'Nomor HP sudah terdaftar',
+        detail: `Nomor ${phoneToCheck} sudah memiliki pendaftaran aktif dengan status: ${existing[0].status}.`,
+      });
+    }
+  }
+
   // 1. Simpan transaksi ke Supabase dengan status pending
   const { error: insertError } = await supabase
     .from('transactions')
