@@ -484,7 +484,7 @@
 
             // === KONFIGURASI BACKEND ===
             // const BACKEND_URL = "https://apibedasrun.hirumi.app";
-            const BACKEND_URL = "http://localhost:3000";
+            const BACKEND_URL = "http://[IP_ADDRESS]";
             // ==========================
 
             Offline.options = { checks: { xhr: { url: 'https://httpbin.org/get' } } };
@@ -979,7 +979,7 @@
                     lucide.createIcons();
                     mobileNav.classList.add('hidden');
 
-                    const payRes = await fetch(`${BACKEND_URL}/payment`, {
+                    const payRes = await fetch(`/payment`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
