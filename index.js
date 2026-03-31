@@ -272,7 +272,7 @@ app.get('/check-transaction', async (req, res) => {
   const formBody = new URLSearchParams(body).toString();
 
   try {
-    const ipaymuRes = await fetch('https://my.ipaymu.com/api/v2/transaction', {
+    const ipaymuRes = await fetch('https://sandbox.ipaymu.com/api/v2/transaction', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
