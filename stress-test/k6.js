@@ -62,12 +62,14 @@ const scenarioConfigs = {
   /**
    * Skenario 3 — Quota Boundary
    * Pre-condition: jalankan seed.js dulu (isi 990 baris dummy).
-   * 100 VU serentak → hanya 10 yang boleh masuk, sisanya harus dapat 429.
+   * 20 VU serentak → hanya 10 yang boleh masuk, sisanya harus dapat 429.
    * Tujuan: validasi tidak ada insert ke-1001.
+   * Catatan: VU dibatasi 20 agar tidak langsung kena MAX_CONCURRENT limiter
+   *          sebelum sempat hit quota check di Supabase.
    */
   quota: {
     executor: 'constant-vus',
-    vus: 100,
+    vus: 20,
     duration: '15s',
   },
 };
