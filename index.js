@@ -183,7 +183,7 @@ app.post('/callback', async (req, res) => {
   }
 
   const referenceId = payload.reference_id || payload.referenceId;
-  const trxStatus   = (payload.status || '').toLowerCase();
+  const trxStatus = (payload.status || '').toLowerCase();
   console.log(`[callback] reference_id: ${referenceId} | status: ${trxStatus}`);
 
   if (!referenceId) {
@@ -201,12 +201,12 @@ app.post('/callback', async (req, res) => {
   const { error } = await supabase
     .from('transactions')
     .update({
-      status:          newStatus,
-      trx_id:          payload.trx_id          || null,
-      tipe:            payload.tipe             || null,
-      payment_method:  payload.payment_method   || null,
-      payment_channel: payload.payment_channel  || null,
-      updated_at:      new Date().toISOString(),
+      status: newStatus,
+      trx_id: payload.trx_id || null,
+      tipe: payload.tipe || null,
+      payment_method: payload.via || null,
+      payment_channel: payload.channel || null,
+      updated_at: new Date().toISOString(),
     })
     .eq('reference_id', referenceId);
 
