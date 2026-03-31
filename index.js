@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'example')));
 
 // iPaymu config
@@ -155,14 +156,13 @@ app.post('/payment', async (req, res) => {
 
 // Callback dari iPaymu setelah user bayar
 app.post('/callback', async (req, res) => {
+  console.log('[callback] Headers:', JSON.stringify(req.headers, null, 2));
   console.log('[callback] Payload diterima:', JSON.stringify(req.body, null, 2));
-  console.log('[callback] req.body:', req.body);
 
   const payload = { ...req.body };
 
-  // 1. Verifikasi signature (secret key = VA number)
-  const receivedSignature = payload.signature;
-  delete payload.signature;
+  // 1. Verifikasi signature dari header X-Signature
+  const receivedSignature = req.headers['x-signature'];
 
   const sortedData = Object.keys(payload).sort().reduce((acc, key) => {
     acc[key] = payload[key];
@@ -174,8 +174,11 @@ app.post('/callback', async (req, res) => {
     .update(JSON.stringify(sortedData))
     .digest('hex');
 
+  console.log('[callback] X-Signature received  :', receivedSignature);
+  console.log('[callback] Signature calculated   :', calculatedSignature);
+
   if (calculatedSignature !== receivedSignature) {
-    console.error('[callback] Signature tidak valid — received:', receivedSignature, '| calculated:', calculatedSignature);
+    console.error('[callback] Signature tidak valid');
     return res.status(400).send('Invalid Signature');
   }
 
