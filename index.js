@@ -21,14 +21,30 @@ const IPAYMU_VA = process.env.IPAYMU_VA;
 const IPAYMU_URL = 'https://my.ipaymu.com/api/v2/payment';
 // const IPAYMU_URL = 'https://sandbox.ipaymu.com/api/v2/payment';
 
-// Supabase config
+// Supabase config — dengan fetch timeout 8s agar fail-fast saat Supabase overload
+const SUPABASE_FETCH_TIMEOUT = parseInt(process.env.SUPABASE_FETCH_TIMEOUT || '8000', 10);
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
+  process.env.SUPABASE_KEY,
+  {
+    global: {
+      fetch: (url, options = {}) => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), SUPABASE_FETCH_TIMEOUT);
+        return fetch(url, { ...options, signal: controller.signal })
+          .finally(() => clearTimeout(timer));
+      },
+    },
+  }
 );
 
 // Base URL server ini (untuk notifyUrl callback dari iPaymu)
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
+
+// Concurrency limiter — cegah Supabase dibanjiri koneksi serentak
+// Atur via env MAX_CONCURRENT (default 20). Request di atas batas → 503.
+let activePayments = 0;
+const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT || '15', 10);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -55,6 +71,21 @@ app.post('/payment', async (req, res) => {
   if (!MOCK_MODE && (!IPAYMU_API_KEY || !IPAYMU_VA)) {
     return res.status(500).json({ error: 'IPAYMU_API_KEY and IPAYMU_VA env variables are required' });
   }
+
+  // Tolak langsung jika sudah terlalu banyak request serentak
+  if (activePayments >= MAX_CONCURRENT) {
+    return res.status(503).json({
+      error: 'Server sedang sibuk',
+      detail: 'Terlalu banyak pendaftaran diproses bersamaan, silakan coba lagi dalam beberapa detik.',
+    });
+  }
+  activePayments++;
+
+  // Pastikan counter selalu dikurangi tepat sekali saat request selesai
+  let released = false;
+  const release = () => { if (!released) { released = true; activePayments--; } };
+  res.on('finish', release);
+  res.on('close',  release);
 
   const {
     returnUrl, cancelUrl,
