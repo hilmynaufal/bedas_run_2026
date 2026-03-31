@@ -38,8 +38,7 @@ app.get('/quota', async (req, res) => {
   const QUOTA_TOTAL = 1000;
   const { count, error } = await supabase
     .from('transactions')
-    .select('*', { count: 'exact', head: true })
-    .in('status', ['pending', 'success']);
+    .select('*', { count: 'exact', head: true });
 
   if (error) {
     return res.status(500).json({ error: 'Gagal mengambil data kuota', detail: error.message });
@@ -93,8 +92,7 @@ app.post('/payment', async (req, res) => {
   const QUOTA_TOTAL = 1000;
   const { count: quotaCount, error: quotaError } = await supabase
     .from('transactions')
-    .select('*', { count: 'exact', head: true })
-    .in('status', ['pending', 'success']);
+    .select('*', { count: 'exact', head: true });
 
   if (quotaError) {
     return res.status(500).json({ error: 'Gagal memeriksa kuota', detail: quotaError.message });
