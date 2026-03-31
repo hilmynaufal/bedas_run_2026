@@ -564,7 +564,7 @@
                         </div>
                         
                         <button id="main-reg-btn" disabled class="w-full mt-12 bg-slate-800 text-slate-500 font-black py-6 rounded-[2rem] cursor-not-allowed transition-all uppercase tracking-widest shadow-2xl shadow-black/50 text-sm tracking-widest italic">
-                            Menunggu 1 April 2026
+                            DAFTAR SEKARANG
                         </button>
                     </div>
                 </div>
@@ -670,8 +670,8 @@
 
         // Countdown Logic
         (function() {
-            const regStartDate = new Date('April 1, 2026 08:00:00').getTime();
-            const regEndDate = new Date('April 12, 2026 23:59:59').getTime();
+            const regStartDate = new Date('March 30, 2026 08:00:00').getTime();
+            const regEndDate = new Date('April 19, 2026 23:59:59').getTime();
 
             const updateTimer = () => {
                 const now = new Date().getTime();
@@ -714,6 +714,7 @@
                     btn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
                     btn.classList.add('bg-bedas-green', 'text-white', 'hover:scale-105', 'bg-gradient-to-r', 'from-bedas-green', 'to-bedas-blue');
                     btn.textContent = "DAFTAR SEKARANG";
+                    btn.onclick = () => window.location.href = 'daftar.html';
                 }
             };
 
