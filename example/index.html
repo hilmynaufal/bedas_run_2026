@@ -543,7 +543,7 @@
                     </div>
 
                     <div class="bg-white/5 p-10 rounded-[3rem] border border-white/10 backdrop-blur-xl text-center">
-                        <h4 class="font-black text-bedas-green dark:text-bedas-lime mb-8 uppercase tracking-[0.4em] text-[11px] italic">Waktu Mundur Pembukaan</h4>
+                        <h4 class="font-black text-bedas-green dark:text-bedas-lime mb-8 uppercase tracking-[0.4em] text-[11px] italic">Waktu Mundur Penutupan Pendaftaran</h4>
                         <div id="countdown" class="grid grid-cols-4 gap-4 text-center">
                             <div class="bg-white/5 p-4 rounded-2xl">
                                 <div id="days" class="text-3xl md:text-5xl font-black tracking-tighter text-white">00</div>
@@ -668,20 +668,14 @@
         }, observerOptions);
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        // Countdown Logic
+        // Countdown Logic — sudah dibuka, set statis
         (function() {
             const regStartDate = new Date('March 30, 2026 08:00:00').getTime();
             const regEndDate = new Date('April 19, 2026 23:59:59').getTime();
 
             const updateTimer = () => {
                 const now = new Date().getTime();
-                let diff = regStartDate - now;
-                let isStarted = false;
-
-                if (diff < 0) {
-                    diff = regEndDate - now;
-                    isStarted = true;
-                }
+                const diff = regEndDate - now;
 
                 if (diff < 0) {
                     const countdownEl = document.getElementById('countdown');
@@ -706,7 +700,7 @@
                 const btn = document.getElementById('main-reg-btn');
                 const stText = document.getElementById('status-text');
 
-                if (isStarted && btn && stText) {
+                if (btn && stText) {
                     stText.textContent = "SEDANG DIBUKA";
                     stText.classList.remove('text-white');
                     stText.classList.add('text-bedas-lime');
