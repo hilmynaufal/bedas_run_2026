@@ -541,10 +541,10 @@
 
             async function fetchQuota() {
                 try {
-                    const response = await fetch(QUOTA_API_URL);
+                    const response = await fetch('/quota');
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
-                    if (data && data.status === 'success' && data.quota_available !== undefined) {
+                    if (data && data.quota_available !== undefined) {
                         return { quota_available: parseInt(data.quota_available, 10) };
                     }
                     throw new Error("Format data kuota tidak valid");
@@ -1006,6 +1006,20 @@
                                 <a href="/check.html" class="mt-6 px-6 py-3 bg-[var(--primary-500)] text-white rounded-xl font-semibold hover:opacity-90 transition">
                                     Cek Status Pendaftaran
                                 </a>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                        mobileNav.classList.add('hidden');
+                        return;
+                    }
+
+                    // Kuota pendaftaran penuh
+                    if (payRes.status === 429) {
+                        document.getElementById('form-container').innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-center py-12">
+                                <i data-lucide="users" class="w-14 h-14 text-red-500 mb-4"></i>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">Pendaftaran Ditutup</h2>
+                                <p class="text-[var(--text-secondary)] mt-2">${payData.detail || payData.error}</p>
                             </div>
                         `;
                         lucide.createIcons();
