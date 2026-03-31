@@ -5,7 +5,8 @@
       "Bash(npm install:*)",
       "Bash(npm uninstall:*)",
       "WebFetch(domain:documenter.getpostman.com)",
-      "WebFetch(domain:my.ipaymu.com)"
+      "WebFetch(domain:my.ipaymu.com)",
+      "Bash(find /c/Users/Hype/bedas_run_2026 -name *.env* -o -name *.md -o -name README*)"
     ]
   }
 }
