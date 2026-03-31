@@ -34,6 +34,21 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.get('/quota', async (req, res) => {
+  const QUOTA_TOTAL = 1000;
+  const { count, error } = await supabase
+    .from('transactions')
+    .select('*', { count: 'exact', head: true });
+
+  if (error) {
+    return res.status(500).json({ error: 'Gagal mengambil data kuota', detail: error.message });
+  }
+
+  const quota_used = count || 0;
+  const quota_available = Math.max(0, QUOTA_TOTAL - quota_used);
+  res.json({ quota_used, quota_total: QUOTA_TOTAL, quota_available });
+});
+
 app.post('/payment', async (req, res) => {
   if (!IPAYMU_API_KEY || !IPAYMU_VA) {
     return res.status(500).json({ error: 'IPAYMU_API_KEY and IPAYMU_VA env variables are required' });
@@ -71,6 +86,23 @@ app.post('/payment', async (req, res) => {
         detail: `Nomor ${phoneToCheck} sudah memiliki pendaftaran aktif dengan status: ${existing[0].status}.`,
       });
     }
+  }
+
+  // 0b. Cek kuota — tolak jika sudah mencapai batas 1000 transaksi
+  const QUOTA_TOTAL = 1000;
+  const { count: quotaCount, error: quotaError } = await supabase
+    .from('transactions')
+    .select('*', { count: 'exact', head: true });
+
+  if (quotaError) {
+    return res.status(500).json({ error: 'Gagal memeriksa kuota', detail: quotaError.message });
+  }
+
+  if ((quotaCount || 0) >= QUOTA_TOTAL) {
+    return res.status(429).json({
+      error: 'Quota pendaftaran penuh',
+      detail: 'Maaf, kuota pendaftaran sudah mencapai batas maksimum.',
+    });
   }
 
   // 1. Simpan transaksi ke Supabase dengan status pending
