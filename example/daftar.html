@@ -540,13 +540,23 @@
                 }
             }
 
-            async function fetchQuota() {
+            // Cache quota selama 30 detik — cegah DB di-hit setiap step advance
+            const QUOTA_CACHE_TTL = 30_000;
+            let quotaCache = null; // { value, expiresAt }
+
+            async function fetchQuota({ forceRefresh = false } = {}) {
+                const now = Date.now();
+                if (!forceRefresh && quotaCache && now < quotaCache.expiresAt) {
+                    return quotaCache.value;
+                }
                 try {
                     const response = await fetch('/quota');
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     if (data && data.quota_available !== undefined) {
-                        return { quota_available: parseInt(data.quota_available, 10) };
+                        const value = { quota_available: parseInt(data.quota_available, 10) };
+                        quotaCache = { value, expiresAt: now + QUOTA_CACHE_TTL };
+                        return value;
                     }
                     throw new Error("Format data kuota tidak valid");
                 } catch (error) {
@@ -905,7 +915,7 @@
                 mobileSubmitBtn.disabled = true;
                 mobileSubmitBtn.innerHTML = loadingSpinner;
 
-                const quotaData = await fetchQuota();
+                const quotaData = await fetchQuota({ forceRefresh: true }); // selalu fresh saat submit
                 if (quotaData.quota_available <= 0) {
                     showStatusMessage('Pendaftaran Ditutup', 'Mohon Maaf Quota Pendaftaran sudah Penuh', 'users');
                     mobileNav.classList.add('hidden');
