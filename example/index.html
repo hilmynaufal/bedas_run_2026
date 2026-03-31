@@ -528,11 +528,24 @@
                 return steps;
             }
 
+            const KATEGORI_OPTIONS = [
+                { option_text: 'BIG - MAN 2K' },
+                { option_text: 'BIG - WOMAN 2K' },
+                { option_text: 'CHILD - BOY 2K' },
+                { option_text: 'CHILD - GIRL 2K' },
+            ];
+
             async function fetchData() {
                 try {
                     const response = await fetch(API_URL);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return await response.json();
+                    const data = await response.json();
+                    // Override opsi Kategori Lari dengan daftar kategori kustom
+                    if (data && data.data) {
+                        const kategoriField = data.data.find(q => q.question_text === 'Kategori Lari');
+                        if (kategoriField) kategoriField.options = KATEGORI_OPTIONS;
+                    }
+                    return data;
                 } catch (error) {
                     console.warn("Gagal mengambil data form dari API.", error);
                     return null;

@@ -66,7 +66,7 @@ app.post('/payment', async (req, res) => {
 
   // Harga berdasarkan kategori lari
   const kategori = (fd['Kategori Lari'] || '').toUpperCase();
-  const HARGA = kategori === 'CHILD' ? 100000 : 115000; // default Big
+  const HARGA = kategori.includes('CHILD') ? 100000 : 115000; // default Big
   const PRODUCT = ['Registrasi Bedas Run'];
   const QTY = ['1'];
   const PRICE = [String(HARGA)];
