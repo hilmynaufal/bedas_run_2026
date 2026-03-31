@@ -141,10 +141,14 @@ export default function () {
   if (is200) insertedOk.add(1);
   if (is409) dupHit.add(1);
   if (is429) quotaHit.add(1);
-  if (is5xx) errorRate.add(1);
+  if (is5xx) {
+    errorRate.add(1);
+    // Log body error agar mudah diagnosa root cause
+    console.error(`[5xx] VU=${__VU} iter=${__ITER} status=${res.status} dur=${res.timings.duration.toFixed(0)}ms body=${res.body?.slice(0, 200)}`);
+  }
 
-  // Log singkat untuk debugging (hanya sample)
-  if (__ITER % 50 === 0) {
+  // Log sample setiap 50 iterasi untuk non-error
+  if (!is5xx && __ITER % 50 === 0) {
     console.log(`VU=${__VU} iter=${__ITER} status=${res.status} dur=${res.timings.duration.toFixed(0)}ms`);
   }
 
@@ -156,20 +160,22 @@ export function handleSummary(data) {
   const m = data.metrics;
   const dur = m['http_req_duration'];
 
+  // Counter metric → .values.count  |  Rate metric → .values.passes (truthy samples)
   const summary = {
-    scenario:      SCENARIO,
-    total_requests: m['http_reqs']?.values?.count ?? 0,
-    inserted_ok:   m['inserted_ok']?.values?.count ?? 0,
-    quota_hit:     m['quota_hit']?.values?.count ?? 0,
-    duplicate_hit: m['duplicate_hit']?.values?.count ?? 0,
-    custom_errors: m['custom_errors']?.values?.count ?? 0,
+    scenario:       SCENARIO,
+    total_requests: m['http_reqs']?.values?.count   ?? 0,
+    inserted_ok:    m['inserted_ok']?.values?.count  ?? 0,  // Counter
+    quota_hit:      m['quota_hit']?.values?.count    ?? 0,  // Counter
+    duplicate_hit:  m['duplicate_hit']?.values?.count ?? 0, // Counter
+    errors_5xx:     m['custom_errors']?.values?.passes ?? 0, // Rate → passes = truthy count
+    error_rate_pct: ((m['custom_errors']?.values?.rate ?? 0) * 100).toFixed(2) + '%',
     latency: {
-      avg:  dur?.values?.avg?.toFixed(2) + 'ms',
-      p95:  dur?.values?.['p(95)']?.toFixed(2) + 'ms',
-      p99:  dur?.values?.['p(99)']?.toFixed(2) + 'ms',
-      max:  dur?.values?.max?.toFixed(2) + 'ms',
+      avg: (dur?.values?.avg        ?? 0).toFixed(2) + 'ms',
+      p95: (dur?.values?.['p(95)']  ?? 0).toFixed(2) + 'ms',
+      p99: (dur?.values?.['p(99)']  ?? 0).toFixed(2) + 'ms',
+      max: (dur?.values?.max        ?? 0).toFixed(2) + 'ms',
     },
-    rps: m['http_reqs']?.values?.rate?.toFixed(2),
+    rps: (m['http_reqs']?.values?.rate ?? 0).toFixed(2),
   };
 
   console.log('\n=== STRESS TEST SUMMARY ===');

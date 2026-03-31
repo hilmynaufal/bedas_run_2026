@@ -30,6 +30,11 @@ const supabase = createClient(
 // Base URL server ini (untuk notifyUrl callback dari iPaymu)
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 
+// Concurrency limiter — cegah Supabase dibanjiri koneksi serentak
+// Atur via env MAX_CONCURRENT (default 20). Request di atas batas → 503.
+let activePayments = 0;
+const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT || '20', 10);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -55,6 +60,21 @@ app.post('/payment', async (req, res) => {
   if (!MOCK_MODE && (!IPAYMU_API_KEY || !IPAYMU_VA)) {
     return res.status(500).json({ error: 'IPAYMU_API_KEY and IPAYMU_VA env variables are required' });
   }
+
+  // Tolak langsung jika sudah terlalu banyak request serentak
+  if (activePayments >= MAX_CONCURRENT) {
+    return res.status(503).json({
+      error: 'Server sedang sibuk',
+      detail: 'Terlalu banyak pendaftaran diproses bersamaan, silakan coba lagi dalam beberapa detik.',
+    });
+  }
+  activePayments++;
+
+  // Pastikan counter selalu dikurangi tepat sekali saat request selesai
+  let released = false;
+  const release = () => { if (!released) { released = true; activePayments--; } };
+  res.on('finish', release);
+  res.on('close',  release);
 
   const {
     returnUrl, cancelUrl,
