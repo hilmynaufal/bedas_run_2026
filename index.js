@@ -60,15 +60,17 @@ app.post('/payment', async (req, res) => {
     formData,
   } = req.body;
 
-  // Konfigurasi produk & harga — tidak diterima dari frontend
-  const PRODUCT = ['Registrasi Bedas Run'];
-  const QTY = ['1'];
-  const PRICE = ['1000'];
-  const AMOUNT = '1000';
-
   const txReferenceId = referenceId || `ID${Date.now()}`;
 
   const fd = formData || {};
+
+  // Harga berdasarkan kategori lari
+  const kategori = (fd['Kategori Lari'] || '').toUpperCase();
+  const HARGA = kategori === 'CHILD' ? 100000 : 115000; // default Big
+  const PRODUCT = ['Registrasi Bedas Run'];
+  const QTY = ['1'];
+  const PRICE = [String(HARGA)];
+  const AMOUNT = String(HARGA);
 
   // 0. Cek duplikat nomor HP — tolak jika sudah ada transaksi pending/success
   const phoneToCheck = buyerPhone || fd['Nomor Whatsapp Aktif'] || null;
