@@ -18,8 +18,8 @@ app.use(express.static(path.join(__dirname, 'example')));
 // iPaymu config
 const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY;
 const IPAYMU_VA = process.env.IPAYMU_VA;
-// const IPAYMU_URL = 'https://my.ipaymu.com/api/v2/payment';
-const IPAYMU_URL = 'https://sandbox.ipaymu.com/api/v2/payment';
+const IPAYMU_URL = 'https://my.ipaymu.com/api/v2/payment';
+// const IPAYMU_URL = 'https://sandbox.ipaymu.com/api/v2/payment';
 
 // Supabase config — dengan fetch timeout 8s agar fail-fast saat Supabase overload
 const SUPABASE_FETCH_TIMEOUT = parseInt(process.env.SUPABASE_FETCH_TIMEOUT || '8000', 10);
@@ -371,7 +371,7 @@ app.get('/check-transaction', async (req, res) => {
   const formBody = new URLSearchParams(body).toString();
 
   try {
-    const ipaymuRes = await fetch('https://sandbox.ipaymu.com/api/v2/transaction', {
+    const ipaymuRes = await fetch('https://my.ipaymu.com/api/v2/transaction', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
