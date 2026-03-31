@@ -89,7 +89,7 @@ app.post('/payment', async (req, res) => {
     qty: QTY,
     price: PRICE,
     amount: AMOUNT,
-    returnUrl: returnUrl || `${BASE_URL}payment/return`,
+    returnUrl: returnUrl || `${BASE_URL}/payment/return`,
     cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
     notifyUrl: `${BASE_URL}/callback`,
     paymentMethod: 'qris',
@@ -156,6 +156,7 @@ app.post('/payment', async (req, res) => {
 // Callback dari iPaymu setelah user bayar
 app.post('/callback', async (req, res) => {
   console.log('[callback] Payload diterima:', JSON.stringify(req.body, null, 2));
+  console.log('[callback] req.body:', req.body);
 
   const payload = { ...req.body };
 
