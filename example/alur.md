@@ -25,7 +25,3 @@
   - *Lunas* — Tiket digital dan QR Code tersedia, dapat disimpan ke galeri.
   - *Menunggu Pembayaran* — Gunakan link bayar yang tertera untuk melanjutkan.
   - *Dibatalkan* — Pendaftaran dapat diulang dari awal.
-
-  ---
-
-  Harap menunjukkan QR Code tiket saat pengambilan race pack.
