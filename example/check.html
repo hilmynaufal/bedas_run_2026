@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,8 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -16,18 +18,37 @@
 
     <style>
         :root {
-            --primary-600: #0f766e; --primary-500: #14b8a6; --primary-400: #2dd4bf;
-            --primary-100: #ccfbf1; --primary-50: #f0fdfa;
-            --neutral-900: #1a1a1a; --neutral-800: #2c2c2e; --neutral-700: #3a3a3c;
-            --neutral-600: #48484a; --neutral-500: #8e8e93; --neutral-400: #c7c7cc;
-            --neutral-300: #d1d1d6; --neutral-200: #e5e5ea; --neutral-100: #f2f2f7;
+            --primary-600: #0f766e;
+            --primary-500: #14b8a6;
+            --primary-400: #2dd4bf;
+            --primary-100: #ccfbf1;
+            --primary-50: #f0fdfa;
+            --neutral-900: #1a1a1a;
+            --neutral-800: #2c2c2e;
+            --neutral-700: #3a3a3c;
+            --neutral-600: #48484a;
+            --neutral-500: #8e8e93;
+            --neutral-400: #c7c7cc;
+            --neutral-300: #d1d1d6;
+            --neutral-200: #e5e5ea;
+            --neutral-100: #f2f2f7;
             --neutral-50: #f9f9fb;
-            --radius-lg: 12px; --radius-xl: 16px; --radius-2xl: 20px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
             --bg-primary: var(--neutral-100);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { -webkit-text-size-adjust: 100%; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
             background: var(--bg-primary);
@@ -36,201 +57,698 @@
         }
 
         /* ===== DARK THEME ===== */
-        .dark-theme { --bg-primary: #121212; }
-        .dark-theme body { color: #f0f0f0; }
-        .dark-theme .app-header { background: rgba(20,20,20,0.85); border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .dark-theme .app-title { color: white; }
-        .dark-theme .icon-button { border-color: rgba(255,255,255,0.15); color: #ccc; }
-        .dark-theme .search-hero h1 { color: white; }
-        .dark-theme .input-wrapper input { background: #2c2c2e; color: white; border-color: #3a3a3c; }
-        .dark-theme .ticket-card { background: #1e1e1e; border-color: #333; color: white; }
-        .dark-theme .ticket-body, .dark-theme .ticket-footer, .dark-theme .ticket-notch { background: #1e1e1e; }
-        .dark-theme .bib-display { background: #2c2c2e; border-color: #3a3a3c; }
-        .dark-theme .bib-number, .dark-theme .info-pill strong, .dark-theme .runner-name h2, .dark-theme .detail-item span { color: #fff; }
-        .dark-theme .info-pill, .dark-theme .detail-compact-grid { background: #2c2c2e; border-color: #3a3a3c; }
-        .dark-theme .runner-category-badge { background: #2c2c2e; color: #ccc; }
-        .dark-theme .ticket-notch::before, .dark-theme .ticket-notch::after { background: var(--bg-primary); }
-        .dark-theme .pending-card, .dark-theme .cancelled-card { background: #1e1e1e; border-color: #333; }
-        .dark-theme .status-message { border-color: #444; color: #888; }
-        .dark-theme .download-btn { border-color: #444; color: white; }
-        .dark-theme .download-btn:hover { background: #2c2c2e; }
-        .dark-theme .qr-code-wrapper { background: white; }
+        .dark-theme {
+            --bg-primary: #121212;
+        }
+
+        .dark-theme body {
+            color: #f0f0f0;
+        }
+
+        .dark-theme .app-header {
+            background: rgba(20, 20, 20, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .dark-theme .app-title {
+            color: white;
+        }
+
+        .dark-theme .icon-button {
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ccc;
+        }
+
+        .dark-theme .search-hero h1 {
+            color: white;
+        }
+
+        .dark-theme .input-wrapper input {
+            background: #2c2c2e;
+            color: white;
+            border-color: #3a3a3c;
+        }
+
+        .dark-theme .ticket-card {
+            background: #1e1e1e;
+            border-color: #333;
+            color: white;
+        }
+
+        .dark-theme .ticket-body,
+        .dark-theme .ticket-footer,
+        .dark-theme .ticket-notch {
+            background: #1e1e1e;
+        }
+
+        .dark-theme .bib-display {
+            background: #2c2c2e;
+            border-color: #3a3a3c;
+        }
+
+        .dark-theme .bib-number,
+        .dark-theme .info-pill strong,
+        .dark-theme .runner-name h2,
+        .dark-theme .detail-item span {
+            color: #fff;
+        }
+
+        .dark-theme .info-pill,
+        .dark-theme .detail-compact-grid {
+            background: #2c2c2e;
+            border-color: #3a3a3c;
+        }
+
+        .dark-theme .runner-category-badge {
+            background: #2c2c2e;
+            color: #ccc;
+        }
+
+        .dark-theme .ticket-notch::before,
+        .dark-theme .ticket-notch::after {
+            background: var(--bg-primary);
+        }
+
+        .dark-theme .pending-card,
+        .dark-theme .cancelled-card {
+            background: #1e1e1e;
+            border-color: #333;
+        }
+
+        .dark-theme .status-message {
+            border-color: #444;
+            color: #888;
+        }
+
+        .dark-theme .download-btn {
+            border-color: #444;
+            color: white;
+        }
+
+        .dark-theme .download-btn:hover {
+            background: #2c2c2e;
+        }
+
+        .dark-theme .qr-code-wrapper {
+            background: white;
+        }
 
         /* ===== LAYOUT ===== */
         .app-header {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-            background: rgba(255,255,255,0.85); backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         }
+
         .header-inner {
-            display: flex; justify-content: space-between; align-items: center;
-            max-width: 480px; margin: 0 auto; padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 12px 16px;
         }
-        .app-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-        .app-logo img { width: 34px; height: 34px; }
-        .app-title { font-size: 17px; font-weight: 800; color: var(--neutral-900); letter-spacing: -0.3px; }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .app-logo img {
+            width: 34px;
+            height: 34px;
+        }
+
+        .app-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--neutral-900);
+            letter-spacing: -0.3px;
+        }
+
         .icon-button {
-            width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-            background: transparent; border: 1px solid rgba(0,0,0,0.1); border-radius: 50%;
-            color: var(--neutral-600); cursor: pointer; transition: all 0.2s;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            color: var(--neutral-600);
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
         .page-container {
-            max-width: 480px; margin: 0 auto;
+            max-width: 480px;
+            margin: 0 auto;
             padding: 84px 16px 40px 16px;
-            opacity: 0; animation: fadeIn 0.5s ease 0.2s forwards;
+            opacity: 0;
+            animation: fadeIn 0.5s ease 0.2s forwards;
         }
-        @keyframes fadeIn { to { opacity: 1; } }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
 
         /* ===== SEARCH ===== */
-        .search-hero { text-align: center; margin-bottom: 28px; }
-        .search-hero h1 { font-size: 22px; font-weight: 800; color: var(--neutral-900); margin-bottom: 8px; }
-        .search-hero p { color: var(--neutral-500); font-size: 13px; max-width: 320px; margin: 0 auto 24px; line-height: 1.6; }
-        .search-form { display: flex; flex-direction: column; gap: 12px; }
-        .input-wrapper { position: relative; }
-        .input-icon { position: absolute; top: 50%; left: 16px; transform: translateY(-50%); color: var(--neutral-400); pointer-events: none; }
+        .search-hero {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .search-hero h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--neutral-900);
+            margin-bottom: 8px;
+        }
+
+        .search-hero p {
+            color: var(--neutral-500);
+            font-size: 13px;
+            max-width: 320px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            color: var(--neutral-400);
+            pointer-events: none;
+        }
+
         .input-wrapper input {
-            width: 100%; padding: 15px 16px 15px 46px;
-            border: 2px solid transparent; border-radius: var(--radius-xl);
-            font-size: 15px; font-weight: 600; font-family: inherit;
-            color: var(--neutral-900); background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06); outline: none; transition: all 0.2s;
+            width: 100%;
+            padding: 15px 16px 15px 46px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-xl);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--neutral-900);
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            outline: none;
+            transition: all 0.2s;
         }
-        .input-wrapper input:focus { border-color: var(--primary-500); box-shadow: 0 0 0 4px var(--primary-100); }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 4px var(--primary-100);
+        }
+
         .btn-primary {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            background: var(--neutral-900); color: white; border: none;
-            padding: 15px; border-radius: var(--radius-xl);
-            font-size: 15px; font-weight: 700; font-family: inherit;
-            cursor: pointer; transition: all 0.2s; box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--neutral-900);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--radius-xl);
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
-        .dark-theme .btn-primary { background: var(--primary-500); color: #000; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.18); }
-        .btn-primary:disabled { background: var(--neutral-400); cursor: not-allowed; transform: none; box-shadow: none; }
-        .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .dark-theme .btn-primary {
+            background: var(--primary-500);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+        }
+
+        .btn-primary:disabled {
+            background: var(--neutral-400);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* ===== STATUS PLACEHOLDER ===== */
         .status-message {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; color: var(--neutral-500); padding: 40px 20px;
-            border: 2px dashed var(--neutral-300); border-radius: var(--radius-xl); font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--neutral-500);
+            padding: 40px 20px;
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-xl);
+            font-size: 13px;
         }
 
         /* ===== TICKET CARD ===== */
-        .ticket-result-wrapper { animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .ticket-result-wrapper {
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .ticket-card {
-            background: white; border-radius: var(--radius-2xl);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1); overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.05); max-width: 380px; margin: 0 auto;
+            background: white;
+            border-radius: var(--radius-2xl);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            max-width: 380px;
+            margin: 0 auto;
         }
+
         .ticket-header {
-            position: relative; padding: 20px; color: white; text-align: center; overflow: hidden;
+            position: relative;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            overflow: hidden;
         }
+
         .ticket-header::before {
-            content: ''; position: absolute; inset: 0;
+            content: '';
+            position: absolute;
+            inset: 0;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
+
         .ticket-branding {
-            display: flex; align-items: center; justify-content: center;
-            gap: 10px; margin-bottom: 16px; position: relative; z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 2;
         }
-        .ticket-branding img { width: 34px; height: 34px; background: white; padding: 3px; border-radius: 50%; }
-        .ticket-branding h3 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; line-height: 1.2; }
+
+        .ticket-branding img {
+            width: 34px;
+            height: 34px;
+            background: white;
+            padding: 3px;
+            border-radius: 50%;
+        }
+
+        .ticket-branding h3 {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            line-height: 1.2;
+        }
+
         .bib-display {
-            background: rgba(255,255,255,0.95); border-radius: var(--radius-lg);
-            padding: 8px 20px; display: inline-flex; flex-direction: column; align-items: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15); position: relative; z-index: 2;
-            min-width: 160px; border: 2px solid rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--radius-lg);
+            padding: 8px 20px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 2;
+            min-width: 160px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
         }
-        .bib-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--neutral-500); margin-bottom: 2px; }
-        .bib-number { font-size: 28px; font-weight: 800; line-height: 1; color: var(--neutral-900); letter-spacing: -0.5px; word-break: break-all; }
 
-        .ticket-body { padding: 20px; background: white; }
-        .runner-name { text-align: center; margin-bottom: 16px; }
-        .runner-name h2 { font-size: 19px; font-weight: 800; color: var(--neutral-900); margin-bottom: 5px; line-height: 1.2; }
+        .bib-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--neutral-500);
+            margin-bottom: 2px;
+        }
+
+        .bib-number {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--neutral-900);
+            letter-spacing: -0.5px;
+            word-break: break-all;
+        }
+
+        .ticket-body {
+            padding: 20px;
+            background: white;
+        }
+
+        .runner-name {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .runner-name h2 {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--neutral-900);
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
         .runner-category-badge {
-            display: inline-block; padding: 3px 12px; border-radius: 12px;
-            font-size: 11px; font-weight: 700; text-transform: uppercase;
-            background: var(--neutral-100); color: var(--neutral-600);
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: var(--neutral-100);
+            color: var(--neutral-600);
         }
-        .info-pills { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+
+        .info-pills {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
         .info-pill {
-            display: flex; flex-direction: column; align-items: center;
-            background: var(--neutral-50); border: 1px solid var(--neutral-200);
-            padding: 8px 12px; border-radius: 10px; min-width: 72px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--neutral-50);
+            border: 1px solid var(--neutral-200);
+            padding: 8px 12px;
+            border-radius: 10px;
+            min-width: 72px;
         }
-        .info-pill span { font-size: 10px; text-transform: uppercase; color: var(--neutral-500); font-weight: 600; margin-bottom: 2px; }
-        .info-pill strong { font-size: 18px; color: var(--neutral-900); font-weight: 800; line-height: 1.2; }
+
+        .info-pill span {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--neutral-500);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .info-pill strong {
+            font-size: 18px;
+            color: var(--neutral-900);
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
         .detail-compact-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-            background: var(--neutral-50); padding: 12px; border-radius: var(--radius-lg);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: var(--neutral-50);
+            padding: 12px;
+            border-radius: var(--radius-lg);
         }
-        .detail-item { display: flex; flex-direction: column; }
-        .detail-item label { font-size: 9px; text-transform: uppercase; color: var(--neutral-400); margin-bottom: 2px; }
-        .detail-item span { font-weight: 600; color: var(--neutral-800); font-size: 12px; }
 
-        .ticket-notch { position: relative; height: 16px; margin: 0 4px; overflow: hidden; background: white; }
-        .ticket-notch::before, .ticket-notch::after {
-            content: ''; position: absolute; top: 50%; transform: translateY(-50%);
-            width: 20px; height: 20px; background: var(--bg-primary); border-radius: 50%; z-index: 10;
+        .detail-item {
+            display: flex;
+            flex-direction: column;
         }
-        .ticket-notch::before { left: -10px; }
-        .ticket-notch::after { right: -10px; }
-        .ticket-notch-line { border-top: 2px dashed var(--neutral-300); position: absolute; top: 50%; left: 16px; right: 16px; }
 
-        .ticket-footer { padding: 20px; background: white; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .qr-code-wrapper { background: white; padding: 8px; border-radius: var(--radius-lg); margin-bottom: 8px; display: inline-block; }
-        .qr-hint { font-size: 11px; color: var(--neutral-500); max-width: 200px; line-height: 1.4; }
+        .detail-item label {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: var(--neutral-400);
+            margin-bottom: 2px;
+        }
+
+        .detail-item span {
+            font-weight: 600;
+            color: var(--neutral-800);
+            font-size: 12px;
+        }
+
+        .ticket-notch {
+            position: relative;
+            height: 16px;
+            margin: 0 4px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .ticket-notch::before,
+        .ticket-notch::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--bg-primary);
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .ticket-notch::before {
+            left: -10px;
+        }
+
+        .ticket-notch::after {
+            right: -10px;
+        }
+
+        .ticket-notch-line {
+            border-top: 2px dashed var(--neutral-300);
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            right: 16px;
+        }
+
+        .ticket-footer {
+            padding: 20px;
+            background: white;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .qr-code-wrapper {
+            background: white;
+            padding: 8px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .qr-hint {
+            font-size: 11px;
+            color: var(--neutral-500);
+            max-width: 200px;
+            line-height: 1.4;
+        }
 
         /* ===== DOWNLOAD BUTTON ===== */
         .download-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; max-width: 380px; margin: 16px auto 0;
-            background: transparent; border: 2px solid var(--neutral-200);
-            color: var(--neutral-900); padding: 14px; border-radius: var(--radius-xl);
-            font-size: 14px; font-weight: 700; font-family: inherit;
-            cursor: pointer; transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 380px;
+            margin: 16px auto 0;
+            background: transparent;
+            border: 2px solid var(--neutral-200);
+            color: var(--neutral-900);
+            padding: 14px;
+            border-radius: var(--radius-xl);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .download-btn:hover { background: var(--neutral-100); border-color: var(--neutral-300); transform: translateY(-1px); }
-        .download-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .download-btn:hover {
+            background: var(--neutral-100);
+            border-color: var(--neutral-300);
+            transform: translateY(-1px);
+        }
+
+        .download-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
 
         /* ===== PENDING / CANCELLED CARDS ===== */
-        .pending-card, .cancelled-card {
-            background: white; border-radius: var(--radius-xl); border: 1px solid var(--neutral-200);
-            overflow: hidden; max-width: 380px; margin: 0 auto;
+        .pending-card,
+        .cancelled-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+            max-width: 380px;
+            margin: 0 auto;
         }
-        .pending-header { background: linear-gradient(135deg, #f59e0b, #fcd34d); padding: 24px; text-align: center; color: white; }
-        .cancelled-header { background: linear-gradient(135deg, #ef4444, #fca5a5); padding: 24px; text-align: center; color: white; }
-        .status-icon { font-size: 40px; margin-bottom: 8px; }
-        .status-title { font-size: 20px; font-weight: 800; }
-        .status-subtitle { font-size: 13px; opacity: 0.9; margin-top: 4px; }
-        .card-body { padding: 20px; }
-        .card-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--neutral-100); font-size: 13px; }
-        .card-row:last-child { border-bottom: none; }
-        .card-label { color: var(--neutral-500); }
-        .card-value { font-weight: 600; color: var(--neutral-800); }
-        .dark-theme .card-row { border-color: #333; }
-        .dark-theme .card-value { color: #ddd; }
+
+        .pending-header {
+            background: linear-gradient(135deg, #f59e0b, #fcd34d);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+
+        .cancelled-header {
+            background: linear-gradient(135deg, #ef4444, #fca5a5);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+
+        .status-icon {
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .status-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .status-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--neutral-100);
+            font-size: 13px;
+        }
+
+        .card-row:last-child {
+            border-bottom: none;
+        }
+
+        .card-label {
+            color: var(--neutral-500);
+        }
+
+        .card-value {
+            font-weight: 600;
+            color: var(--neutral-800);
+        }
+
+        .dark-theme .card-row {
+            border-color: #333;
+        }
+
+        .dark-theme .card-value {
+            color: #ddd;
+        }
+
         .pay-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: 100%; background: var(--primary-500); color: white; border: none;
-            padding: 14px; border-radius: var(--radius-xl); margin-top: 16px;
-            font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: var(--primary-500);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius-xl);
+            margin-top: 16px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .pay-btn:hover { background: var(--primary-600); }
-        .back-link { display: block; text-align: center; margin-top: 16px; color: var(--primary-500); font-size: 13px; text-decoration: none; font-weight: 600; }
-        .back-link:hover { text-decoration: underline; }
+
+        .pay-btn:hover {
+            background: var(--primary-600);
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: var(--primary-500);
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
+
 <body class="light-theme">
 
     <header class="app-header">
         <div class="header-inner">
             <a href="#" class="app-logo">
-                <img id="header-logo" src="https://hakordiabedasrun.bandungkab.go.id/assets/img/logonav.png" alt="Logo Bedas Run">
+                <img id="header-logo" src="https://hakordiabedasrun.bandungkab.go.id/assets/img/logonav.png"
+                    alt="Logo Bedas Run">
                 <span class="app-title">Bedas Run 2026</span>
             </a>
             <button class="icon-button" id="theme-toggle" aria-label="Toggle tema">
@@ -264,100 +782,100 @@
     </div>
 
     <script>
-    const BACKEND_URL = 'https://apibedasrun.hirumi.app';
-    const LOGO_URL    = 'https://hakordiabedasrun.bandungkab.go.id/assets/img/logonav.png';
+        const BACKEND_URL = 'https://apibedasrun.hirumi.app';
+        const LOGO_URL = 'https://hakordiabedasrun.bandungkab.go.id/assets/img/logonav.png';
 
-    document.addEventListener('DOMContentLoaded', () => {
-        lucide.createIcons();
-
-        // ===== THEME =====
-        const themeToggle = document.getElementById('theme-toggle');
-        const savedTheme  = localStorage.getItem('bedasrun-theme') || 'light';
-        applyTheme(savedTheme);
-
-        themeToggle.addEventListener('click', () => {
-            const next = document.body.classList.contains('light-theme') ? 'dark' : 'light';
-            applyTheme(next);
-            localStorage.setItem('bedasrun-theme', next);
-        });
-
-        function applyTheme(theme) {
-            document.body.className = theme + '-theme';
-            themeToggle.innerHTML = `<i data-lucide="${theme === 'light' ? 'moon' : 'sun'}" style="width:18px;height:18px;"></i>`;
+        document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-        }
 
-        // ===== SEARCH =====
-        document.getElementById('search-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const phone   = document.getElementById('phone-input').value.trim();
-            const btn     = document.getElementById('search-btn');
-            const results = document.getElementById('ticket-results');
-            if (!phone) return;
+            // ===== THEME =====
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('bedasrun-theme') || 'light';
+            applyTheme(savedTheme);
 
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin" style="width:18px;height:18px;"></i><span>Mencari...</span>`;
-            lucide.createIcons();
-            results.innerHTML = '';
+            themeToggle.addEventListener('click', () => {
+                const next = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+                applyTheme(next);
+                localStorage.setItem('bedasrun-theme', next);
+            });
 
-            try {
-                const res  = await fetch(`${BACKEND_URL}/check-transaction?phone=${encodeURIComponent(phone)}`);
-                const data = await res.json();
+            function applyTheme(theme) {
+                document.body.className = theme + '-theme';
+                themeToggle.innerHTML = `<i data-lucide="${theme === 'light' ? 'moon' : 'sun'}" style="width:18px;height:18px;"></i>`;
+                lucide.createIcons();
+            }
 
-                if (!res.ok) {
-                    results.innerHTML = `
+            // ===== SEARCH =====
+            document.getElementById('search-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const phone = document.getElementById('phone-input').value.trim();
+                const btn = document.getElementById('search-btn');
+                const results = document.getElementById('ticket-results');
+                if (!phone) return;
+
+                btn.disabled = true;
+                btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin" style="width:18px;height:18px;"></i><span>Mencari...</span>`;
+                lucide.createIcons();
+                results.innerHTML = '';
+
+                try {
+                    const res = await fetch(`${BACKEND_URL}/check-transaction?phone=${encodeURIComponent(phone)}`);
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        results.innerHTML = `
                         <div class="status-message">
                             <i data-lucide="alert-circle" style="width:30px;height:30px;margin-bottom:10px;color:#ef4444;"></i>
                             <p>${data.error || 'Transaksi tidak ditemukan.'}</p>
                         </div>`;
-                    lucide.createIcons();
-                    return;
-                }
+                        lucide.createIcons();
+                        return;
+                    }
 
-                const trx       = data.transaction;
-                const iStatus   = data.ipaymu?.Data?.Status ?? null;
-                const isPaid    = trx.status === 'success' || [1, 6, 7].includes(iStatus);
-                const isPending = trx.status === 'pending';
+                    const trx = data.transaction;
+                    const iStatus = data.ipaymu?.Data?.Status ?? null;
+                    const isPaid = trx.status === 'success' || [1, 6, 7].includes(iStatus);
+                    const isPending = trx.status === 'pending';
 
-                if (isPaid) {
-                    renderTicket(trx, results);
-                } else if (isPending) {
-                    renderPending(trx, results);
-                } else {
-                    renderCancelled(trx, results);
-                }
+                    if (isPaid) {
+                        renderTicket(trx, results);
+                    } else if (isPending) {
+                        renderPending(trx, results);
+                    } else {
+                        renderCancelled(trx, results);
+                    }
 
-            } catch (err) {
-                results.innerHTML = `
+                } catch (err) {
+                    results.innerHTML = `
                     <div class="status-message">
                         <i data-lucide="wifi-off" style="width:30px;height:30px;margin-bottom:10px;opacity:0.5;"></i>
                         <p>Gagal menghubungi server. Coba lagi.</p>
                     </div>`;
-                lucide.createIcons();
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<i data-lucide="search" style="width:18px;height:18px;"></i><span>Cari Tiket</span>`;
-                lucide.createIcons();
-            }
+                    lucide.createIcons();
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i data-lucide="search" style="width:18px;height:18px;"></i><span>Cari Tiket</span>`;
+                    lucide.createIcons();
+                }
+            });
         });
-    });
 
-    // ===== RENDER TICKET =====
-    function renderTicket(trx, container) {
-        const bib      = trx.reference_id || '-';
-        const kategori = (trx.kategori_lari || '').toUpperCase();
-        const gender   = trx.jenis_kelamin === 'L' || trx.jenis_kelamin === 'Laki-Laki' ? 'L' : trx.jenis_kelamin === 'P' || trx.jenis_kelamin === 'Perempuan' ? 'P' : '-';
+        // ===== RENDER TICKET =====
+        function renderTicket(trx, container) {
+            const bib = trx.reference_id || '-';
+            const kategori = (trx.kategori_lari || '').toUpperCase();
+            const gender = trx.jenis_kelamin === 'L' || trx.jenis_kelamin === 'Laki-Laki' ? 'L' : trx.jenis_kelamin === 'P' || trx.jenis_kelamin === 'Perempuan' ? 'P' : '-';
 
-        let gradient = 'linear-gradient(135deg, #3b82f6, #06b6d4)';
-        if (kategori.includes('BIG'))        gradient = 'linear-gradient(135deg, #0f766e, #2dd4bf)';
-        else if (kategori.includes('CHILD')) gradient = 'linear-gradient(135deg, #4f46e5, #818cf8)';
+            let gradient = 'linear-gradient(135deg, #3b82f6, #06b6d4)';
+            if (kategori.includes('BIG')) gradient = 'linear-gradient(135deg, #0f766e, #2dd4bf)';
+            else if (kategori.includes('CHILD')) gradient = 'linear-gradient(135deg, #4f46e5, #818cf8)';
 
-        const qrId      = `qr-${bib.replace(/[^a-zA-Z0-9]/g, '')}`;
-        const cardId    = `ticket-${qrId}`;
+            const qrId = `qr-${bib.replace(/[^a-zA-Z0-9]/g, '')}`;
+            const cardId = `ticket-${qrId}`;
 
-        const wrapper = document.createElement('div');
-        wrapper.className = 'ticket-result-wrapper';
-        wrapper.innerHTML = `
+            const wrapper = document.createElement('div');
+            wrapper.className = 'ticket-result-wrapper';
+            wrapper.innerHTML = `
             <div class="ticket-card" id="${cardId}">
                 <div class="ticket-header" style="background:${gradient}">
                     <div class="ticket-branding">
@@ -414,27 +932,27 @@
             <a href="/ui.html" class="back-link">← Kembali ke Pendaftaran</a>
         `;
 
-        container.appendChild(wrapper);
-        lucide.createIcons();
+            container.appendChild(wrapper);
+            lucide.createIcons();
 
-        // Generate QR
-        new QRCode(document.getElementById(qrId), {
-            text: JSON.stringify({
-                ref:      trx.reference_id,
-                name:     trx.buyer_name,
-                phone:    trx.buyer_phone,
-                kategori: trx.kategori_lari,
-                kaos:     trx.ukuran_kaos,
-            }),
-            width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M
-        });
-    }
+            // Generate QR
+            new QRCode(document.getElementById(qrId), {
+                text: JSON.stringify({
+                    ref: trx.reference_id,
+                    name: trx.buyer_name,
+                    phone: trx.buyer_phone,
+                    kategori: trx.kategori_lari,
+                    kaos: trx.ukuran_kaos,
+                }),
+                width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M
+            });
+        }
 
-    // ===== RENDER PENDING =====
-    function renderPending(trx, container) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'ticket-result-wrapper';
-        wrapper.innerHTML = `
+        // ===== RENDER PENDING =====
+        function renderPending(trx, container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'ticket-result-wrapper';
+            wrapper.innerHTML = `
             <div class="pending-card">
                 <div class="pending-header">
                     <div class="status-icon">⏳</div>
@@ -455,15 +973,15 @@
             </div>
             <a href="/ui.html" class="back-link">← Kembali ke Pendaftaran</a>
         `;
-        container.appendChild(wrapper);
-        lucide.createIcons();
-    }
+            container.appendChild(wrapper);
+            lucide.createIcons();
+        }
 
-    // ===== RENDER CANCELLED =====
-    function renderCancelled(trx, container) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'ticket-result-wrapper';
-        wrapper.innerHTML = `
+        // ===== RENDER CANCELLED =====
+        function renderCancelled(trx, container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'ticket-result-wrapper';
+            wrapper.innerHTML = `
             <div class="cancelled-card">
                 <div class="cancelled-header">
                     <div class="status-icon">❌</div>
@@ -477,38 +995,39 @@
             </div>
             <a href="/ui.html" class="back-link">← Daftar Ulang</a>
         `;
-        container.appendChild(wrapper);
-        lucide.createIcons();
-    }
-
-    // ===== DOWNLOAD =====
-    async function downloadTicket(cardId, bib) {
-        const btn = document.querySelector('.download-btn');
-        const orig = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin" style="width:18px;height:18px;"></i><span>Memproses...</span>`;
-        lucide.createIcons();
-
-        try {
-            const el = document.getElementById(cardId);
-            const canvas = await html2canvas(el, {
-                scale: 3, useCORS: true, logging: false,
-                backgroundColor: document.body.classList.contains('dark-theme') ? '#1e1e1e' : '#ffffff'
-            });
-            const link = document.createElement('a');
-            link.download = `TIKET_BEDASRUN_${bib}.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
-        } catch (err) {
-            alert('Gagal menyimpan tiket. Coba lagi.');
-        } finally {
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = orig;
-                lucide.createIcons();
-            }, 1500);
+            container.appendChild(wrapper);
+            lucide.createIcons();
         }
-    }
+
+        // ===== DOWNLOAD =====
+        async function downloadTicket(cardId, bib) {
+            const btn = document.querySelector('.download-btn');
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin" style="width:18px;height:18px;"></i><span>Memproses...</span>`;
+            lucide.createIcons();
+
+            try {
+                const el = document.getElementById(cardId);
+                const canvas = await html2canvas(el, {
+                    scale: 3, useCORS: true, logging: false,
+                    backgroundColor: document.body.classList.contains('dark-theme') ? '#1e1e1e' : '#ffffff'
+                });
+                const link = document.createElement('a');
+                link.download = `TIKET_BEDASRUN_${bib}.png`;
+                link.href = canvas.toDataURL('image/png', 1.0);
+                link.click();
+            } catch (err) {
+                alert('Gagal menyimpan tiket. Coba lagi.');
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = orig;
+                    lucide.createIcons();
+                }, 1500);
+            }
+        }
     </script>
 </body>
+
 </html>
