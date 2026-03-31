@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flowchart Sistem Pendaftaran</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: #f0fdfa;
       min-height: 100vh;
       padding: 32px 16px;
     }
+
     h1 {
       text-align: center;
       font-size: 20px;
@@ -21,80 +29,90 @@
       color: #0f766e;
       margin-bottom: 8px;
     }
+
     p.sub {
       text-align: center;
       font-size: 13px;
       color: #64748b;
       margin-bottom: 32px;
     }
+
     .diagram-wrapper {
       background: white;
       border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
       padding: 32px 16px;
       max-width: 860px;
       margin: 0 auto;
       overflow-x: auto;
     }
+
     .mermaid {
       display: flex;
       justify-content: center;
     }
   </style>
 </head>
+
 <body>
-  <h1>Flowchart Sistem Pendaftaran Bedas Run 2026</h1>
-  <p class="sub">Termasuk validasi nomor HP, sistem quota, dan status pembayaran</p>
+  <h1>Flowchart Sistem Pendaftaran Big & Child Run 2026</h1>
+  <p class="sub">Alur lengkap dari pengisian form hingga tiket tersedia — termasuk validasi HP, quota, pembayaran
+    iPaymu, dan cek status</p>
 
   <div class="diagram-wrapper">
     <div class="mermaid">
-flowchart TD
-    A([🏁 User buka ui.html]) --> B[Isi form pendaftaran]
-    B --> C[Klik Daftar]
-    C --> D{Cek Quota\nyang tersedia}
+      flowchart TD
+      A([🏁 User buka daftar.html]) --> B[Isi form multi-step\nIdentitas · Kategori · Kesehatan · Kontak]
+      B --> C[Setujui Surat Pernyataan\n& Klik Daftar]
+      C --> D[POST /payment\nke backend]
 
-    D -->|Quota habis| E([❌ Tampilkan pesan\nQuota Penuh])
+      D --> E{Cek nomor HP\ndi database}
 
-    D -->|Quota tersedia| F{Cek nomor HP\ndi database}
+      E -->|HP sudah ada\nstatus pending / success| F([❌ HTTP 409\nNomor HP Sudah Terdaftar\nLink ke check.html])
 
-    F -->|HP sudah SUCCESS| G([🎟️ Arahkan ke\ncheck.html untuk\nlihat tiket])
+      E -->|HP belum terdaftar\natau status cancelled| G{Cek quota\ntotal transaksi}
 
-    F -->|HP ada, status PENDING\nbuat < 2 jam| H([⏳ Arahkan ke\nhalaman pembayaran\nyang sudah ada])
+      G -->|>= 1.000 transaksi| H([❌ HTTP 429\nQuota Pendaftaran Penuh])
 
-    F -->|HP ada, PENDING\n> 2 jam atau CANCELLED| I[Buat transaksi baru]
-    F -->|HP belum terdaftar| I
+      G -->|Quota tersedia| I[Tentukan harga\nBig: Rp 115.000 · Child: Rp 100.000]
+      I --> J[Simpan transaksi ke Supabase\nstatus: pending]
+      J --> K[Forward ke iPaymu\ndengan HMAC-SHA256 Signature]
+      K --> L{Response iPaymu}
 
-    I --> J[Simpan ke Supabase\nstatus: pending]
-    J --> K[Forward ke iPaymu]
-    K --> L{Response\niPaymu}
+      L -->|Error / Gagal| M([⚠️ HTTP 500\nGagal terhubung ke iPaymu])
+      L -->|Berhasil\ndapat SessionID & URL| N[Update record:\nsimpan session_id & ipaymu_url]
+      N --> O([🔗 Redirect user ke\nhalaman bayar iPaymu])
 
-    L -->|Gagal| M([⚠️ Tampilkan\npesan error])
-    L -->|Berhasil, dapat URL| N[Update record:\nsimpan session_id & url]
-    N --> O([🔗 Redirect user ke\nhalaman bayar iPaymu])
+      O --> P{User membayar?}
 
-    O --> P{User membayar?}
+      P -->|Bayar ✅| Q[iPaymu POST /callback\nstatus: berhasil]
+      P -->|Expired / Batal / Gagal ❌| R[iPaymu POST /callback\nstatus: expired / batal / gagal]
+      P -->|Kembali manual| S([↩️ GET /payment/return\nRedirect ke success.html])
 
-    P -->|Bayar ✅| Q[iPaymu trigger\nPOST /callback]
-    P -->|Batal / Expire ❌| R[iPaymu trigger\nPOST /callback\nstatus: expired/batal]
-    P -->|User kembali manual| S([↩️ GET /payment/return\nredirect ke success.html])
+      Q --> T[Update Supabase\nstatus: success]
+      R --> U[Update Supabase\nstatus: cancelled]
 
-    Q --> T[Update Supabase\nstatus: success]
-    R --> U[Update Supabase\nstatus: cancelled]
+      T --> V([✅ success.html\nLink ke check.html])
+      S --> V
 
-    T --> V([🎟️ Tiket tersedia\ndi check.html])
-    U --> W([❌ Tampilkan\nstatus dibatalkan\ndi check.html])
+      V --> W[GET /check-transaction\n?phone=xxxxxx]
+      W --> X{Status transaksi}
 
-    style A fill:#0f766e,color:#fff,stroke:none
-    style E fill:#fee2e2,color:#991b1b,stroke:#fca5a5
-    style G fill:#dcfce7,color:#166534,stroke:#86efac
-    style H fill:#fef9c3,color:#854d0e,stroke:#fde047
-    style M fill:#fee2e2,color:#991b1b,stroke:#fca5a5
-    style O fill:#dbeafe,color:#1e40af,stroke:#93c5fd
-    style S fill:#f0fdf4,color:#166534,stroke:#86efac
-    style V fill:#dcfce7,color:#166534,stroke:#86efac
-    style W fill:#fee2e2,color:#991b1b,stroke:#fca5a5
-    style T fill:#14b8a6,color:#fff,stroke:none
-    style U fill:#ef4444,color:#fff,stroke:none
+      X -->|success| Y([🎟️ Tampilkan Tiket\n+ QR Code\nBisa disimpan ke galeri])
+      X -->|pending| Z([⏳ Belum Dibayar\nTampilkan link bayar iPaymu])
+      X -->|cancelled| AA([❌ Pembayaran Dibatalkan\nBisa daftar ulang])
+
+      style A fill:#0f766e,color:#fff,stroke:none
+      style F fill:#fee2e2,color:#991b1b,stroke:#fca5a5
+      style H fill:#fee2e2,color:#991b1b,stroke:#fca5a5
+      style M fill:#fee2e2,color:#991b1b,stroke:#fca5a5
+      style O fill:#dbeafe,color:#1e40af,stroke:#93c5fd
+      style T fill:#14b8a6,color:#fff,stroke:none
+      style U fill:#ef4444,color:#fff,stroke:none
+      style V fill:#f0fdf4,color:#166534,stroke:#86efac
+      style Y fill:#dcfce7,color:#166534,stroke:#86efac
+      style Z fill:#fef9c3,color:#854d0e,stroke:#fde047
+      style AA fill:#fee2e2,color:#991b1b,stroke:#fca5a5
     </div>
   </div>
 
@@ -119,4 +137,5 @@ flowchart TD
     });
   </script>
 </body>
+
 </html>

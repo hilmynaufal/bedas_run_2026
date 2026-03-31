@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Layanan Dinamis & Pembayaran</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Leaflet & Plugin CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
+
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Choices.js CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Offline.js Theme -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/offline-js/0.7.1/themes/offline-theme-chrome.min.css">
+
+    <!-- Tailwind CSS JIT CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+
+    <style>
+        :root {
+            --primary-600: #0f766e;
+            --primary-500: #14b8a6;
+            --primary-400: #2dd4bf;
+            --primary-100: #ccfbf1;
+            --primary-50: #f0fdfa;
+            --neutral-900: #1a1a1a;
+            --neutral-800: #2c2c2e;
+            --neutral-700: #3a3a3c;
+            --neutral-600: #48484a;
+            --neutral-500: #8e8e93;
+            --neutral-400: #c7c7cc;
+            --neutral-300: #d1d1d6;
+            --neutral-200: #e5e5ea;
+            --neutral-100: #f2f2f7;
+            --neutral-50: #f9f9fb;
+            --accent-red: #ff3b30;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+        }
+
+        .light-theme {
+            --bg-primary: #ffffff;
+            --bg-secondary: var(--neutral-50);
+            --bg-tertiary: var(--neutral-100);
+            --text-primary: var(--neutral-900);
+            --text-secondary: var(--neutral-600);
+            --text-tertiary: var(--neutral-500);
+            --border-primary: var(--neutral-200);
+            --card-bg: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.85);
+        }
+
+        .dark-theme {
+            --bg-primary: #121212;
+            --bg-secondary: #000000;
+            --bg-tertiary: var(--neutral-800);
+            --text-primary: #ffffff;
+            --text-secondary: var(--neutral-300);
+            --text-tertiary: var(--neutral-400);
+            --border-primary: var(--neutral-700);
+            --card-bg: var(--neutral-800);
+            --nav-bg: rgba(18, 18, 18, 0.85);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Custom Stepper Styles */
+        .stepper-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .stepper-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .stepper-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 2px solid var(--border-primary);
+            background-color: var(--card-bg);
+            color: var(--text-tertiary);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+
+        .stepper-title {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+            color: var(--text-tertiary);
+            transition: all 0.3s ease;
+            line-height: 1.3;
+        }
+
+        .stepper-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: var(--border-primary);
+            transform: translateY(-50%);
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .stepper-item.active .stepper-icon {
+            border-color: var(--primary-500);
+            background-color: var(--primary-500);
+            color: white;
+        }
+
+        .stepper-item.active .stepper-title {
+            color: var(--text-primary);
+        }
+
+        .stepper-item.completed .stepper-icon {
+            border-color: var(--primary-500);
+            background-color: var(--primary-500);
+            color: white;
+        }
+
+        .stepper-item.completed .stepper-title {
+            color: var(--text-secondary);
+        }
+
+        .stepper-item.completed::after {
+            background-color: var(--primary-500);
+        }
+
+        /* Custom Form Input Styles */
+        .form-input {
+            width: 100%;
+            display: block;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: var(--neutral-800);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--neutral-800) transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Leaflet & GeoSearch Customization */
+        .leaflet-pane {
+            z-index: 10;
+        }
+
+        .leaflet-top.leaflet-left {
+            top: 1rem;
+            left: 1rem;
+        }
+
+        .leaflet-bar a {
+            background-color: var(--card-bg) !important;
+            color: var(--text-secondary) !important;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .leaflet-bar a:hover {
+            background-color: var(--bg-tertiary) !important;
+        }
+
+        .leaflet-control-layers {
+            background-color: var(--card-bg);
+            border-radius: var(--radius-lg);
+        }
+
+        /* Kustomisasi Choices.js */
+        .choices__inner {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            min-height: auto;
+        }
+
+        .choices[data-type*="select-one"] .choices__inner {
+            padding-bottom: 0.5rem;
+        }
+
+        .choices__list--dropdown {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            z-index: 20;
+        }
+
+        .choices__input {
+            background-color: transparent;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .choices__item {
+            font-weight: 500;
+        }
+
+        .choices__item--selectable {
+            color: var(--text-secondary);
+        }
+
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .dark-theme .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: var(--neutral-700);
+            color: var(--text-primary);
+        }
+
+        .choices[data-type*="select-one"]::after {
+            border-color: var(--text-tertiary) transparent transparent;
+            margin-top: -5px;
+            right: 1.25rem;
+        }
+
+        .choices.is-open[data-type*="select-one"]::after {
+            border-color: transparent transparent var(--text-tertiary);
+            margin-top: -7.5px;
+        }
+
+        .choices__list--dropdown .choices__placeholder,
+        .choices__list--single .choices__placeholder {
+            color: var(--text-tertiary);
+            opacity: 1;
+        }
+
+        /* Popup Styles */
+        #info-popup.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #info-popup.visible #popup-content {
+            transform: scale(1);
+        }
+
+        /* Shimmer Animation */
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .shimmer-bg {
+            position: relative;
+            overflow: hidden;
+            background-color: var(--bg-tertiary);
+        }
+
+        .shimmer-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .dark-theme .shimmer-bg::after {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        }
+    </style>
+</head>
+
+<body class="light-theme">
+    <div id="top-loader" class="fixed top-0 left-0 w-full h-1 z-[101] bg-transparent hidden">
+        <div id="loader-bar" class="h-full bg-gradient-to-r from-[var(--primary-400)] to-[var(--primary-500)]"
+            style="width: 0%;"></div>
+    </div>
+    <div class="app-container min-h-screen">
+        <header class="sticky top-0 z-50 bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--border-primary)]">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16 sm:h-20">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-br from-[var(--primary-400)] to-[var(--primary-500)] rounded-lg flex items-center justify-center">
+                            <i data-lucide="file-signature" class="text-white"></i>
+                        </div>
+                        <h1 id="form-title" class="text-lg sm:text-xl font-bold text-[var(--text-primary)]">Formulir
+                            Pendaftaran</h1>
+                    </div>
+                    <button
+                        class="w-10 h-10 flex items-center justify-center bg-[var(--bg-tertiary)] rounded-lg text-[var(--text-secondary)]"
+                        id="theme-toggle"><i data-lucide="moon"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            <div class="max-w-3xl mx-auto p-4 sm:p-6 pb-24">
+                <div id="loading-placeholder">
+                    <div class="flex justify-between items-center mb-8">
+                        <div class="h-14 w-1/4 shimmer-bg rounded-lg"></div>
+                        <div class="h-14 w-1/4 shimmer-bg rounded-lg"></div>
+                        <div class="h-14 w-1/4 shimmer-bg rounded-lg"></div>
+                    </div>
+                    <div class="h-8 w-3/5 shimmer-bg rounded-md mb-2"></div>
+                    <div class="h-5 w-4/5 shimmer-bg rounded-md mb-8"></div>
+                    <div class="space-y-5">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="h-16 shimmer-bg rounded-lg"></div>
+                            <div class="h-16 shimmer-bg rounded-lg"></div>
+                        </div>
+                        <div class="h-32 shimmer-bg rounded-lg"></div>
+                    </div>
+                </div>
+
+                <div id="form-wrapper" class="hidden">
+                    <div id="stepper-indicator" class="mb-8"></div>
+
+                    <div id="form-container"
+                        class="bg-[var(--card-bg)] p-5 sm:p-8 rounded-[var(--radius-2xl)] shadow-[var(--shadow-md)] border border-[var(--border-primary)]">
+                        <div id="success-message" class="hidden">
+                            <div class="flex flex-col items-center justify-center text-center py-12">
+                                <div
+                                    class="w-20 h-20 bg-[var(--primary-50)] rounded-full flex items-center justify-center">
+                                    <i data-lucide="check-circle-2" class="w-12 h-12 text-[var(--primary-500)]"></i>
+                                </div>
+                                <h2 class="text-3xl font-extrabold mt-6 text-[var(--text-primary)]">Pendaftaran
+                                    Berhasil!</h2>
+                                <p class="text-[var(--text-secondary)] mt-2 max-w-md">Data Anda berhasil dikirim. Jika
+                                    pembayaran belum dilakukan, mohon hubungi pihak panitia.</p>
+                            </div>
+                        </div>
+                        <form id="dynamic-form" novalidate></form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Popup Info -->
+    <div id="info-popup"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div id="popup-content"
+            class="bg-[var(--card-bg)] w-full max-w-md p-6 sm:p-8 rounded-[var(--radius-2xl)] shadow-[var(--shadow-md)] border border-[var(--border-primary)] transform scale-95 transition-transform duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 id="popup-title" class="text-xl sm:text-2xl font-bold text-[var(--text-primary)]"></h2>
+                    <p id="popup-description" class="text-base text-[var(--text-secondary)] mt-2"></p>
+                </div>
+                <button id="close-popup"
+                    class="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors flex-shrink-0 ml-4">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="mt-6 flex flex-col sm:flex-row-reverse sm:items-center sm:justify-between gap-4">
+                <button id="confirm-popup"
+                    class="w-full sm:w-auto py-3 px-6 rounded-[var(--radius-lg)] font-bold text-white bg-gradient-to-r from-[var(--primary-500)] to-[var(--primary-600)] hover:opacity-90 transition-opacity">Mengerti</button>
+                <div class="flex items-center">
+                    <input type="checkbox" id="dont-show-again" name="dont-show-again"
+                        class="h-5 w-5 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                    <label for="dont-show-again" class="ml-2 text-sm text-[var(--text-secondary)]">Jangan tampilkan
+                        lagi</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Floating Navbar -->
+    <div id="mobile-nav"
+        class="hidden fixed bottom-0 left-0 right-0 bg-[var(--nav-bg)] backdrop-blur-xl shadow-[0_-2px_10px_rgba(0,0,0,0.08)] p-3 border-t border-[var(--border-primary)] z-40"
+        style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
+        <div class="flex justify-between items-center max-w-md mx-auto gap-4">
+            <button type="button" id="mobilePrevBtn"
+                class="py-3 px-4 rounded-[var(--radius-lg)] font-bold text-[var(--text-secondary)] bg-[var(--bg-tertiary)] hover:bg-[var(--neutral-200)] transition-all flex-shrink-0">Kembali</button>
+            <div id="mobile-step-indicator"
+                class="text-sm font-semibold text-[var(--text-secondary)] whitespace-nowrap"></div>
+            <button type="button" id="mobileNextBtn"
+                class="flex-grow py-3 px-4 rounded-[var(--radius-lg)] font-bold text-white bg-gradient-to-r from-[var(--primary-500)] to-[var(--primary-600)] hover:opacity-90 transition-opacity flex items-center justify-center"></button>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/offline-js/0.7.1/offline.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+
+            // === KONFIGURASI BACKEND ===
+            const BACKEND_URL = "https://apibedasrun.hirumi.app";
+            // ==========================
+
+            Offline.options = { checks: { xhr: { url: 'https://httpbin.org/get' } } };
+
+            const API_URL = "https://api.bandungkab.go.id/api/form/format/pendaftaran-big-and-child-run";
+            const SUBMIT_URL = "https://api.bandungkab.go.id/api/form/create/pendaftaran-big-and-child-run";
+            const QUOTA_API_URL = "https://aplikasi.bandungkab.go.id/api/form/quota/pendaftaran-big-and-child-run";
+            const FIELDS_PER_STEP = 4;
+
+            const form = document.getElementById('dynamic-form');
+            const stepperContainer = document.getElementById('stepper-indicator');
+            const loadingPlaceholder = document.getElementById('loading-placeholder');
+            const formWrapper = document.getElementById('form-wrapper');
+            const successMessage = document.getElementById('success-message');
+            const mobileNav = document.getElementById('mobile-nav');
+            const infoPopup = document.getElementById('info-popup');
+            const popupContent = document.getElementById('popup-content');
+            const popupTitle = document.getElementById('popup-title');
+            const popupDescription = document.getElementById('popup-description');
+            const closePopupButton = document.getElementById('close-popup');
+            const confirmPopupButton = document.getElementById('confirm-popup');
+            const dontShowAgainCheckbox = document.getElementById('dont-show-again');
+
+            let currentStep = 1;
+            let totalSteps = 0;
+            let apiData = null;
+            let dynamicSteps = [];
+            let maps = {};
+            let choicesInstances = {};
+
+            const loadingSpinner = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+
+            function createDynamicSteps(questions, fieldsPerStep) {
+                const steps = [];
+                if (!questions || questions.length === 0) return steps;
+                for (let i = 0; i < questions.length; i += fieldsPerStep) {
+                    const chunk = questions.slice(i, i + fieldsPerStep);
+                    const stepTitle = chunk[0] ? chunk[0].question_text.split(' ').slice(0, 2).join(' ') : `Langkah ${steps.length + 1}`;
+                    steps.push({ title: stepTitle, questions: chunk });
+                }
+                steps.push({ title: "Resume", questions: [], isReviewStep: true });
+                return steps;
+            }
+
+            async function fetchData() {
+                try {
+                    const response = await fetch(API_URL);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.warn("Gagal mengambil data form dari API.", error);
+                    return null;
+                }
+            }
+
+            async function fetchQuota() {
+                try {
+                    const response = await fetch('/quota');
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    if (data && data.quota_available !== undefined) {
+                        return { quota_available: parseInt(data.quota_available, 10) };
+                    }
+                    throw new Error("Format data kuota tidak valid");
+                } catch (error) {
+                    console.warn("Gagal mengambil data kuota:", error);
+                    return { quota_available: 1 }; // Fail-open
+                }
+            }
+
+            const toKebabCase = str => str.toLowerCase().replace(/\s+/g, '-');
+
+            function generateResumeHtml() {
+                let html = '<div class="space-y-4">';
+                apiData.data.forEach(q => {
+                    const fieldName = toKebabCase(q.question_text);
+                    let answer = '<i class="text-[var(--text-tertiary)]">Tidak diisi</i>';
+
+                    switch (q.question_type) {
+                        case 'radio':
+                            const checkedRadio = form.querySelector(`input[name="${fieldName}"]:checked`);
+                            if (checkedRadio) answer = checkedRadio.value;
+                            break;
+                        case 'checkbox':
+                            const checkedBoxes = Array.from(form.querySelectorAll(`input[name="${fieldName}"]:checked`));
+                            if (checkedBoxes.length > 0) answer = checkedBoxes.map(cb => cb.value).join(', ');
+                            break;
+                        case 'file': case 'image':
+                            const fileInput = form.querySelector(`[data-question-id="${q.id}"]`);
+                            if (fileInput && fileInput.files.length > 0) {
+                                answer = `<span class="flex items-center"><i data-lucide="file-check-2" class="w-4 h-4 mr-2 text-[var(--primary-500)]"></i>${fileInput.files[0].name}</span>`;
+                            }
+                            break;
+                        default:
+                            const el = form.querySelector(`[data-question-id="${q.id}"]`);
+                            if (el && el.value.trim()) answer = el.value;
+                            break;
+                    }
+
+                    html += `<div class="py-3 border-b border-dashed border-[var(--border-primary)]">
+                                <p class="text-sm font-medium text-[var(--text-secondary)]">${q.question_text}</p>
+                                <p class="text-base font-semibold text-[var(--text-primary)] mt-1">${answer}</p>
+                               </div>`;
+                });
+                html += '</div>';
+                return html;
+            }
+
+            function generateUI() {
+                const formTitle = apiData.title || 'Formulir Layanan';
+                document.getElementById('form-title').textContent = formTitle;
+                document.title = formTitle;
+                totalSteps = dynamicSteps.length;
+
+                stepperContainer.innerHTML = `<div class="stepper-container">${dynamicSteps.map((step, index) => `<div class="stepper-item" data-step-id="${index + 1}"><div class="stepper-icon"><span class="stepper-number">${index + 1}</span><i data-lucide="check" class="stepper-check hidden w-5 h-5"></i></div><p class="stepper-title">${step.title}</p></div>`).join('')}</div>`;
+
+                let formStepsHtml = `<div class="form-steps-container relative">${dynamicSteps.map((step, index) => `<div class="form-step transition-all duration-500 ${index === 0 ? 'opacity-100' : 'opacity-0 -translate-x-8 pointer-events-none absolute w-full top-0'}" data-step-id="${index + 1}"><div class="mb-6"><h2 class="text-xl sm:text-2xl font-extrabold text-[var(--text-primary)]">${step.title}</h2><p class="text-[var(--text-secondary)] mt-1 text-sm sm:text-base">${!step.isReviewStep ? apiData.description : 'Mohon periksa kembali data yang Anda masukkan sebelum mengirim.'}</p></div><div class="space-y-5" id="step-grid-${index + 1}"></div></div>`).join('')}</div>`;
+                form.innerHTML = formStepsHtml;
+
+                dynamicSteps.forEach((step, index) => {
+                    const stepGrid = document.getElementById(`step-grid-${index + 1}`);
+                    if (step.isReviewStep) {
+                        stepGrid.innerHTML = '';
+                    } else {
+                        step.questions.forEach(q => {
+                            const fieldId = toKebabCase(q.question_text);
+                            const commonAttrs = `id="${fieldId}" name="${fieldId}" data-question-id="${q.id}" ${q.validation_rules.required ? 'required' : ''}`;
+                            let fieldHtml = '';
+
+                            const labelHtml = `<label class="flex items-center text-sm font-medium text-[var(--text-secondary)] mb-2" for="${fieldId}">${q.question_text}${q.question_description ? ` <span class="tooltip-container ml-2"><i data-lucide="info" class="w-4 h-4 text-[var(--text-tertiary)] cursor-help"></i><span class="tooltip-text">${q.question_description}</span></span>` : ''}</label>`;
+                            const validationAttrs = (q.validation_rules.min_length ? ` data-min-length="${q.validation_rules.min_length}"` : '') + (q.validation_rules.max_length ? ` data-max-length="${q.validation_rules.max_length}"` : '');
+
+                            switch (q.question_type) {
+                                case 'date': fieldHtml = `${labelHtml}<input type="text" class="form-input date-picker" ${commonAttrs} placeholder="${q.question_placeholder || 'Pilih tanggal...'}">`; break;
+                                case 'text': case 'number': fieldHtml = `${labelHtml}<input type="${q.question_type}" class="form-input" ${commonAttrs} ${validationAttrs} placeholder="${q.question_placeholder || ''}">`; break;
+                                case 'file': case 'image': fieldHtml = `${labelHtml}<div class="file-upload-wrapper mt-1"><input type="file" class="hidden" ${commonAttrs}><div class="file-upload-ui flex items-center justify-center w-full p-4 border-2 border-[var(--border-primary)] border-dashed rounded-[var(--radius-xl)] cursor-pointer hover:bg-[var(--bg-tertiary)]"><div class="text-center"><i data-lucide="upload-cloud" class="mx-auto h-10 w-10 text-[var(--text-tertiary)]"></i><p class="mt-2 text-sm text-[var(--text-secondary)]"><span class="font-semibold text-[var(--primary-500)]">Klik untuk upload</span> atau seret</p></div></div></div><div class="file-preview mt-3 text-sm"></div>`; break;
+                                case 'textarea': fieldHtml = `${labelHtml}<textarea class="form-input" ${commonAttrs} ${validationAttrs} rows="5" placeholder="${q.question_placeholder || ''}"></textarea>`; break;
+                                case 'dropdown':
+                                case 'select': {
+                                    if (!q.depends_on && (!q.options || q.options.length === 0)) {
+                                        fieldHtml = `${labelHtml}<input type="text" class="form-input" ${commonAttrs} ${validationAttrs} placeholder="${q.question_placeholder || 'Masukkan ' + q.question_text}">`;
+                                    } else {
+                                        let selectOptionsHtml = '';
+                                        let isDisabled = false;
+                                        const findParentQuestionText = (parentId) => (apiData.data.find(q => q.id == parentId) || {}).question_text || '';
+
+                                        if (q.depends_on) {
+                                            isDisabled = true;
+                                            selectOptionsHtml = `<option value="">Pilih ${findParentQuestionText(q.depends_on)} dahulu</option>`;
+                                        } else {
+                                            selectOptionsHtml = `<option value="">${q.question_placeholder || 'Pilih salah satu...'}</option>`;
+                                            if (q.options && q.options.length > 0) {
+                                                if (q.options[0].hasOwnProperty('option_text')) {
+                                                    q.options.sort((a, b) => a.option_text.localeCompare(b.option_text));
+                                                    selectOptionsHtml += (q.options || []).map(opt => `<option value="${opt.option_text}">${opt.option_text}</option>`).join('');
+                                                } else if (q.options[0].hasOwnProperty('text')) {
+                                                    q.options.sort((a, b) => a.text.localeCompare(b.text));
+                                                    selectOptionsHtml += (q.options || []).map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
+                                                }
+                                            }
+                                        }
+
+                                        const disabledAttr = isDisabled ? 'disabled' : '';
+                                        const dependsOnAttr = q.depends_on ? `data-depends-on="${q.depends_on}"` : '';
+                                        fieldHtml = `${labelHtml}<select class="form-input" ${commonAttrs} ${dependsOnAttr} ${disabledAttr}>${selectOptionsHtml}</select>`;
+                                    }
+                                    break;
+                                }
+                                case 'radio': fieldHtml = `<div data-question-id="${q.id}" ${q.validation_rules.required ? 'required' : ''}><legend class="flex items-center text-sm font-medium text-[var(--text-secondary)] mb-2">${q.question_text}${q.question_description ? `<span class="tooltip-container ml-2"><i data-lucide="info" class="w-4 h-4 text-[var(--text-tertiary)] cursor-help"></i><span class="tooltip-text">${q.question_description}</span></span>` : ''}</legend><div class="mt-2 space-y-3">${(q.options || []).map(opt => `<label for="${fieldId}-${opt.id}" class="flex items-center p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all"><input type="radio" class="focus:ring-[var(--primary-500)] h-5 w-5 text-[var(--primary-600)] border-[var(--neutral-400)]" id="${fieldId}-${opt.id}" name="${fieldId}" value="${opt.option_text}" ${q.validation_rules.required ? 'required' : ''}><span class="ml-4 block text-sm sm:text-base font-medium text-[var(--text-primary)]">${opt.option_text}</span></label>`).join('')}</div></div>`; break;
+                                case 'checkbox': fieldHtml = `<div data-question-id="${q.id}" ${q.validation_rules.required ? 'required' : ''}><legend class="flex items-center text-sm font-medium text-[var(--text-secondary)] mb-2">${q.question_text}${q.question_description ? `<span class="tooltip-container ml-2"><i data-lucide="info" class="w-4 h-4 text-[var(--text-tertiary)] cursor-help"></i><span class="tooltip-text">${q.question_description}</span></span>` : ''}</legend><div class="mt-2 space-y-3">${(q.options || []).map(opt => `<label for="${fieldId}-${opt.id}" class="flex items-center p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all"><input type="checkbox" class="focus:ring-[var(--primary-500)] h-5 w-5 text-[var(--primary-600)] border-[var(--neutral-400)] rounded" id="${fieldId}-${opt.id}" name="${fieldId}" value="${opt.option_text}"><span class="ml-4 block text-sm sm:text-base font-medium text-[var(--text-primary)]">${opt.option_text}</span></label>`).join('')}</div></div>`; break;
+                                case 'map':
+                                    fieldHtml = `${labelHtml}
+                                     <div class="relative mb-3">
+                                         <input type="text" id="map-search-${q.id}" class="form-input !pr-12" placeholder="Cari alamat atau lokasi...">
+                                         <button type="button" id="map-search-btn-${q.id}" class="absolute top-1/2 right-2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-[var(--primary-500)] text-white rounded-[var(--radius-lg)] hover:bg-[var(--primary-600)] transition-colors">
+                                             <i data-lucide="search" class="w-5 h-5"></i>
+                                         </button>
+                                     </div>
+                                     <div class="relative">
+                                         <div id="map-${q.id}" class="map-container h-64 sm:h-80 w-full rounded-[var(--radius-xl)] z-10 border border-[var(--border-primary)]"></div>
+                                         <button type="button" id="geolocate-btn-${q.id}" title="Gunakan Lokasi Saya" class="absolute bottom-4 right-4 z-20 w-12 h-12 bg-white dark:bg-[var(--neutral-700)] rounded-full flex items-center justify-center text-[var(--primary-500)] shadow-lg hover:bg-gray-100 dark:hover:bg-[var(--neutral-600)] transition-all transform hover:scale-110">
+                                             <i data-lucide="navigation" class="w-6 h-6"></i>
+                                          </button>
+                                     </div>
+                                     <div id="location-error-${q.id}" class="hidden mt-2 text-sm text-[var(--accent-red)] font-medium"></div>
+                                     <input type="hidden" ${commonAttrs}>`;
+                                    break;
+                            }
+                            stepGrid.innerHTML += `<div class="form-group">${fieldHtml}<p class="error-message mt-2 text-sm text-[var(--accent-red)] font-medium"></p></div>`;
+                        });
+                    }
+                });
+
+                const finalStepGrid = document.getElementById(`step-grid-${totalSteps}`);
+                if (finalStepGrid) {
+                    const declarationHtml = `
+                    <div class="form-group mt-6 pt-6 border-t border-dashed border-[var(--border-primary)]">
+                        <legend class="text-base font-semibold text-[var(--text-primary)] mb-3">Dengan ini saya Menyatakan Bahwa:</legend>
+                        <div class="space-y-3">
+                            <label for="pernyataan-1" class="flex items-start p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all">
+                                <input type="checkbox" id="pernyataan-1" name="pernyataan_data_benar" required class="declaration-checkbox h-5 w-5 mt-0.5 flex-shrink-0 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                                <span class="ml-3 text-base text-[var(--text-secondary)] has-[:checked]:text-[var(--text-primary)]">Data yang saya isi dalam formulir ini adalah benar.</span>
+                            </label>
+                            <label for="pernyataan-2" class="flex items-start p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all">
+                                <input type="checkbox" id="pernyataan-2" name="pernyataan_kondisi_sehat" required class="declaration-checkbox h-5 w-5 mt-0.5 flex-shrink-0 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                                <span class="ml-3 text-base text-[var(--text-secondary)] has-[:checked]:text-[var(--text-primary)]">Saya dalam Kondisi Sehat dan Sangguh Mengikuti Kegiatan Hakordia Bedas Run 2025.</span>
+                            </label>
+                            <label for="pernyataan-3" class="flex items-start p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all">
+                                <input type="checkbox" id="pernyataan-3" name="pernyataan_tata_tertib" required class="declaration-checkbox h-5 w-5 mt-0.5 flex-shrink-0 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                                <span class="ml-3 text-base text-[var(--text-secondary)] has-[:checked]:text-[var(--text-primary)]">Saya Bersedia Mengikuti Seluruh Ketentuan dan Tata Tertib yang di Tetapkan Panitia.</span>
+                            </label>
+                            <label for="pernyataan-4" class="flex items-start p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all">
+                                <input type="checkbox" id="pernyataan-4" name="pernyataan_keselamatan_diri" required class="declaration-checkbox h-5 w-5 mt-0.5 flex-shrink-0 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                                <span class="ml-3 text-base text-[var(--text-secondary)] has-[:checked]:text-[var(--text-primary)]">Saya bertanggung jawab penuh atas kesehatan dan keselamatan diri saya sendiri selama perjalanan.</span>
+                            </label>
+                            <label for="pernyataan-5" class="flex items-start p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all">
+                                <input type="checkbox" id="pernyataan-5" name="pernyataan_biaya_medis" required class="declaration-checkbox h-5 w-5 mt-0.5 flex-shrink-0 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                                <span class="ml-3 text-base text-[var(--text-secondary)] has-[:checked]:text-[var(--text-primary)]">Saya menyetujui dan bertanggung jawab atas semua biaya perawatan medis.</span>
+                            </label>
+                        </div>
+                        <p class="error-message mt-3 text-sm text-[var(--accent-red)] font-medium"></p>
+                    </div>`;
+                    finalStepGrid.innerHTML = declarationHtml;
+                }
+
+                lucide.createIcons();
+                updateUI();
+            }
+
+            function initializePlugins(stepNum) {
+                const currentStepElement = document.querySelector(`.form-step[data-step-id="${stepNum}"]`);
+                if (!currentStepElement) return;
+
+                currentStepElement.querySelectorAll('.date-picker').forEach(input => {
+                    if (input._flatpickr) return;
+                    flatpickr(input, { locale: "id", dateFormat: "d/m/Y", altInput: true, altFormat: "d/m/Y" });
+                });
+
+                currentStepElement.querySelectorAll('select.form-input').forEach(selectEl => {
+                    const qId = selectEl.dataset.questionId;
+                    if (!qId || choicesInstances[qId]) return;
+                    choicesInstances[qId] = new Choices(selectEl, {
+                        searchEnabled: true, placeholder: true, allowHTML: false,
+                        itemSelectText: 'Tekan enter untuk memilih',
+                        noResultsText: 'Tidak ada hasil ditemukan', noChoicesText: 'Tidak ada pilihan lagi',
+                        sorter: (a, b) => {
+                            if (a.placeholder) return -1; if (b.placeholder) return 1;
+                            return a.label.localeCompare(b.label);
+                        },
+                    });
+                });
+
+                currentStepElement.querySelectorAll('.map-container').forEach(mapContainer => {
+                    const qId = mapContainer.id.split('-')[1];
+                    if (maps[qId]) { maps[qId].invalidateSize(); return; }
+
+                    const qData = apiData.data.find(q => q.id == qId);
+                    const hiddenInput = document.querySelector(`input[data-question-id="${qId}"]`);
+                    const lat = qData.options?.lat || -6.9175; const lng = qData.options?.lng || 107.6191;
+
+                    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' });
+                    const map = L.map(mapContainer, { layers: [osm] }).setView([lat, lng], 18);
+                    maps[qId] = map;
+
+                    const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                    const updateMapValue = (latlng) => {
+                        hiddenInput.value = `${latlng.lat}, ${latlng.lng}`;
+                        hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        marker.bindPopup(`<b>Koordinat:</b><br>${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}`).openPopup();
+                    };
+                    updateMapValue(marker.getLatLng());
+
+                    marker.on('dragend', e => updateMapValue(e.target.getLatLng()));
+                    map.on('click', e => { marker.setLatLng(e.latlng); updateMapValue(e.latlng); });
+                });
+            }
+
+            function updateUI() {
+                document.querySelectorAll('.stepper-item').forEach(item => {
+                    const stepId = parseInt(item.dataset.stepId);
+                    item.classList.remove('active', 'completed');
+                    if (stepId < currentStep) item.classList.add('completed');
+                    else if (stepId === currentStep) item.classList.add('active');
+                    item.querySelector('.stepper-number').classList.toggle('hidden', stepId < currentStep);
+                    item.querySelector('.stepper-check').classList.toggle('hidden', stepId >= currentStep);
+                });
+
+                document.querySelectorAll('.form-step').forEach(s => {
+                    const isActive = parseInt(s.dataset.stepId) === currentStep;
+                    s.classList.toggle('opacity-100', isActive); s.classList.toggle('opacity-0', !isActive);
+                    s.classList.toggle('-translate-x-8', !isActive); s.classList.toggle('pointer-events-none', !isActive);
+                    s.classList.toggle('absolute', !isActive);
+                });
+
+                document.getElementById('mobilePrevBtn').classList.toggle('invisible', currentStep <= 1);
+                document.getElementById('mobile-step-indicator').textContent = `Langkah ${currentStep} dari ${totalSteps}`;
+
+                const mobileNextBtn = document.getElementById('mobileNextBtn');
+                if (currentStep === totalSteps) {
+                    mobileNextBtn.textContent = 'Kirim & Bayar';
+                } else if (currentStep === totalSteps - 1) {
+                    mobileNextBtn.textContent = 'Resume';
+                } else {
+                    mobileNextBtn.textContent = 'Berikutnya';
+                }
+
+                if (dynamicSteps[currentStep - 1]?.isReviewStep) {
+                    const stepGrid = document.getElementById(`step-grid-${currentStep}`);
+                    const summaryHtml = generateResumeHtml();
+                    const declarationHtml = `
+                    <div class="form-group mt-6 pt-6 border-t border-dashed border-[var(--border-primary)]">
+                        <legend class="text-base font-semibold text-[var(--text-primary)] mb-3">Dengan ini saya Menyatakan Bahwa:</legend>
+                        <div class="space-y-3">
+                            <label for="pernyataan-1-resume" class="flex items-start p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all">
+                                <input type="checkbox" id="pernyataan-1-resume" name="pernyataan_data_benar" required class="declaration-checkbox h-5 w-5 mt-0.5 flex-shrink-0 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                                <span class="ml-3 text-base text-[var(--text-secondary)] has-[:checked]:text-[var(--text-primary)]">Data yang saya isi dalam formulir ini adalah benar.</span>
+                            </label>
+                            <label for="pernyataan-2-resume" class="flex items-start p-3 sm:p-4 border border-[var(--border-primary)] rounded-[var(--radius-lg)] cursor-pointer hover:bg-[var(--bg-tertiary)] has-[:checked]:bg-[var(--primary-50)] has-[:checked]:border-[var(--primary-500)] transition-all">
+                                <input type="checkbox" id="pernyataan-2-resume" name="pernyataan_kondisi_sehat" required class="declaration-checkbox h-5 w-5 mt-0.5 flex-shrink-0 rounded border-[var(--neutral-400)] text-[var(--primary-600)] focus:ring-[var(--primary-500)]">
+                                <span class="ml-3 text-base text-[var(--text-secondary)] has-[:checked]:text-[var(--text-primary)]">Saya dalam Kondisi Sehat dan Sanggup.</span>
+                            </label>
+                        </div>
+                        <p class="error-message mt-3 text-sm text-[var(--accent-red)] font-medium"></p>
+                    </div>`;
+                    stepGrid.innerHTML = summaryHtml + declarationHtml;
+                    lucide.createIcons();
+                }
+
+                if (currentStep === totalSteps) updateSubmitButtonState();
+                else { mobileNextBtn.disabled = false; mobileNextBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+                setTimeout(() => initializePlugins(currentStep), 410);
+            }
+
+            function validateAllFieldsAndNavigate() {
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+                let firstInvalidStep = -1;
+
+                for (let i = 0; i < dynamicSteps.length; i++) {
+                    const stepIndex = i + 1;
+                    const step = dynamicSteps[i];
+                    let isStepValid = true;
+
+                    if (step.isReviewStep) {
+                        const declarationCheckboxes = form.querySelectorAll(`.form-step[data-step-id="${stepIndex}"] .declaration-checkbox`);
+                        const allChecked = Array.from(declarationCheckboxes).every(cb => cb.checked);
+
+                        if (!allChecked) {
+                            isStepValid = false;
+                            const errorMsgEl = form.querySelector(`.form-step[data-step-id="${stepIndex}"] .form-group .error-message`);
+                            if (errorMsgEl) errorMsgEl.textContent = 'Anda harus menyetujui semua pernyataan.';
+                        }
+                    } else {
+                        const fieldsToValidate = document.querySelectorAll(`.form-step[data-step-id="${stepIndex}"] input[required], .form-step[data-step-id="${stepIndex}"] select[required], .form-step[data-step-id="${stepIndex}"] textarea[required]`);
+                        const validatedGroups = new Set();
+
+                        fieldsToValidate.forEach(field => {
+                            const fieldGroup = field.closest('.form-group');
+                            const errorMsgEl = fieldGroup?.querySelector('.error-message');
+                            if (!errorMsgEl) return;
+
+                            const groupName = field.name;
+                            if ((field.type === 'radio' || field.type === 'checkbox')) {
+                                if (validatedGroups.has(groupName)) return;
+                                validatedGroups.add(groupName);
+                            }
+
+                            let errorMessage = '';
+                            if (field.type === 'radio' || field.type === 'checkbox') {
+                                if (!form.querySelector(`input[name="${groupName}"]:checked`)) errorMessage = 'Wajib diisi.';
+                            } else if (field.type === 'file') {
+                                if (field.files.length === 0) errorMessage = 'Wajib diunggah.';
+                            } else if (!field.value.trim()) {
+                                errorMessage = 'Wajib diisi.';
+                            }
+
+                            if (errorMessage) {
+                                errorMsgEl.textContent = errorMessage;
+                                isStepValid = false;
+                            }
+                        });
+                    }
+
+                    if (!isStepValid && firstInvalidStep === -1) firstInvalidStep = stepIndex;
+                }
+
+                if (firstInvalidStep !== -1) { currentStep = firstInvalidStep; updateUI(); return false; }
+                return true;
+            }
+
+            function updateSubmitButtonState() {
+                const mobileSubmitBtn = document.getElementById('mobileNextBtn');
+                if (currentStep !== totalSteps) return;
+                const declarationCheckboxes = form.querySelectorAll('.declaration-checkbox');
+                const allChecked = Array.from(declarationCheckboxes).every(cb => cb.checked);
+                mobileSubmitBtn.disabled = !allChecked;
+                mobileSubmitBtn.classList.toggle('opacity-50', !allChecked);
+                mobileSubmitBtn.classList.toggle('cursor-not-allowed', !allChecked);
+            }
+
+            function validateCurrentStep() {
+                if (dynamicSteps[currentStep - 1]?.isReviewStep) return true; // simplified for dynamic check
+                return true;
+            }
+
+            async function handleFormSubmit() {
+                if (Offline.state === 'down') {
+                    alert('Koneksi terputus. Mohon periksa internet Anda.');
+                    return;
+                }
+
+                const mobileSubmitBtn = document.getElementById('mobileNextBtn');
+                const mobilePrevBtn = document.getElementById('mobilePrevBtn');
+                const originalText = mobileSubmitBtn.textContent;
+
+                const formElements = form.querySelectorAll('input, select, textarea');
+                formElements.forEach(el => el.disabled = true);
+                mobilePrevBtn.disabled = true;
+                mobileSubmitBtn.disabled = true;
+                mobileSubmitBtn.innerHTML = loadingSpinner;
+
+                const quotaData = await fetchQuota();
+                if (quotaData.quota_available <= 0) {
+                    showStatusMessage('Pendaftaran Ditutup', 'Mohon Maaf Quota Pendaftaran sudah Penuh', 'users');
+                    mobileNav.classList.add('hidden');
+                    return;
+                }
+
+                if (!validateAllFieldsAndNavigate()) {
+                    formElements.forEach(el => el.disabled = false);
+                    mobilePrevBtn.disabled = false;
+                    mobileSubmitBtn.innerHTML = originalText;
+                    mobileSubmitBtn.disabled = false;
+                    updateSubmitButtonState();
+                    return;
+                }
+
+                const topLoader = document.getElementById('top-loader');
+                const loaderBar = document.getElementById('loader-bar');
+                topLoader.classList.remove('hidden');
+                loaderBar.style.width = '0%';
+                setTimeout(() => { loaderBar.style.transition = 'width 4s cubic-bezier(0.25, 1, 0.5, 1)'; loaderBar.style.width = '95%'; }, 100);
+
+                const formData = new FormData();
+                apiData.data.forEach(question => {
+                    const fieldName = toKebabCase(question.question_text);
+                    const el = form.querySelector(`[data-question-id="${question.id}"]`);
+                    if (question.question_type === 'radio') { const checked = form.querySelector(`input[name="${fieldName}"]:checked`); if (checked) formData.append(`answers[${question.id}]`, checked.value); }
+                    else if (question.question_type === 'checkbox') { form.querySelectorAll(`input[name="${fieldName}"]:checked`).forEach(cb => formData.append(`answers[${question.id}][]`, cb.value)); }
+                    else if (['file', 'image'].includes(question.question_type)) { if (el && el.files.length > 0) formData.append(`answers[${question.id}]`, el.files[0]); }
+                    else { if (el && el.value?.trim()) formData.append(`answers[${question.id}]`, el.value); }
+                });
+                form.querySelectorAll('.declaration-checkbox:checked').forEach(checkbox => { formData.append(checkbox.name, 'disetujui'); });
+
+                // Kumpulkan jawaban form sebagai plain object untuk disimpan ke Supabase
+                const formAnswers = {};
+                apiData.data.forEach(question => {
+                    if (['file', 'image'].includes(question.question_type)) return;
+                    const fieldName = toKebabCase(question.question_text);
+                    const el = form.querySelector(`[data-question-id="${question.id}"]`);
+                    if (question.question_type === 'radio') {
+                        const checked = form.querySelector(`input[name="${fieldName}"]:checked`);
+                        if (checked) formAnswers[question.question_text] = checked.value;
+                    } else if (question.question_type === 'checkbox') {
+                        const checked = form.querySelectorAll(`input[name="${fieldName}"]:checked`);
+                        if (checked.length > 0) formAnswers[question.question_text] = Array.from(checked).map(cb => cb.value);
+                    } else {
+                        if (el && el.value?.trim()) formAnswers[question.question_text] = el.value.trim();
+                    }
+                });
+
+                // Ekstrak buyer info dari field yang diketahui
+                const buyerName = formAnswers['Nama Lengkap'] || '';
+                const buyerPhone = formAnswers['Nomor Whatsapp Aktif'] || '';
+                const buyerEmail = formAnswers['Email'] || '';
+
+                try {
+                    // SUBMIT_URL (Bandung API) dinonaktifkan sementara
+                    // const response = await fetch(SUBMIT_URL, { method: 'POST', body: formData });
+                    const responseData = null;
+
+                    // ==========================================
+                    //  PEMBAYARAN VIA BACKEND
+                    // ==========================================
+
+                    document.getElementById('form-container').innerHTML = `
+                        <div class="flex flex-col items-center justify-center text-center py-12 animate-pulse">
+                             <i data-lucide="loader-2" class="animate-spin w-14 h-14 text-[var(--primary-500)] mb-4"></i>
+                             <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">Mempersiapkan Pembayaran...</h2>
+                             <p class="text-[var(--text-secondary)] mt-2">Mohon tunggu sebentar, Anda akan dialihkan ke halaman pembayaran.</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    mobileNav.classList.add('hidden');
+
+                    const payRes = await fetch(`${BACKEND_URL}/payment`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            referenceId: `ID${responseData?.data?.id || Date.now()}`,
+                            buyerName,
+                            buyerPhone,
+                            buyerEmail,
+                            formData: formAnswers,
+                        })
+                    });
+
+                    const payData = await payRes.json();
+
+                    loaderBar.style.transition = 'width 0.3s ease-in-out';
+                    loaderBar.style.width = '100%';
+                    setTimeout(() => { topLoader.classList.add('hidden'); }, 400);
+
+                    // Nomor HP sudah terdaftar
+                    if (payRes.status === 409) {
+                        document.getElementById('form-container').innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-center py-12">
+                                <i data-lucide="circle-alert" class="w-14 h-14 text-red-500 mb-4"></i>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">Nomor HP Sudah Terdaftar</h2>
+                                <p class="text-[var(--text-secondary)] mt-2">${payData.detail || payData.error}</p>
+                                <a href="/check.html" class="mt-6 px-6 py-3 bg-[var(--primary-500)] text-white rounded-xl font-semibold hover:opacity-90 transition">
+                                    Cek Status Pendaftaran
+                                </a>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                        mobileNav.classList.add('hidden');
+                        return;
+                    }
+
+                    // Kuota pendaftaran penuh
+                    if (payRes.status === 429) {
+                        document.getElementById('form-container').innerHTML = `
+                            <div class="flex flex-col items-center justify-center text-center py-12">
+                                <i data-lucide="users" class="w-14 h-14 text-red-500 mb-4"></i>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-[var(--text-primary)]">Pendaftaran Ditutup</h2>
+                                <p class="text-[var(--text-secondary)] mt-2">${payData.detail || payData.error}</p>
+                            </div>
+                        `;
+                        lucide.createIcons();
+                        mobileNav.classList.add('hidden');
+                        return;
+                    }
+
+                    // Redirect apabila API sukses
+                    if (payData.Status === 200 && payData.Data && payData.Data.Url) {
+                        window.location.href = payData.Data.Url;
+                    } else {
+                        throw new Error(payData.Message || "Gagal mendapatkan tautan dari layanan pembayaran.");
+                    }
+
+                } catch (error) {
+                    console.error('Submit/Payment Error:', error);
+                    loaderBar.style.transition = 'width 0.3s ease-in-out';
+                    loaderBar.style.width = '100%';
+                    setTimeout(() => { topLoader.classList.add('hidden'); }, 400);
+
+                    // Cek error validasi backend vs payment error
+                    if (error.validationErors) {
+                        alert('Kesalahan validasi data form.');
+                    } else {
+                        // Tampilkan UI pesan error Payment jika Submit berhasil tapi gagal menghubungkan ke iPaymu
+                        document.getElementById('form-container').innerHTML = '';
+                        successMessage.classList.remove('hidden');
+                        successMessage.querySelector('p').innerHTML += `<br><br><span class="text-[var(--accent-red)] font-bold">Terjadi kendala terhubung ke iPaymu: ${error.message}</span>`;
+                        document.getElementById('form-container').appendChild(successMessage);
+                    }
+
+                    formElements.forEach(el => el.disabled = false);
+                    mobilePrevBtn.disabled = false;
+                    mobileSubmitBtn.innerHTML = originalText;
+                    mobileSubmitBtn.disabled = false;
+                    updateSubmitButtonState();
+                }
+            }
+
+            const updateDependentDropdown = (parentSelect) => {
+                const parentQuestionId = parentSelect.dataset.questionId;
+                const childSelect = form.querySelector(`select[data-depends-on="${parentQuestionId}"]`);
+                if (!childSelect) return;
+
+                const childQuestionId = childSelect.dataset.questionId;
+                const childChoiceInstance = choicesInstances[childQuestionId];
+                if (!childChoiceInstance) return;
+
+                const parentQuestion = apiData.data.find(q => q.id == parentQuestionId);
+                const childQuestion = apiData.data.find(q => q.id == childQuestionId);
+                const findParentQuestionText = (parentId) => (apiData.data.find(q => q.id == parentId) || {}).question_text || '';
+
+                const selectedParentOption = parentQuestion.options.find(opt => opt.option_text === parentSelect.value);
+
+                if (selectedParentOption) {
+                    const filteredOptions = childQuestion.options.filter(opt => opt.parent_option_id == selectedParentOption.id);
+                    filteredOptions.sort((a, b) => a.option_text.localeCompare(b.option_text));
+                    const choicesArray = filteredOptions.map(opt => ({ value: opt.option_text, label: opt.option_text }));
+                    childChoiceInstance.enable();
+                    childChoiceInstance.setChoices([{ value: '', label: 'Pilih salah satu...', placeholder: true }, ...choicesArray], 'value', 'label', true);
+                } else {
+                    childChoiceInstance.disable();
+                    childChoiceInstance.setChoices([{ value: '', label: `Pilih ${findParentQuestionText(parentQuestionId)} dahulu`, placeholder: true }], 'value', 'label', true);
+                }
+            };
+
+            function updateConnectivityStatus() {
+                const mobileNextBtn = document.getElementById('mobileNextBtn');
+                if (!mobileNextBtn) return;
+
+                if (Offline.state === 'down') {
+                    mobileNextBtn.disabled = true; mobileNextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    if (currentStep === totalSteps) updateSubmitButtonState();
+                    else { mobileNextBtn.disabled = false; mobileNextBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+                }
+            }
+
+            mobileNav.addEventListener('click', async e => {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                if (button.id === 'mobileNextBtn') {
+                    const mobileNextBtn = document.getElementById('mobileNextBtn');
+                    const originalText = mobileNextBtn.textContent;
+                    mobileNextBtn.disabled = true; mobileNextBtn.innerHTML = loadingSpinner;
+
+                    if (currentStep === totalSteps) {
+                        await handleFormSubmit();
+                    } else {
+                        const quotaData = await fetchQuota();
+                        if (quotaData.quota_available <= 0) {
+                            showStatusMessage('Pendaftaran Ditutup', 'Mohon Maaf Quota Pendaftaran sudah Penuh', 'users');
+                            mobileNav.classList.add('hidden');
+                            return;
+                        }
+
+                        if (validateCurrentStep()) { currentStep++; updateUI(); }
+                        mobileNextBtn.disabled = false; mobileNextBtn.innerHTML = ''; mobileNextBtn.textContent = originalText;
+                        updateUI();
+                    }
+                }
+                else if (button.id === 'mobilePrevBtn') {
+                    if (currentStep > 1) { currentStep--; updateUI(); }
+                }
+            });
+
+            form.addEventListener('input', e => {
+                const target = e.target;
+                if (target.classList.contains('declaration-checkbox')) {
+                    updateSubmitButtonState(); validateCurrentStep();
+                } else if (target.type !== 'file') { validateCurrentStep(); }
+            });
+
+            form.addEventListener('change', e => {
+                if (e.target.tagName === 'SELECT') { updateDependentDropdown(e.target); }
+                validateCurrentStep();
+            });
+
+            // Theme Toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.className = savedTheme + '-theme';
+
+            function updateThemeIcon(theme) {
+                themeToggle.innerHTML = `<i data-lucide="${theme === 'light' ? 'moon' : 'sun'}"></i>`;
+                lucide.createIcons();
+            }
+            updateThemeIcon(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const newTheme = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+                document.body.className = newTheme + '-theme';
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            });
+
+            function showPopup() {
+                if (!apiData || !apiData.title) return;
+                const popupKey = `hidePopup-${toKebabCase(apiData.title)}`;
+                if (localStorage.getItem(popupKey) === 'true') return;
+                popupTitle.textContent = apiData.title; popupDescription.textContent = apiData.description;
+                infoPopup.classList.add('visible'); lucide.createIcons();
+            }
+
+            function closePopup() {
+                if (dontShowAgainCheckbox.checked) localStorage.setItem(`hidePopup-${toKebabCase(apiData.title)}`, 'true');
+                infoPopup.classList.remove('visible');
+            }
+            closePopupButton.addEventListener('click', closePopup); confirmPopupButton.addEventListener('click', closePopup);
+
+            function showStatusMessage(title, message, icon = 'info') {
+                loadingPlaceholder.classList.add('hidden'); formWrapper.classList.remove('hidden');
+                let iconColorClass = 'text-[var(--text-tertiary)]';
+                if (icon === 'users' || icon === 'alert-triangle') iconColorClass = 'text-[var(--accent-red)]';
+                formWrapper.innerHTML = `
+                    <div class="bg-[var(--card-bg)] p-5 sm:p-8 rounded-[var(--radius-2xl)] shadow-[var(--shadow-md)] border border-[var(--border-primary)]">
+                        <div class="flex flex-col items-center justify-center text-center py-12">
+                            <div class="w-20 h-20 bg-[var(--bg-tertiary)] rounded-full flex items-center justify-center">
+                                <i data-lucide="${icon}" class="w-12 h-12 ${iconColorClass}"></i>
+                            </div>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold mt-6 text-[var(--text-primary)]">${title}</h2>
+                            <p class="text-[var(--text-secondary)] mt-2 max-w-md">${message}</p>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+
+            async function init() {
+                const [formApiData, quotaApiData] = await Promise.all([fetchData(), fetchQuota()]);
+                apiData = formApiData;
+
+                if (!apiData || !apiData.data) {
+                    showStatusMessage('Mohon tunggu beberapa saat', 'Refresh untuk reload halaman ini.', 'alert-triangle');
+                    return;
+                }
+
+                const quotaAvailable = quotaApiData.quota_available;
+                if (isNaN(quotaAvailable) || quotaAvailable <= 0) {
+                    showStatusMessage('Pendaftaran Ditutup', 'Mohon Maaf Quota Pendaftaran sudah Penuh', 'users');
+                    return;
+                }
+
+                loadingPlaceholder.classList.add('hidden');
+                formWrapper.classList.remove('hidden');
+
+                dynamicSteps = createDynamicSteps(apiData.data, FIELDS_PER_STEP);
+                if (dynamicSteps.length > 0) {
+                    generateUI(); mobileNav.classList.remove('hidden'); showPopup();
+                    Offline.on('up', updateConnectivityStatus); Offline.on('down', updateConnectivityStatus);
+                    setTimeout(updateConnectivityStatus, 500);
+                }
+            }
+
+            init();
+        });
+    </script>
+</body>
+
+</html>
