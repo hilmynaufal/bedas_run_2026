@@ -50,7 +50,9 @@ app.get('/quota', async (req, res) => {
 });
 
 app.post('/payment', async (req, res) => {
-  if (!IPAYMU_API_KEY || !IPAYMU_VA) {
+  const MOCK_MODE = process.env.IPAYMU_MOCK === 'true';
+
+  if (!MOCK_MODE && (!IPAYMU_API_KEY || !IPAYMU_VA)) {
     return res.status(500).json({ error: 'IPAYMU_API_KEY and IPAYMU_VA env variables are required' });
   }
 
@@ -170,6 +172,20 @@ app.post('/payment', async (req, res) => {
   const stringToSign = `POST:${IPAYMU_VA}:${bodyHash}:${IPAYMU_API_KEY}`;
   const signature = crypto.createHmac('sha256', IPAYMU_API_KEY).update(stringToSign).digest('hex');
   const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+
+  // Mock mode: skip iPaymu, langsung return fake response (untuk stress testing)
+  if (MOCK_MODE) {
+    await supabase
+      .from('transactions')
+      .update({
+        ipaymu_session_id: `mock-${txReferenceId}`,
+        ipaymu_url: 'https://mock-payment.test/pay',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('reference_id', txReferenceId);
+
+    return res.json({ Status: 200, Data: { Url: 'https://mock-payment.test/pay', SessionID: `mock-${txReferenceId}` } });
+  }
 
   try {
     // 4. Forward ke iPaymu
