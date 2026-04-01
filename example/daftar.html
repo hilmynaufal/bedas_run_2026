@@ -483,8 +483,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
 
             // === KONFIGURASI BACKEND ===
-            // const BACKEND_URL = "https://apibedasrun.hirumi.app";
-            // const BACKEND_URL = "http://[IP_ADDRESS]";
+            const BACKEND_URL = "https://api.bigandchildrun.com";
             // ==========================
 
             Offline.options = { checks: { xhr: { url: 'https://httpbin.org/get' } } };
@@ -550,7 +549,7 @@
                     return quotaCache.value;
                 }
                 try {
-                    const response = await fetch('/quota');
+                    const response = await fetch(`${BACKEND_URL}/quota`);
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     const data = await response.json();
                     if (data && data.quota_available !== undefined) {
@@ -989,7 +988,7 @@
                     lucide.createIcons();
                     mobileNav.classList.add('hidden');
 
-                    const payRes = await fetch(`/payment`, {
+                    const payRes = await fetch(`${BACKEND_URL}/payment`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
