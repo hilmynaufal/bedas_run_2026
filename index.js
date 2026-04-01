@@ -10,10 +10,16 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://registrasi.bigandchildrun.com',
+    /^http:\/\/localhost(:\d+)?$/,  // lokal dev
+  ],
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'example')));
 
 // iPaymu config
 const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY;
@@ -42,8 +48,10 @@ const supabase = createClient(
   }
 );
 
-// Base URL server ini (untuk notifyUrl callback dari iPaymu)
+// URL API ini sendiri (untuk notifyUrl callback dari iPaymu)
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
+// URL frontend (untuk returnUrl & cancelUrl yang diarahkan ke UI)
+const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://registrasi.bigandchildrun.com').replace(/\/$/, '');
 
 // Concurrency limiter — cegah Supabase dibanjiri koneksi serentak
 // Atur via env MAX_CONCURRENT (default 20). Request di atas batas → 503.
@@ -180,7 +188,7 @@ app.post('/payment', async (req, res) => {
     price: PRICE,
     amount: AMOUNT,
     returnUrl: returnUrl || `${BASE_URL}/payment/return`,
-    cancelUrl: cancelUrl || `${BASE_URL}/cancel.html`,
+    cancelUrl: cancelUrl || `${FRONTEND_URL}/cancel.html`,
     notifyUrl: `${BASE_URL}/callback`,
     paymentMethod: 'qris',
     buyerName: buyerName || fd['Nama Lengkap'] || null,
@@ -322,10 +330,11 @@ app.post('/callback', async (req, res) => {
   res.status(200).json({ ok: true });
 });
 
-// Return URL dari iPaymu — pure redirect ke success.html
+// Return URL dari iPaymu — redirect ke success.html di domain frontend
 app.get('/payment/return', (req, res) => {
   console.log('[return] Query params:', req.query);
-  res.redirect('/success.html');
+  const query = new URLSearchParams(req.query).toString();
+  res.redirect(`${FRONTEND_URL}/success.html${query ? '?' + query : ''}`);
 });
 
 // Cek status transaksi berdasarkan nomor HP
