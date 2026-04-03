@@ -58,7 +58,35 @@ const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://registrasi.bigandchil
 let activePayments = 0;
 const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT || '15', 10);
 
-app.get('/health', (req, res) => {
+// Mapping kategori lari → prefix BIB number
+function getBibPrefix(kategori) {
+  const k = (kategori || '').toUpperCase();
+  if (k.includes('BIG')   && k.includes('MAN'))   return 'BM';
+  if (k.includes('BIG')   && k.includes('WOMAN'))  return 'BW';
+  if (k.includes('CHILD') && k.includes('BOY'))    return 'CB';
+  if (k.includes('CHILD') && k.includes('GIRL'))   return 'CG';
+  return 'XX'; // fallback jika kategori tidak dikenali
+}
+
+// Generate BIB number berikutnya berdasarkan prefix (BM0001, BW0042, dst)
+async function generateBibNumber(prefix) {
+  const { data } = await supabase
+    .from('transactions')
+    .select('reference_id')
+    .like('reference_id', `${prefix}%`)
+    .order('reference_id', { ascending: false })
+    .limit(1);
+
+  let nextNum = 1;
+  if (data && data.length > 0) {
+    const lastNum = parseInt(data[0].reference_id.slice(prefix.length), 10);
+    if (!isNaN(lastNum)) nextNum = lastNum + 1;
+  }
+
+  return `${prefix}${String(nextNum).padStart(4, '0')}`;
+}
+
+
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -101,11 +129,9 @@ app.post('/payment', async (req, res) => {
 
   const {
     returnUrl, cancelUrl,
-    referenceId, buyerName, buyerPhone, buyerEmail,
+    buyerName, buyerPhone, buyerEmail,
     formData,
   } = req.body;
-
-  const txReferenceId = referenceId || `ID${Date.now()}`;
 
   const fd = formData || {};
 
@@ -151,6 +177,10 @@ app.post('/payment', async (req, res) => {
       detail: 'Maaf, kuota pendaftaran sudah mencapai batas maksimum.',
     });
   }
+
+  // 0c. Generate BIB number sebagai reference_id (BM0001, BW0001, CB0001, CG0001)
+  const bibPrefix = getBibPrefix(fd['Kategori Lari'] || '');
+  const txReferenceId = await generateBibNumber(bibPrefix);
 
   // 1. Simpan transaksi ke Supabase dengan status pending
   const { error: insertError } = await supabase
