@@ -86,7 +86,7 @@ async function generateBibNumber(prefix) {
   return `${prefix}${String(nextNum).padStart(4, '0')}`;
 }
 
-
+app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
