@@ -480,11 +480,172 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
+        // === KONFIGURASI BACKEND (global scope) ===
+        const BACKEND_URL = "https://api.bigandchildrun.com";
 
-            // === KONFIGURASI BACKEND ===
-            const BACKEND_URL = "https://api.bigandchildrun.com";
-            // ==========================
+        // ─── TAMPILKAN INFO TRANSFER BANK ────────────────────────────────────────
+        // Harus global — dipanggil dari onclick di HTML yang digenerate secara dinamis
+        function showBankTransferInfo(payData) {
+            const fmt = (n) => new Intl.NumberFormat('id-ID').format(n);
+            const container = document.getElementById('form-container');
+            container.innerHTML = `
+                <div class="max-w-lg mx-auto py-8 px-2">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="banknote" class="w-8 h-8 text-teal-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Pendaftaran Berhasil!</h2>
+                        <p class="text-[var(--text-secondary)] mt-1 text-sm">Selesaikan pembayaran dengan transfer bank di bawah ini</p>
+                    </div>
+
+                    <!-- Info rekening -->
+                    <div class="bg-teal-50 border border-teal-200 rounded-2xl p-5 mb-5">
+                        <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3">Rekening Tujuan</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Bank</span>
+                                <span class="font-bold text-gray-800">${payData.bank.name}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">No. Rekening</span>
+                                <span class="font-bold text-gray-800 font-mono tracking-wider">${payData.bank.accountNumber}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-500">Atas Nama</span>
+                                <span class="font-bold text-gray-800">${payData.bank.accountName}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nominal transfer -->
+                    <div class="bg-white border-2 border-teal-400 rounded-2xl p-5 mb-5 text-center shadow-sm">
+                        <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Transfer TEPAT sebesar</p>
+                        <p class="text-4xl font-extrabold text-teal-600">Rp ${fmt(payData.totalTransfer)}</p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            (Harga Rp ${fmt(payData.amount)} + kode unik <strong>${String(payData.uniqueCode).padStart(3, '0')}</strong>)
+                        </p>
+                        <p class="text-xs text-orange-500 font-semibold mt-2">⚠ Nominal harus TEPAT agar verifikasi berjalan otomatis</p>
+                    </div>
+
+                    <!-- No referensi -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-5 text-center text-sm">
+                        <span class="text-gray-500">No. Pendaftaran: </span>
+                        <span class="font-bold font-mono text-gray-800">${payData.referenceId}</span>
+                    </div>
+
+                    <!-- Langkah -->
+                    <div class="text-sm text-gray-600 mb-6 space-y-2">
+                        <p class="font-semibold text-gray-700">Langkah selanjutnya:</p>
+                        <ol class="list-decimal list-inside space-y-1 text-gray-600">
+                            <li>Transfer ke rekening di atas dengan nominal <strong>TEPAT</strong></li>
+                            <li>Ambil screenshot/foto bukti transfer</li>
+                            <li>Upload bukti di form bawah ini</li>
+                            <li>Tunggu konfirmasi dari panitia (maks 1×24 jam)</li>
+                        </ol>
+                    </div>
+
+                    <!-- Upload bukti -->
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                        <p class="font-semibold text-gray-700 mb-3 text-sm">Upload Bukti Transfer</p>
+                        <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-400 transition-colors" onclick="document.getElementById('proof-file').click()">
+                            <i data-lucide="upload-cloud" class="w-10 h-10 text-gray-400 mx-auto mb-2"></i>
+                            <p class="text-sm text-gray-500">Klik atau drag foto bukti transfer</p>
+                            <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — maks 5 MB</p>
+                        </div>
+                        <input type="file" id="proof-file" accept="image/*" class="hidden" onchange="previewProofFile(this)">
+                        <div id="preview-wrapper" class="hidden mt-3">
+                            <img id="proof-preview" class="max-h-48 mx-auto rounded-lg border border-gray-200" alt="Preview">
+                            <p id="proof-filename" class="text-xs text-center text-gray-400 mt-1"></p>
+                        </div>
+                        <button id="upload-btn" onclick="uploadProof('${payData.referenceId}')" disabled
+                            class="mt-4 w-full py-3 rounded-xl font-bold text-white bg-teal-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-teal-600 transition text-sm">
+                            Kirim Bukti Transfer
+                        </button>
+                        <div id="upload-status" class="mt-3 text-center text-sm hidden"></div>
+                    </div>
+
+                    <p class="text-center text-xs text-gray-400 mt-6">
+                        Sudah mendaftar tapi halaman ter-refresh? <a href="upload.html" class="text-teal-600 font-semibold underline">Buka halaman upload bukti</a>
+                    </p>
+                </div>
+            `;
+            lucide.createIcons();
+            document.getElementById('mobile-nav').classList.add('hidden');
+        }
+
+        // Dipanggil dari onchange di input file (harus global)
+        function previewProofFile(input) {
+            if (!input.files.length) return;
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('proof-preview').src = e.target.result;
+                document.getElementById('proof-filename').textContent = file.name;
+                document.getElementById('preview-wrapper').classList.remove('hidden');
+                document.getElementById('upload-area').classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+            document.getElementById('upload-btn').disabled = false;
+        }
+
+        // ─── UPLOAD BUKTI TRANSFER (global) ─────────────────────────────────────
+        // Harus global — dipanggil dari onclick di HTML yang digenerate secara dinamis
+        async function uploadProof(referenceId) {
+            const fileInput = document.getElementById('proof-file');
+            const btn = document.getElementById('upload-btn');
+            const statusEl = document.getElementById('upload-status');
+            if (!fileInput.files.length) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Mengupload...';
+            statusEl.classList.remove('hidden');
+            statusEl.className = 'mt-3 text-center text-sm text-gray-500';
+            statusEl.textContent = 'Sedang mengupload bukti transfer...';
+
+            try {
+                const formData = new FormData();
+                formData.append('referenceId', referenceId);
+                formData.append('proof', fileInput.files[0]);
+
+                const res = await fetch(`${BACKEND_URL}/upload-proof`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    document.getElementById('form-container').innerHTML = `
+                        <div class="flex flex-col items-center justify-center text-center py-12 max-w-md mx-auto">
+                            <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="clock" class="w-8 h-8 text-teal-600"></i>
+                            </div>
+                            <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Bukti Diterima!</h2>
+                            <p class="text-[var(--text-secondary)] mt-2 text-sm">
+                                Bukti transfer kamu sudah kami terima. Panitia akan memverifikasi dalam <strong>1×24 jam</strong>.
+                            </p>
+                            <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm">
+                                <span class="text-gray-500">No. Pendaftaran: </span>
+                                <span class="font-bold font-mono">${referenceId}</span>
+                            </div>
+                            <a href="check.html" class="mt-6 px-6 py-3 bg-teal-500 text-white rounded-xl font-semibold hover:bg-teal-600 transition text-sm">
+                                Cek Status Pendaftaran
+                            </a>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    document.getElementById('mobile-nav').classList.add('hidden');
+                } else {
+                    throw new Error(data.error || data.detail || 'Gagal mengupload bukti');
+                }
+            } catch (err) {
+                statusEl.className = 'mt-3 text-center text-sm text-red-500';
+                statusEl.textContent = `Gagal: ${err.message}`;
+                btn.disabled = false;
+                btn.textContent = 'Kirim Bukti Transfer';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
 
             Offline.options = { checks: { xhr: { url: 'https://httpbin.org/get' } } };
 
@@ -896,166 +1057,6 @@
             function validateCurrentStep() {
                 if (dynamicSteps[currentStep - 1]?.isReviewStep) return true; // simplified for dynamic check
                 return true;
-            }
-
-            // ─── TAMPILKAN INFO TRANSFER BANK ────────────────────────────────────────
-            function showBankTransferInfo(payData) {
-                const fmt = (n) => new Intl.NumberFormat('id-ID').format(n);
-                const container = document.getElementById('form-container');
-                container.innerHTML = `
-                    <div class="max-w-lg mx-auto py-8 px-2">
-                        <div class="text-center mb-6">
-                            <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i data-lucide="banknote" class="w-8 h-8 text-teal-600"></i>
-                            </div>
-                            <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Pendaftaran Berhasil!</h2>
-                            <p class="text-[var(--text-secondary)] mt-1 text-sm">Selesaikan pembayaran dengan transfer bank di bawah ini</p>
-                        </div>
-
-                        <!-- Info rekening -->
-                        <div class="bg-teal-50 border border-teal-200 rounded-2xl p-5 mb-5">
-                            <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3">Rekening Tujuan</p>
-                            <div class="space-y-2 text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Bank</span>
-                                    <span class="font-bold text-gray-800">${payData.bank.name}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">No. Rekening</span>
-                                    <span class="font-bold text-gray-800 font-mono tracking-wider">${payData.bank.accountNumber}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-500">Atas Nama</span>
-                                    <span class="font-bold text-gray-800">${payData.bank.accountName}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Nominal transfer -->
-                        <div class="bg-white border-2 border-teal-400 rounded-2xl p-5 mb-5 text-center shadow-sm">
-                            <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Transfer TEPAT sebesar</p>
-                            <p class="text-4xl font-extrabold text-teal-600">Rp ${fmt(payData.totalTransfer)}</p>
-                            <p class="text-xs text-gray-400 mt-1">
-                                (Harga Rp ${fmt(payData.amount)} + kode unik <strong>${String(payData.uniqueCode).padStart(3, '0')}</strong>)
-                            </p>
-                            <p class="text-xs text-orange-500 font-semibold mt-2">⚠ Nominal harus TEPAT agar verifikasi berjalan otomatis</p>
-                        </div>
-
-                        <!-- No referensi -->
-                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-5 text-center text-sm">
-                            <span class="text-gray-500">No. Pendaftaran: </span>
-                            <span class="font-bold font-mono text-gray-800">${payData.referenceId}</span>
-                        </div>
-
-                        <!-- Langkah -->
-                        <div class="text-sm text-gray-600 mb-6 space-y-2">
-                            <p class="font-semibold text-gray-700">Langkah selanjutnya:</p>
-                            <ol class="list-decimal list-inside space-y-1 text-gray-600">
-                                <li>Transfer ke rekening di atas dengan nominal <strong>TEPAT</strong></li>
-                                <li>Ambil screenshot/foto bukti transfer</li>
-                                <li>Upload bukti di form bawah ini</li>
-                                <li>Tunggu konfirmasi dari panitia (maks 1×24 jam)</li>
-                            </ol>
-                        </div>
-
-                        <!-- Upload bukti -->
-                        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                            <p class="font-semibold text-gray-700 mb-3 text-sm">Upload Bukti Transfer</p>
-                            <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-teal-400 transition-colors" onclick="document.getElementById('proof-file').click()">
-                                <i data-lucide="upload-cloud" class="w-10 h-10 text-gray-400 mx-auto mb-2"></i>
-                                <p class="text-sm text-gray-500">Klik atau drag foto bukti transfer</p>
-                                <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — maks 5 MB</p>
-                            </div>
-                            <input type="file" id="proof-file" accept="image/*" class="hidden">
-                            <div id="preview-wrapper" class="hidden mt-3">
-                                <img id="proof-preview" class="max-h-48 mx-auto rounded-lg border border-gray-200" alt="Preview">
-                                <p id="proof-filename" class="text-xs text-center text-gray-400 mt-1"></p>
-                            </div>
-                            <button id="upload-btn" onclick="uploadProof('${payData.referenceId}')" disabled
-                                class="mt-4 w-full py-3 rounded-xl font-bold text-white bg-teal-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-teal-600 transition text-sm">
-                                Kirim Bukti Transfer
-                            </button>
-                            <div id="upload-status" class="mt-3 text-center text-sm hidden"></div>
-                        </div>
-
-                        <p class="text-center text-xs text-gray-400 mt-6">
-                            Sudah transfer? <a href="check.html" class="text-teal-600 font-semibold underline">Cek status pendaftaran</a>
-                        </p>
-                    </div>
-                `;
-                lucide.createIcons();
-                mobileNav.classList.add('hidden');
-
-                // Preview file sebelum upload
-                document.getElementById('proof-file').addEventListener('change', function () {
-                    if (!this.files.length) return;
-                    const file = this.files[0];
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        document.getElementById('proof-preview').src = e.target.result;
-                        document.getElementById('proof-filename').textContent = file.name;
-                        document.getElementById('preview-wrapper').classList.remove('hidden');
-                        document.getElementById('upload-area').classList.add('hidden');
-                    };
-                    reader.readAsDataURL(file);
-                    document.getElementById('upload-btn').disabled = false;
-                });
-            }
-
-            // ─── UPLOAD BUKTI TRANSFER ───────────────────────────────────────────────
-            async function uploadProof(referenceId) {
-                const fileInput = document.getElementById('proof-file');
-                const btn = document.getElementById('upload-btn');
-                const statusEl = document.getElementById('upload-status');
-                if (!fileInput.files.length) return;
-
-                btn.disabled = true;
-                btn.textContent = 'Mengupload...';
-                statusEl.classList.remove('hidden');
-                statusEl.className = 'mt-3 text-center text-sm text-gray-500';
-                statusEl.textContent = 'Sedang mengupload bukti transfer...';
-
-                try {
-                    const formData = new FormData();
-                    formData.append('referenceId', referenceId);
-                    formData.append('proof', fileInput.files[0]);
-
-                    const res = await fetch(`${BACKEND_URL}/upload-proof`, {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const data = await res.json();
-
-                    if (res.ok && data.ok) {
-                        document.getElementById('form-container').innerHTML = `
-                            <div class="flex flex-col items-center justify-center text-center py-12 max-w-md mx-auto">
-                                <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i data-lucide="clock" class="w-8 h-8 text-teal-600"></i>
-                                </div>
-                                <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Bukti Diterima!</h2>
-                                <p class="text-[var(--text-secondary)] mt-2 text-sm">
-                                    Bukti transfer kamu sudah kami terima. Panitia akan memverifikasi dalam <strong>1×24 jam</strong>.
-                                </p>
-                                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm">
-                                    <span class="text-gray-500">No. Pendaftaran: </span>
-                                    <span class="font-bold font-mono">${referenceId}</span>
-                                </div>
-                                <a href="check.html" class="mt-6 px-6 py-3 bg-teal-500 text-white rounded-xl font-semibold hover:bg-teal-600 transition text-sm">
-                                    Cek Status Pendaftaran
-                                </a>
-                            </div>
-                        `;
-                        lucide.createIcons();
-                        mobileNav.classList.add('hidden');
-                    } else {
-                        throw new Error(data.error || data.detail || 'Gagal mengupload bukti');
-                    }
-                } catch (err) {
-                    statusEl.className = 'mt-3 text-center text-sm text-red-500';
-                    statusEl.textContent = `Gagal: ${err.message}`;
-                    btn.disabled = false;
-                    btn.textContent = 'Kirim Bukti Transfer';
-                }
             }
 
             async function handleFormSubmit() {
