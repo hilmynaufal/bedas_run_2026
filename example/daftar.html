@@ -1318,7 +1318,36 @@
 
             form.addEventListener('change', e => {
                 if (e.target.tagName === 'SELECT') { updateDependentDropdown(e.target); }
+                // Preview nama file saat file dipilih di field surat/file dinamis
+                if (e.target.type === 'file') {
+                    const wrapper = e.target.closest('.file-upload-wrapper');
+                    if (wrapper) {
+                        const preview = wrapper.nextElementSibling; // .file-preview div
+                        const ui = wrapper.querySelector('.file-upload-ui');
+                        if (e.target.files && e.target.files.length > 0) {
+                            const f = e.target.files[0];
+                            if (preview) preview.innerHTML = `<span class="flex items-center gap-1.5 text-xs text-[var(--primary-600)] font-medium"><i data-lucide="file-check-2" class="w-3.5 h-3.5"></i>${f.name}</span>`;
+                            if (ui) ui.classList.add('border-[var(--primary-400)]', 'bg-[var(--primary-50)]');
+                            lucide.createIcons();
+                        } else {
+                            if (preview) preview.innerHTML = '';
+                            if (ui) ui.classList.remove('border-[var(--primary-400)]', 'bg-[var(--primary-50)]');
+                        }
+                    }
+                }
                 validateCurrentStep();
+            });
+
+            // Event delegation: klik .file-upload-ui → trigger hidden file input
+            form.addEventListener('click', e => {
+                const ui = e.target.closest('.file-upload-ui');
+                if (ui) {
+                    const wrapper = ui.closest('.file-upload-wrapper');
+                    if (wrapper) {
+                        const input = wrapper.querySelector('input[type="file"]');
+                        if (input) input.click();
+                    }
+                }
             });
 
             // Theme Toggle
