@@ -143,6 +143,7 @@
               <tr class="bg-slate-50 border-b border-gray-200 text-xs text-gray-500 font-semibold">
                 <th class="text-left px-4 py-3 whitespace-nowrap">BIB / Ref</th>
                 <th class="text-left px-4 py-3 whitespace-nowrap">Nama</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Instansi</th>
                 <th class="text-left px-4 py-3 whitespace-nowrap">WA / Email</th>
                 <th class="text-left px-4 py-3 whitespace-nowrap">Kategori</th>
                 <th class="text-left px-4 py-3 whitespace-nowrap">Transfer</th>
@@ -335,6 +336,11 @@
           <td class="px-4 py-3">
             <p class="font-semibold text-gray-800 text-xs whitespace-nowrap">${trx.buyer_name || '-'}</p>
             <p class="text-gray-400 text-xs">${trx.ukuran_kaos ? 'Kaos: ' + trx.ukuran_kaos : ''}</p>
+          </td>
+          <td class="px-4 py-3 text-xs whitespace-nowrap">
+            ${trx.nama_instansi
+              ? `<span class="inline-block bg-blue-50 text-blue-700 border border-blue-200 rounded-md px-2 py-0.5 text-xs font-medium">${trx.nama_instansi}</span>`
+              : `<span class="text-gray-300">—</span>`}
           </td>
           <td class="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
             <p>${trx.buyer_phone || '-'}</p>

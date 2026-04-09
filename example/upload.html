@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Bukti Transfer — Bedas Run 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .upload-drop { border: 2px dashed #d1d5db; border-radius: 12px; transition: border-color 0.2s, background 0.2s; }
+    .upload-drop:hover, .upload-drop.drag-over { border-color: #14b8a6; background: #f0fdfa; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-50">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 px-4 py-3">
+    <div class="max-w-lg mx-auto flex items-center gap-3">
+      <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center shrink-0">
+        <i data-lucide="upload-cloud" class="w-5 h-5 text-teal-600"></i>
+      </div>
+      <div>
+        <p class="font-extrabold text-gray-800 text-sm leading-tight">Upload Bukti Transfer</p>
+        <p class="text-xs text-gray-400">Bedas Run 2026</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-lg mx-auto px-4 py-8">
+
+    <!-- Step 1: Input Nomor HP -->
+    <div id="step-phone" class="fade-in">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="smartphone" class="w-8 h-8 text-teal-600"></i>
+        </div>
+        <h1 class="text-2xl font-extrabold text-gray-800">Cek Pendaftaran</h1>
+        <p class="text-sm text-gray-500 mt-1">Masukkan nomor HP yang digunakan saat mendaftar</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nomor WhatsApp Aktif</label>
+        <input type="tel" id="phone-input" placeholder="Contoh: 081234567890"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+          onkeydown="if(event.key==='Enter') checkPhone()">
+        <p id="phone-error" class="text-red-500 text-xs mt-1.5 hidden"></p>
+        <button onclick="checkPhone()" id="check-btn"
+          class="mt-4 w-full py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          Cari Pendaftaran
+        </button>
+      </div>
+
+      <p class="text-center text-xs text-gray-400 mt-5">
+        Belum mendaftar? <a href="daftar.html" class="text-teal-600 font-semibold underline">Daftar sekarang</a>
+      </p>
+    </div>
+
+    <!-- Step 2: Hasil cek (diisi JS) -->
+    <div id="step-result" class="hidden"></div>
+
+  </main>
+
+  <script>
+    const BACKEND_URL = 'https://api.bigandchildrun.com';
+    const fmt = (n) => new Intl.NumberFormat('id-ID').format(n || 0);
+
+    async function checkPhone() {
+      const phone = document.getElementById('phone-input').value.trim();
+      const errEl = document.getElementById('phone-error');
+      const btn = document.getElementById('check-btn');
+
+      errEl.classList.add('hidden');
+
+      if (!phone) {
+        errEl.textContent = 'Nomor HP wajib diisi.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Mencari...`;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/check-transaction?phone=${encodeURIComponent(phone)}`);
+        const data = await res.json();
+
+        if (res.status === 404) {
+          errEl.textContent = 'Nomor HP tidak ditemukan. Pastikan nomor sesuai dengan saat mendaftar.';
+          errEl.classList.remove('hidden');
+          return;
+        }
+
+        if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan server.');
+
+        renderResult(data.transaction, data.bank, phone);
+      } catch (err) {
+        errEl.textContent = 'Gagal terhubung ke server: ' + err.message;
+        errEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Cari Pendaftaran`;
+      }
+    }
+
+    function renderResult(trx, bank, phone) {
+      document.getElementById('step-phone').classList.add('hidden');
+      const result = document.getElementById('step-result');
+      result.classList.remove('hidden');
+      result.className = 'fade-in';
+
+      const status = trx.status;
+      const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
+
+      if (status === 'pending_payment' || status === 'rejected') {
+        result.innerHTML = buildUploadView(trx, bank, totalTransfer);
+        lucide.createIcons();
+
+        // Drag & drop
+        const dropArea = document.getElementById('upload-drop');
+        dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('drag-over'); });
+        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
+        dropArea.addEventListener('drop', e => {
+          e.preventDefault();
+          dropArea.classList.remove('drag-over');
+          const file = e.dataTransfer.files[0];
+          if (file) handleFileSelect(file);
+        });
+
+        document.getElementById('proof-file').addEventListener('change', function () {
+          if (this.files[0]) handleFileSelect(this.files[0]);
+        });
+
+      } else if (status === 'pending_verification') {
+        result.innerHTML = `
+          <div class="text-center py-8 fade-in">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="clock" class="w-8 h-8 text-yellow-500"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-gray-800">Sedang Diverifikasi</h2>
+            <p class="text-sm text-gray-500 mt-2">Bukti transfer kamu sedang diperiksa panitia.<br>Proses verifikasi maks <strong>1×24 jam</strong>.</p>
+            <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm inline-block">
+              <span class="text-gray-500">No. Pendaftaran: </span>
+              <span class="font-bold font-mono">${trx.reference_id}</span>
+            </div>
+            <div class="mt-6 flex flex-col gap-2">
+              <a href="check.html" class="px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl transition">Cek Status Tiket</a>
+              <button onclick="location.reload()" class="px-5 py-2 text-sm text-gray-500 hover:text-gray-700">← Cari nomor lain</button>
+            </div>
+          </div>`;
+        lucide.createIcons();
+
+      } else if (status === 'success') {
+        result.innerHTML = `
+          <div class="text-center py-8 fade-in">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="check-circle" class="w-8 h-8 text-green-500"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-gray-800">Pembayaran Terverifikasi!</h2>
+            <p class="text-sm text-gray-500 mt-2">Pendaftaran <strong>${trx.buyer_name || ''}</strong> sudah dikonfirmasi.</p>
+            <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm inline-block">
+              <span class="text-gray-500">No. BIB: </span>
+              <span class="font-bold font-mono">${trx.reference_id}</span>
+            </div>
+            <div class="mt-6">
+              <a href="check.html" class="px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl transition">Lihat Tiket</a>
+            </div>
+          </div>`;
+        lucide.createIcons();
+
+      } else {
+        // cancelled / unknown
+        result.innerHTML = `
+          <div class="text-center py-8 fade-in">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="x-circle" class="w-8 h-8 text-red-500"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-gray-800">Pendaftaran Tidak Aktif</h2>
+            <p class="text-sm text-gray-500 mt-2">Status: <strong>${status}</strong>. Silakan hubungi panitia.</p>
+            <button onclick="location.reload()" class="mt-5 px-5 py-2 text-sm text-gray-500 hover:text-gray-700">← Kembali</button>
+          </div>`;
+        lucide.createIcons();
+      }
+    }
+
+    function buildUploadView(trx, bank, totalTransfer) {
+      const isRejected = trx.status === 'rejected';
+      return `
+        <div class="fade-in space-y-4">
+          <!-- Info pendaftar -->
+          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center shrink-0">
+                <i data-lucide="user" class="w-5 h-5 text-teal-600"></i>
+              </div>
+              <div>
+                <p class="font-bold text-gray-800">${trx.buyer_name || '-'}</p>
+                <p class="text-xs text-gray-400">${trx.kategori_lari || '-'} · BIB: <span class="font-mono">${trx.reference_id}</span></p>
+              </div>
+            </div>
+          </div>
+
+          ${isRejected && trx.reject_reason ? `
+          <!-- Alasan ditolak -->
+          <div class="bg-red-50 border border-red-200 rounded-2xl p-4">
+            <div class="flex gap-2 items-start">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+              <div>
+                <p class="text-sm font-bold text-red-700">Bukti Sebelumnya Ditolak</p>
+                <p class="text-xs text-red-600 mt-0.5">${trx.reject_reason}</p>
+              </div>
+            </div>
+          </div>` : ''}
+
+          <!-- Info rekening -->
+          <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3">Rekening Tujuan</p>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-gray-500">Bank</span>
+                <span class="font-bold text-gray-800">${bank?.name || '-'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">No. Rekening</span>
+                <span class="font-bold font-mono text-gray-800">${bank?.accountNumber || '-'}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500">Atas Nama</span>
+                <span class="font-bold text-gray-800">${bank?.accountName || '-'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nominal -->
+          <div class="bg-white border-2 border-teal-400 rounded-2xl p-4 text-center shadow-sm">
+            <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Transfer TEPAT sebesar</p>
+            <p class="text-4xl font-extrabold text-teal-600">Rp ${fmt(totalTransfer)}</p>
+            <p class="text-xs text-gray-400 mt-1">
+              (Rp ${fmt(trx.amount)} + kode unik <strong>${String(trx.unique_code || 0).padStart(3, '0')}</strong>)
+            </p>
+            <p class="text-xs text-orange-500 font-semibold mt-1.5">⚠ Nominal harus TEPAT agar verifikasi berjalan</p>
+          </div>
+
+          <!-- Upload -->
+          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+            <p class="font-semibold text-gray-700 mb-3 text-sm">
+              ${isRejected ? 'Upload Ulang Bukti Transfer' : 'Upload Bukti Transfer'}
+            </p>
+
+            <div id="upload-drop" class="upload-drop p-6 text-center cursor-pointer" onclick="document.getElementById('proof-file').click()">
+              <i data-lucide="upload-cloud" class="w-10 h-10 text-gray-400 mx-auto mb-2"></i>
+              <p class="text-sm text-gray-500">Klik atau drag foto bukti transfer ke sini</p>
+              <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — maks 5 MB</p>
+            </div>
+            <input type="file" id="proof-file" accept="image/*" class="hidden">
+
+            <div id="preview-wrapper" class="hidden mt-3 text-center">
+              <img id="proof-preview" class="max-h-52 mx-auto rounded-xl border border-gray-200" alt="Preview">
+              <p id="proof-name" class="text-xs text-gray-400 mt-1"></p>
+              <button onclick="resetFile()" class="text-xs text-red-400 mt-1 underline">Ganti foto</button>
+            </div>
+
+            <button id="upload-btn" onclick="doUpload('${trx.reference_id}')" disabled
+              class="mt-4 w-full py-3 rounded-xl font-bold text-white bg-teal-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-teal-600 transition text-sm">
+              Kirim Bukti Transfer
+            </button>
+            <div id="upload-status" class="mt-3 text-center text-sm hidden"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleFileSelect(file) {
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowed.includes(file.type)) {
+        alert('Format tidak didukung. Gunakan JPG, PNG, atau WEBP.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File terlalu besar. Maksimal 5 MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('proof-preview').src = e.target.result;
+        document.getElementById('proof-name').textContent = file.name;
+        document.getElementById('preview-wrapper').classList.remove('hidden');
+        document.getElementById('upload-drop').classList.add('hidden');
+        document.getElementById('upload-btn').disabled = false;
+      };
+      reader.readAsDataURL(file);
+
+      // Pasang file ke input tersembunyi
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById('proof-file').files = dt.files;
+    }
+
+    function resetFile() {
+      document.getElementById('proof-file').value = '';
+      document.getElementById('preview-wrapper').classList.add('hidden');
+      document.getElementById('upload-drop').classList.remove('hidden');
+      document.getElementById('upload-btn').disabled = true;
+    }
+
+    async function doUpload(referenceId) {
+      const fileInput = document.getElementById('proof-file');
+      const btn = document.getElementById('upload-btn');
+      const statusEl = document.getElementById('upload-status');
+      if (!fileInput.files.length) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Mengupload...';
+      statusEl.classList.remove('hidden');
+      statusEl.className = 'mt-3 text-center text-sm text-gray-500';
+      statusEl.textContent = 'Mengirim bukti transfer...';
+
+      try {
+        const fd = new FormData();
+        fd.append('referenceId', referenceId);
+        fd.append('proof', fileInput.files[0]);
+
+        const res = await fetch(`${BACKEND_URL}/upload-proof`, { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (res.ok && data.ok) {
+          document.getElementById('step-result').innerHTML = `
+            <div class="text-center py-8 fade-in">
+              <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="clock" class="w-8 h-8 text-teal-600"></i>
+              </div>
+              <h2 class="text-xl font-extrabold text-gray-800">Bukti Diterima!</h2>
+              <p class="text-sm text-gray-500 mt-2">
+                Panitia akan memverifikasi dalam <strong>1×24 jam</strong>.
+              </p>
+              <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm inline-block">
+                <span class="text-gray-500">No. Pendaftaran: </span>
+                <span class="font-bold font-mono">${referenceId}</span>
+              </div>
+              <div class="mt-6">
+                <a href="check.html" class="px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl transition">
+                  Cek Status Pendaftaran
+                </a>
+              </div>
+            </div>`;
+          lucide.createIcons();
+        } else {
+          throw new Error(data.error || data.detail || 'Gagal upload');
+        }
+      } catch (err) {
+        statusEl.className = 'mt-3 text-center text-sm text-red-500';
+        statusEl.textContent = `Gagal: ${err.message}`;
+        btn.disabled = false;
+        btn.textContent = 'Kirim Bukti Transfer';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      // Auto-focus input HP
+      document.getElementById('phone-input').focus();
+    });
+  </script>
+</body>
+
+</html>
