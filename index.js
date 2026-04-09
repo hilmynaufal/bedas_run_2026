@@ -223,6 +223,7 @@ app.post('/payment', async (req, res) => {
       golongan_darah:   fd['Golongan Darah'] || null,
       riwayat_penyakit: fd['Riwayat Penyakit'] || null,
       surat_pernyataan: fd['Surat Pernyataan'] || null,
+      nama_instansi:    fd['Nama Instansi (peserta dari unsur pemerintahan, kosongkan jika masyarakat umum)'] || null,
       form_data:        Object.keys(fd).length > 0 ? fd : null,
     });
 
@@ -342,7 +343,10 @@ app.get('/check-transaction', async (req, res) => {
     return res.status(404).json({ error: 'Transaksi tidak ditemukan untuk nomor HP ini' });
   }
 
-  res.json({ transaction: transactions[0] });
+  res.json({
+    transaction: transactions[0],
+    bank: { name: BANK_NAME, accountNumber: BANK_ACCOUNT_NUMBER, accountName: BANK_ACCOUNT_NAME },
+  });
 });
 
 // ─── GET /admin/pending ───────────────────────────────────────────────────────
@@ -369,7 +373,7 @@ app.get('/admin/transactions', requireAdmin, async (req, res) => {
 
   let query = supabase
     .from('transactions')
-    .select('reference_id, buyer_name, buyer_phone, buyer_email, kategori_lari, ukuran_kaos, amount, unique_code, status, payment_proof_url, reject_reason, verified_by, verified_at, created_at, updated_at')
+    .select('reference_id, buyer_name, buyer_phone, buyer_email, nama_instansi, kategori_lari, ukuran_kaos, amount, unique_code, status, payment_proof_url, reject_reason, verified_by, verified_at, created_at, updated_at')
     .order('created_at', { ascending: false });
 
   if (status && ALLOWED_STATUSES.includes(status)) {
