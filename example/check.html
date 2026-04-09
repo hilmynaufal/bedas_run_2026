@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cek e-Tiket | Big & Child Run</title>
-    <meta name="description" content="Cek dan download e-tiket Bedas Run 2026 Kabupaten Bandung.">
+    <meta name="description" content="Cek dan download e-tiket BIG & CHILD RUN 2026 Kabupaten Bandung.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -782,7 +782,7 @@
 
     <script>
         const BACKEND_URL = 'https://api.bigandchildrun.com';
-        const LOGO_URL = 'https://hakordiabedasrun.bandungkab.go.id/assets/img/logonav.png';
+        const LOGO_URL = 'https://bigandchildrun.com/assets/image/logo.png';
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -880,7 +880,7 @@
                 <div class="ticket-header" style="background:${gradient}">
                     <div class="ticket-branding">
                         <img src="${LOGO_URL}" alt="Logo">
-                        <h3>Bedas Run<br>2026</h3>
+                        <h3>BIG & CHILD RUN<br>2026</h3>
                     </div>
                     <div class="bib-display">
                         <span class="bib-label">Nomor BIB</span>
@@ -1199,7 +1199,7 @@
                     backgroundColor: document.body.classList.contains('dark-theme') ? '#1e1e1e' : '#ffffff'
                 });
                 const link = document.createElement('a');
-                link.download = `TIKET_BEDASRUN_${bib}.png`;
+                link.download = `TIKET_BIGCHILDRUN_${bib}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
             } catch (err) {

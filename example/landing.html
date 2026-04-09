@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary Meta Tags -->
+    <title>BIG & CHILD RUN 2026 - Kab. Bandung BEDAS</title>
+    <meta name="title" content="BIG & CHILD RUN 2026 - Kab. Bandung BEDAS">
+    <meta name="description"
+        content="Ikuti BIG & CHILD RUN 2026 di Kabupaten Bandung! Acara lomba lari inklusif dengan kategori Big Run dan Child Run. Rayakan semangat kesehatan dan kemeriahan bersama.">
+    <meta name="keywords"
+        content="Big and Child Run 2026, lari, lomba lari, marathon, Kab Bandung, Bedas Expo 2026, lari anak, lari dewasa, event lari soreang">
+    <meta name="author" content="Kabupaten Bandung">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bigandchildrun.com/">
+    <meta property="og:title" content="BIG & CHILD RUN 2026 - Kab. Bandung BEDAS">
+    <meta property="og:description"
+        content="Ikuti BIG & CHILD RUN 2026 di Kabupaten Bandung! Acara lomba lari inklusif dengan kategori Big Run dan Child Run. Rayakan semangat kesehatan dan kemeriahan bersama.">
+    <meta property="og:image" content="https://bigandchildrun.com/assets/image/logo_seo.png">
+    <meta property="og:image:alt" content="Logo Official BIG & CHILD RUN 2026 Kab. Bandung">
+    <meta property="og:site_name" content="BIG & CHILD RUN 2026">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://bigandchildrun.com/">
+    <meta property="twitter:title" content="BIG & CHILD RUN 2026 - Kab. Bandung BEDAS">
+    <meta property="twitter:description"
+        content="Ikuti BIG & CHILD RUN 2026 di Kabupaten Bandung! Acara lomba lari inklusif dengan kategori Big Run dan Child Run. Rayakan semangat kesehatan dan kemeriahan bersama.">
+    <meta property="twitter:image" content="https://bigandchildrun.com/assets/image/logo_seo.png">
+    <meta property="twitter:image:alt" content="Logo Official BIG & CHILD RUN 2026 Kab. Bandung">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/image/logo.png">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bedas: {
+                            green: '#0a7a35',
+                            light: '#dcfce7',
+                            dark: '#064e3b',
+                            lime: '#84cc16',
+                            blue: '#005b9f',
+                            pink: '#e91e63',
+                            orange: '#f97316',
+                            yellow: '#facc15',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-left {
+            transform: translateX(-50px);
+            opacity: 0;
+        }
+
+        .reveal-right {
+            transform: translateX(50px);
+            opacity: 0;
+        }
+
+        .reveal-left.visible,
+        .reveal-right.visible {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(1deg);
+            }
+        }
+
+        .float-img {
+            animation: float 5s ease-in-out infinite;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0a7a35;
+            border-radius: 10px;
+        }
+
+        .gradient-text-logo {
+            background: linear-gradient(to right, #005b9f, #e91e63, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header-floating {
+            top: 20px;
+            width: calc(100% - 40px);
+            left: 20px;
+            right: 20px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark .header-floating {
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .light .header-floating {
+            background: rgba(255, 255, 255, 0.7);
+            border-color: rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .animate-scroll {
+            animation: scroll 30s linear infinite;
+        }
+
+        .rule-card {
+            transition: all 0.3s ease;
+        }
+
+        .rule-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Updated Size Table Styling for better readability */
+        .size-table-premium {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .size-table-premium th {
+            @apply py-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 text-center;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .size-table-premium td {
+            @apply py-4 px-4 text-sm font-bold text-center transition-all duration-300;
+        }
+
+        .size-table-premium tbody tr {
+            @apply hover:bg-slate-50 dark:hover:bg-white/5;
+        }
+
+        .size-table-premium tbody tr:nth-child(even) {
+            @apply bg-slate-50/40 dark:bg-white/[0.02];
+        }
+
+        @keyframes progress {
+            0% {
+                transform: scaleX(0);
+                transform-origin: left;
+            }
+
+            45% {
+                transform: scaleX(1);
+                transform-origin: left;
+            }
+
+            55% {
+                transform: scaleX(1);
+                transform-origin: right;
+            }
+
+            100% {
+                transform: scaleX(0);
+                transform-origin: right;
+            }
+        }
+
+        html,
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Floating WA */
+        .wa-floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .wa-main-btn {
+            background-color: #25d366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wa-main-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .wa-menu {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            display: none;
+            width: 250px;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .dark .wa-menu {
+            background: #1e293b;
+            color: white;
+        }
+
+        .wa-menu.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="light bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+
+    <!-- Preloader -->
+    <div id="preloader" class="dark:bg-slate-900">
+        <div class="flex flex-col items-center">
+            <div class="relative w-24 h-24 mb-6">
+                <div class="absolute inset-0 border-4 border-bedas-green/20 rounded-full"></div>
+                <div
+                    class="absolute inset-0 border-4 border-bedas-green border-t-transparent rounded-full animate-spin">
+                </div>
+                <div class="absolute inset-4 bg-bedas-green/10 rounded-full flex items-center justify-center">
+                    <img src="assets/image/logo.png" alt="Icon" class="w-8 h-8 object-contain">
+                </div>
+            </div>
+            <h2 class="text-xl font-black gradient-text-logo tracking-tighter uppercase italic animate-pulse">Big &
+                Child Run 2026</h2>
+            <div class="mt-2 w-32 h-1 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
+                <div class="h-full bg-bedas-green w-1/2 animate-[progress_1.5s_ease-in-out_infinite] origin-left"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating WhatsApp -->
+    <div class="wa-floating-btn">
+        <div id="waMenu" class="wa-menu">
+            <h4 class="font-black text-xs uppercase tracking-widest mb-4 text-bedas-green">Hubungi Admin Kami</h4>
+            <div class="space-y-3">
+                <a href="https://wa.me/6287768837252" target="_blank"
+                    class="flex items-center p-3 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-bedas-green/10 transition-colors group border border-slate-100 dark:border-white/10">
+                    <div
+                        class="w-10 h-10 bg-bedas-green/20 text-bedas-green rounded-full flex items-center justify-center mr-3 group-hover:bg-bedas-green group-hover:text-white transition-all">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-tighter opacity-50">Tanya Admin</p>
+                        <p class="text-sm font-bold">Admin 1</p>
+                    </div>
+                </a>
+                <a href="https://wa.me/6283865273909" target="_blank"
+                    class="flex items-center p-3 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-bedas-green/10 transition-colors group border border-slate-100 dark:border-white/10">
+                    <div
+                        class="w-10 h-10 bg-bedas-green/20 text-bedas-green rounded-full flex items-center justify-center mr-3 group-hover:bg-bedas-green group-hover:text-white transition-all">
+                        <i class="fa-brands fa-whatsapp"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-tighter opacity-50">Tanya Admin</p>
+                        <p class="text-sm font-bold">Admin 2</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="wa-main-btn shadow-bedas-green/40" onclick="toggleWaMenu()">
+            <i class="fa-brands fa-whatsapp"></i>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="fixed z-50 header-floating" id="main-nav">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-3 transition-transform hover:scale-105">
+                <img src="assets/image/logo.png" alt="Logo" class="w-10 h-10 object-contain shadow-sm">
+                <div class="flex flex-col">
+                    <span class="text-lg font-black tracking-tighter leading-none dark:text-white text-bedas-blue">BIG &
+                        CHILD RUN</span>
+                    <span class="text-[10px] font-bold tracking-[0.2em] text-bedas-green">KAB. BANDUNG</span>
+                </div>
+            </a>
+
+            <div class="hidden md:flex items-center space-x-1">
+                <a href="#home"
+                    class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-bedas-pink/10 hover:text-bedas-pink transition-all dark:text-white">Beranda</a>
+                <a href="#about"
+                    class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-bedas-pink/10 hover:text-bedas-pink transition-all dark:text-white">Kategori</a>
+                <a href="#jersey"
+                    class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-bedas-pink/10 hover:text-bedas-pink transition-all dark:text-white">Jersey</a>
+                <a href="#route"
+                    class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-bedas-pink/10 hover:text-bedas-pink transition-all dark:text-white">Rute</a>
+                <a href="#rules"
+                    class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-bedas-pink/10 hover:text-bedas-pink transition-all dark:text-white">Aturan</a>
+
+                <div class="h-6 w-[1px] bg-slate-300 dark:bg-slate-700 mx-2"></div>
+
+                <button id="theme-toggle"
+                    class="p-2.5 rounded-xl bg-slate-200/50 dark:bg-slate-800/50 hover:scale-110 transition-all mr-2">
+                    <i id="theme-icon" class="fa-solid fa-moon text-bedas-green dark:text-bedas-lime"></i>
+                </button>
+
+                <a href="#register"
+                    class="bg-bedas-green hover:bg-bedas-dark text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-bedas-green/20 transition-all transform hover:scale-105 bg-gradient-to-r from-bedas-green to-bedas-blue">
+                    Daftar
+                </a>
+            </div>
+
+            <button class="md:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800">
+                <i class="fa-solid fa-bars dark:text-white"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Home Section -->
+    <section id="home"
+        class="relative min-h-screen flex items-center pt-24 pb-12 overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+        <div class="absolute inset-0 z-0">
+            <div
+                class="absolute top-0 right-0 w-1/2 h-full bg-bedas-green/5 dark:bg-bedas-green/10 skew-x-12 transform translate-x-20">
+            </div>
+            <div
+                class="absolute bottom-0 left-0 w-96 h-96 bg-bedas-pink/10 dark:bg-bedas-pink/20 rounded-full blur-[120px]">
+            </div>
+        </div>
+
+        <div class="container mx-auto px-6 grid md:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
+            <div class="reveal reveal-left text-center md:text-left order-2 md:order-1">
+                <img src="assets/image/logo.png" alt="Logo Event"
+                    class="w-32 h-32 md:w-52 md:h-52 object-contain mb-6 md:mb-8 hover:scale-105 transition-transform duration-500 mx-auto md:mx-0">
+                <span
+                    class="inline-block bg-bedas-green/10 text-bedas-green border border-bedas-green/20 px-4 py-1.5 rounded-full text-[10px] md:text-xs font-black mb-6 md:mb-8 tracking-widest uppercase">BEDAS
+                    EXPO 2026</span>
+                <h1
+                    class="text-4xl md:text-7xl font-black leading-[1.1] mb-6 dark:text-white text-slate-900 tracking-tighter">
+                    Melesat Bersama <br>
+                    <span class="gradient-text-logo italic">Semangat Bedas!&ensp;</span>
+                </h1>
+
+                <p id="descText"
+                    class="text-sm md:text-lg text-slate-600 dark:text-bedas-light/60 mb-4 max-w-lg leading-relaxed font-medium mx-auto md:mx-0 line-clamp-3">
+                    Sebagai bagian utama dari <b>BEDAS EXPO 2026</b> dalam rangka memperingati Hari Jadi Kabupaten
+                    Bandung ke-385, Big & Child Run hadir sebagai wadah olahraga inklusif yang merayakan semangat
+                    kesehatan dan kebahagiaan bagi seluruh lapisan masyarakat tanpa batasan. Event ini menekankan bahwa
+                    setiap gerak adalah sebuah kemenangan yang patut dirayakan, di mana kebersamaan di atas lintasan
+                    jauh lebih berharga daripada sekadar mencapai garis finish. Segera siapkan sepatu lari Anda dan
+                    jadilah bagian dari kemeriahan perayaan jejak kebahagiaan ini.
+                </p>
+
+                <button onclick="toggleText()" id="readMoreBtn"
+                    class="text-bedas-green text-sm md:text-base font-bold hover:underline mb-8 md:mb-10">
+                    Baca Selengkapnya
+                </button>
+
+                <div class="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4 mb-8 md:mb-12">
+                    <div
+                        class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-4 py-3 md:pl-5 md:pr-8 md:py-4 rounded-2xl md:rounded-3xl shadow-sm flex items-center group hover:border-bedas-pink transition-colors">
+                        <div
+                            class="w-8 h-8 md:w-10 md:h-10 bg-bedas-pink/10 text-bedas-pink rounded-xl md:rounded-2xl flex items-center justify-center mr-3 md:mr-4 group-hover:bg-bedas-pink group-hover:text-white transition-all">
+                            <i class="fa-solid fa-calendar text-xs md:text-base"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs md:text-sm font-black text-slate-900 dark:text-white leading-none">19
+                                April 2026</p>
+                            <p
+                                class="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                Hari Pelaksanaan</p>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-4 py-3 md:pl-5 md:pr-8 md:py-4 rounded-2xl md:rounded-3xl shadow-sm flex items-center group hover:border-bedas-orange transition-colors">
+                        <div
+                            class="w-8 h-8 md:w-10 md:h-10 bg-bedas-orange/10 text-bedas-orange rounded-xl md:rounded-2xl flex items-center justify-center mr-3 md:mr-4 group-hover:bg-bedas-orange group-hover:text-white transition-all">
+                            <i class="fa-solid fa-location-dot text-xs md:text-base"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs md:text-sm font-black text-slate-900 dark:text-white leading-none">
+                                Soreang, Kab. Bandung</p>
+                            <p
+                                class="text-[8px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                Pusat Pemerintahan</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IMAGE HERO - MOBILE ONLY -->
+                <div class="relative flex justify-center items-center md:hidden mb-10">
+                    <div
+                        class="absolute w-[100%] h-[100%] bg-bedas-green/10 dark:bg-bedas-green/20 rounded-full blur-[60px] animate-pulse">
+                    </div>
+                    <img src="assets/image/heross.png" alt="Bupati Kab. Bandung"
+                        class="max-w-[260px] h-auto object-contain relative z-10 drop-shadow-2xl">
+                </div>
+
+                <!-- NEW COOLER BUTTONS HOME -->
+                <div class="flex flex-col sm:flex-row gap-5 justify-center md:justify-start">
+                    <!-- Button Daftar with Shimmer & Moving Icon -->
+                    <a href="#register"
+                        class="group relative overflow-hidden bg-gradient-to-br from-bedas-green via-bedas-green to-bedas-blue text-white font-black py-5 px-10 rounded-[2rem] text-lg shadow-[0_20px_40px_-10px_rgba(10,122,53,0.4)] transition-all duration-300 hover:scale-105 active:scale-95 uppercase tracking-wider italic flex items-center justify-center gap-3">
+                        <span
+                            class="absolute inset-0 btn-shimmer group-hover:animate-shimmer pointer-events-none"></span>
+                        <span>DAFTAR SEKARANG!</span>
+                        <i
+                            class="fa-solid fa-person-running transition-transform duration-300 group-hover:translate-x-2"></i>
+                    </a>
+
+                    <!-- Button Cek Status with Glassmorphism & Subtle Glow -->
+                    <a href="https://registrasi.bigandchildrun.com/check.html" target="_blank"
+                        class="group relative backdrop-blur-md bg-white/10 dark:bg-white/5 text-bedas-blue dark:text-white border-2 border-bedas-blue/20 dark:border-white/10 font-black py-5 px-10 rounded-[2rem] text-lg shadow-xl transition-all duration-300 hover:bg-white dark:hover:bg-white/10 hover:border-bedas-blue/40 dark:hover:border-white/30 hover:scale-105 active:scale-95 uppercase tracking-wider italic flex items-center justify-center gap-3">
+                        <i
+                            class="fa-solid fa-magnifying-glass text-bedas-blue dark:text-bedas-lime group-hover:rotate-12 transition-transform"></i>
+                        <span>CEK STATUS DAFTAR</span>
+                    </a>
+                </div>
+            </div>
+
+            <div
+                class="relative justify-center items-center reveal reveal-right order-1 md:order-2 mb-8 md:mb-0 hidden md:flex">
+                <div
+                    class="absolute w-[120%] h-[120%] bg-bedas-green/10 dark:bg-bedas-green/20 rounded-full blur-[100px] animate-pulse">
+                </div>
+                <img src="assets/image/heross.png" alt="Bupati Kab. Bandung"
+                    class="max-w-2xl h-auto object-contain relative z-10 float-img drop-shadow-2xl">
+            </div>
+        </div>
+    </section>
+
+    <!-- CSS TAMBAHAN -->
+    <style>
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+
+    <!-- JS -->
+    <script>
+        function toggleText() {
+            const text = document.getElementById("descText");
+            const btn = document.getElementById("readMoreBtn");
+
+            if (text.classList.contains("line-clamp-3")) {
+                text.classList.remove("line-clamp-3");
+                btn.innerText = "Tampilkan Lebih Sedikit";
+            } else {
+                text.classList.add("line-clamp-3");
+                btn.innerText = "Baca Selengkapnya";
+            }
+        }
+    </script>
+
+    <!-- Categories Section -->
+    <section id="about" class="py-24 bg-white dark:bg-slate-950 transition-colors duration-500">
+        <div class="container mx-auto px-6 text-center">
+            <div class="mb-20 reveal">
+                <h2 class="text-4xl md:text-5xl font-black dark:text-white text-slate-900 mb-4 italic">Dua Kategori,
+                    <span class="gradient-text-logo">Satu Semangat</span>
+                </h2>
+                <div class="w-20 h-1.5 bg-bedas-green mx-auto rounded-full mb-6"></div>
+                <p class="text-slate-500 dark:text-bedas-light/40 max-w-2xl mx-auto font-medium">Kategori unik yang
+                    dirancang khusus untuk inklusivitas dan keceriaan keluarga.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                <div
+                    class="group bg-slate-50 dark:bg-white/5 p-12 rounded-[4rem] border border-slate-100 dark:border-white/5 hover:border-bedas-blue transition-all duration-500 reveal reveal-left shadow-xl shadow-slate-200/50 dark:shadow-none text-left">
+                    <div
+                        class="w-24 h-24 bg-bedas-blue/10 dark:bg-bedas-blue/20 text-bedas-blue rounded-[2.5rem] flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:bg-bedas-blue group-hover:text-white transition-all shadow-lg">
+                        <i class="fa-solid fa-weight-scale"></i>
+                    </div>
+                    <h3
+                        class="text-3xl font-black dark:text-white text-slate-900 mb-4 uppercase tracking-tighter italic">
+                        Big Run Category</h3>
+                    <p class="text-slate-600 dark:text-bedas-light/50 mb-8 leading-relaxed font-medium">Kategori ini
+                        diutamakan bagi peserta dengan berat badan >90 kg, tetap terbuka bagi peserta di bawah 90 kg.
+                        Buktikan bahwa kesehatan tidak mengenal batas ukuran</p>
+                </div>
+
+                <div
+                    class="group bg-slate-50 dark:bg-white/5 p-12 rounded-[4rem] border border-slate-100 dark:border-white/5 hover:border-bedas-pink transition-all duration-500 reveal reveal-right shadow-xl shadow-slate-200/50 dark:shadow-none text-left">
+                    <div
+                        class="w-24 h-24 bg-bedas-pink/10 dark:bg-bedas-pink/20 text-bedas-pink rounded-[2.5rem] flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:bg-bedas-pink group-hover:text-white transition-all shadow-lg">
+                        <i class="fa-solid fa-child-reaching"></i>
+                    </div>
+                    <h3
+                        class="text-3xl font-black dark:text-white text-slate-900 mb-4 uppercase tracking-tighter italic">
+                        Child Run Category</h3>
+                    <p class="text-slate-600 dark:text-bedas-light/50 mb-8 leading-relaxed font-medium">Untuk tunas
+                        bangsa berusia <strong>6 hingga 10 tahun</strong>. Gaya hidup sehat sejak dini.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Jersey Section -->
+    <section id="jersey" class="py-24 bg-slate-50 dark:bg-slate-900/50 transition-colors duration-500 overflow-hidden">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+                <!-- Jersey Visual -->
+                <div class="lg:w-1/2 reveal reveal-left flex flex-col items-center">
+                    <div class="relative group flex justify-center w-full">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-tr from-bedas-green/20 via-bedas-blue/15 to-bedas-pink/20 blur-[120px] transition-all opacity-60">
+                        </div>
+                        <img src="assets/image/jerseyfinal.png" alt="Official Jersey"
+                            class="relative z-10 w-full max-w-sm md:max-w-md h-auto float-img select-none pointer-events-none border-none">
+                    </div>
+                    <div class="mt-12 text-center">
+                        <p class="text-slate-400 font-bold uppercase tracking-[0.2em] text-[13px]"><b>Hijau (BIG) • Biru
+                                (Child)</b></p>
+                        <h2 class="text-4xl md:text-5xl font-black dark:text-white text-slate-900 mb-4 italic">Official
+                            <span class="gradient-text-logo">Jersey</span>
+                        </h2>
+                        <p class="text-slate-400 font-bold uppercase tracking-[0.5em] text-[10px] italic">Premium
+                            Athletic Fit • Quick Dry Fiber</p>
+                    </div>
+                </div>
+
+                <!-- Premium Professional Tables -->
+                <div class="lg:w-1/2 reveal reveal-right w-full">
+                    <div class="space-y-10">
+                        <!-- Big Size Table -->
+                        <div
+                            class="bg-white dark:bg-slate-900 rounded-[3.5rem] p-8 md:p-12 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.06)] dark:shadow-none border border-slate-100 dark:border-white/5">
+                            <div class="flex justify-between items-center mb-10">
+                                <div>
+                                    <h4 class="font-black italic uppercase tracking-[0.1em] text-bedas-blue text-base">
+                                        Size Chart BIG / DEWASA</h4>
+                                    <p
+                                        class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest italic opacity-70">
+                                        Aero Dynamic Cut</p>
+                                </div>
+                                <div class="w-12 h-12 bg-bedas-blue/10 rounded-2xl flex items-center justify-center">
+                                    <i class="fa-solid fa-shirt text-bedas-blue"></i>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="size-table-premium w-full text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>Size</th>
+                                            <th>Lebar Dada</th>
+                                            <th>P. Lengan</th>
+                                            <th>Panjang</th>
+                                            <th>BB (kg)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="dark:text-slate-300">
+                                        <tr>
+                                            <td class="text-bedas-blue">2XL</td>
+                                            <td>64</td>
+                                            <td>24</td>
+                                            <td>76</td>
+                                            <td>91-100</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-blue">3XL</td>
+                                            <td>67</td>
+                                            <td>24</td>
+                                            <td>79</td>
+                                            <td>101-110</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-blue">4XL</td>
+                                            <td>70</td>
+                                            <td>25</td>
+                                            <td>80</td>
+                                            <td>111-120</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-blue">5XL</td>
+                                            <td>73</td>
+                                            <td>25</td>
+                                            <td>84</td>
+                                            <td>121-130</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-blue">6XL</td>
+                                            <td>75</td>
+                                            <td>26</td>
+                                            <td>85</td>
+                                            <td>131-140</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-blue">7XL</td>
+                                            <td>80</td>
+                                            <td>26</td>
+                                            <td>86</td>
+                                            <td>141-150</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Child Size Table -->
+                        <div
+                            class="bg-white dark:bg-slate-900 rounded-[3.5rem] p-8 md:p-12 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.06)] dark:shadow-none border border-slate-100 dark:border-white/5">
+                            <div class="flex justify-between items-center mb-10">
+                                <div>
+                                    <h4 class="font-black italic uppercase tracking-[0.1em] text-bedas-pink text-base">
+                                        Size Chart CHILD / ANAK</h4>
+                                    <p
+                                        class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest italic opacity-70">
+                                        Junior Comfort Fit</p>
+                                </div>
+                                <div class="w-12 h-12 bg-bedas-pink/10 rounded-2xl flex items-center justify-center">
+                                    <i class="fa-solid fa-child-reaching text-bedas-pink"></i>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="size-table-premium w-full text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>Size</th>
+                                            <th>Estimasi Usia</th>
+                                            <th>Lebar Dada</th>
+                                            <th>Panjang</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="dark:text-slate-300">
+                                        <tr>
+                                            <td class="text-bedas-pink">S</td>
+                                            <td>2 - 3 Th</td>
+                                            <td>28 cm</td>
+                                            <td>40 cm</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-pink">M</td>
+                                            <td>4 - 5 Th</td>
+                                            <td>30 cm</td>
+                                            <td>43 cm</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-pink">L</td>
+                                            <td>6 - 7 Th</td>
+                                            <td>32 cm</td>
+                                            <td>46 cm</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-pink">XL</td>
+                                            <td>8 - 9 Th</td>
+                                            <td>34 cm</td>
+                                            <td>50 cm</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-bedas-pink">XXL</td>
+                                            <td>10 - 11 Th</td>
+                                            <td>40 cm</td>
+                                            <td>52 cm</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <p
+                        class="mt-8 text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] opacity-60">
+                        Satuan dalam CM (Centimeter)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Route Section -->
+    <section id="route" class="py-24 bg-white dark:bg-slate-950 transition-colors duration-500">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl md:text-5xl font-black dark:text-white text-slate-900 mb-4 italic">Rute <span
+                        class="gradient-text-logo">Big & Child Run</span></h2>
+                <div class="w-20 h-1.5 bg-bedas-green mx-auto rounded-full mb-6"></div>
+                <p class="text-slate-500 dark:text-bedas-light/40 max-w-2xl mx-auto font-medium text-lg">Peta rute resmi
+                    yang aman dan nyaman bagi seluruh keluarga.</p>
+            </div>
+
+            <div class="reveal max-w-6xl mx-auto">
+                <div
+                    class="bg-slate-100 dark:bg-white/5 rounded-[2rem] md:rounded-[4rem] p-2 md:p-4 border-2 border-slate-200 dark:border-slate-800 shadow-2xl">
+                    <div
+                        class="relative w-full overflow-hidden rounded-[1.5rem] md:rounded-[3.2rem] bg-slate-200 dark:bg-slate-800 aspect-[5310/3656]">
+                        <img src="assets/image/rutes.png" alt="Peta Rute Bedas Run"
+                            class="absolute inset-0 w-[133.5%] h-full object-cover object-left transition-transform duration-1000 hover:scale-[1.02]"
+                            onerror="this.src='https://placehold.co/5310x3656/0a7a35/white?text=PETA+RUTE+BEDAS+RUN'">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-10 text-center">
+                    <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-600">peta rute
+                        Big & Child Run</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rules Section -->
+    <section id="rules" class="py-24 bg-bedas-dark dark:bg-slate-900 text-white transition-colors duration-500">
+        <div class="container mx-auto px-6 relative z-10">
+
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl md:text-5xl font-black mb-4 italic uppercase tracking-tighter">
+                    Aturan & <span class="text-bedas-lime">Regulasi Resmi</span>
+                </h2>
+                <div class="h-1.5 w-24 bg-white/20 mx-auto rounded-full mt-6"></div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- A -->
+                <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 reveal">
+                    <h4 class="text-lg font-black text-bedas-lime mb-6 flex items-center uppercase italic">
+                        <span
+                            class="w-7 h-7 bg-bedas-lime text-bedas-dark rounded-full flex items-center justify-center text-[10px] mr-3 font-black not-italic">A</span>
+                        Peraturan Pendaftaran
+                    </h4>
+
+                    <ul class="space-y-3 text-[13px] text-slate-300 leading-relaxed">
+                        <li>a. Peserta memiliki identitas / tanda pengenal seperti (KTP/SIM/PASSPORT/KK/KIA).</li>
+                        <li>b. Peserta adalah WNI dan WNA, namun podium hanya bagi WNI.</li>
+                        <li>c. Pendaftaran tidak dapat dialih namakan dan bersifat final.</li>
+                        <li>d. Inspeksi akan dilaksanakan selama perlombaan.</li>
+                        <li>e. Pengisian formulir online menegaskan persetujuan aturan.</li>
+                        <li>f. Konfirmasi diberikan setelah pendaftaran dan pembayaran.</li>
+                        <li>g. Tidak melayani pembatalan atau pengembalian biaya.</li>
+                        <li>h. Panitia berhak menutup pendaftaran jika kuota penuh.</li>
+                        <li>i. Peserta wajib memberikan data yang benar dan akurat.</li>
+                    </ul>
+                </div>
+
+                <!-- B -->
+                <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 reveal">
+                    <h4 class="text-lg font-black text-bedas-orange mb-6 flex items-center uppercase italic">
+                        <span
+                            class="w-7 h-7 bg-bedas-orange text-white rounded-full flex items-center justify-center text-[10px] mr-3 font-black not-italic">B</span>
+                        Ketentuan Umum & Lomba
+                    </h4>
+
+                    <ul class="space-y-3 text-[13px] text-slate-300 leading-relaxed">
+                        <li>a. Panitia berhak mengubah ketentuan tanpa pemberitahuan.</li>
+                        <li>b. Peserta wajib memberikan data yang benar.</li>
+                        <li>c. Panitia dapat menghubungi peserta melalui email/HP.</li>
+                        <li>d. Pendaftaran dapat ditutup jika kuota penuh.</li>
+                        <li>e. Jika acara dibatalkan karena force majeure, tidak ada refund.</li>
+                        <li>f. Panitia berhak menghentikan lomba atau mengubah rute.</li>
+                        <li>g. Peserta wajib mengetahui rute lomba.</li>
+                        <li>h. Peserta memahami adanya risiko cedera.</li>
+                        <li>i. Peserta menjamin kesiapan fisik.</li>
+                        <li>j. Pelanggaran aturan dapat menghilangkan hak peserta.</li>
+                        <li>k. Dokumentasi foto/video menjadi hak panitia.</li>
+                    </ul>
+                </div>
+
+                <!-- C -->
+                <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 reveal">
+                    <h4 class="text-lg font-black text-bedas-pink mb-6 flex items-center uppercase italic">
+                        <span
+                            class="w-7 h-7 bg-bedas-pink text-white rounded-full flex items-center justify-center text-[10px] mr-3 font-black not-italic">C</span>
+                        Ketentuan Peserta
+                    </h4>
+
+                    <ul class="space-y-3 text-[13px] text-slate-300 leading-relaxed">
+                        <li>a. Peserta terbuka untuk umum.</li>
+                        <li>b. Kategori Big diutamakan berat badan >90 Kg.</li>
+                        <li>c. Kategori Child usia 6–10 tahun.</li>
+                        <li>d. Child wajib dalam pengawasan orang tua.</li>
+                        <li>e. Peserta datang 1 jam sebelum start.</li>
+                        <li>f. Dianjurkan memakai baju resmi panitia.</li>
+                        <li>g. Wajib menggunakan nomor BIB.</li>
+                        <li>h. Dilarang memakai atribut SARA dan politik.</li>
+                        <li>i. Dilarang membawa miras dan senjata tajam.</li>
+                        <li>j. Dilarang membawa rokok.</li>
+                        <li>k. Barang terlarang akan disita panitia.</li>
+                    </ul>
+                </div>
+
+                <!-- D -->
+                <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 reveal">
+                    <h4 class="text-lg font-black text-bedas-blue mb-6 flex items-center uppercase italic">
+                        <span
+                            class="w-7 h-7 bg-bedas-blue text-white rounded-full flex items-center justify-center text-[10px] mr-3 font-black not-italic">D</span>
+                        Pengambilan Racepack
+                    </h4>
+
+                    <ul class="space-y-3 text-[13px] text-slate-300 leading-relaxed">
+                        <li>a. Racepack meliputi baju dan nomor BIB.</li>
+                        <li>b. Nomor BIB ditentukan panitia.</li>
+                        <li>c. Tanpa BIB tidak boleh masuk venue.</li>
+                        <li>d. Jadwal racepack diumumkan kemudian.</li>
+                        <li>e. BIB tidak boleh hilang atau rusak.</li>
+                        <li>f. BIB tidak boleh dipindah tangankan.</li>
+                        <li>g. Wajib membawa identitas saat pengambilan.</li>
+                    </ul>
+                </div>
+
+                <!-- E -->
+                <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 reveal">
+                    <h4 class="text-lg font-black text-yellow-500 mb-6 flex items-center uppercase italic">
+                        <span
+                            class="w-7 h-7 bg-yellow-500 text-slate-900 rounded-full flex items-center justify-center text-[10px] mr-3 font-black not-italic">E</span>
+                        Penitipan Barang
+                    </h4>
+
+                    <ul class="space-y-3 text-[13px] text-slate-300 leading-relaxed">
+                        <li>a. Disediakan fasilitas penitipan barang.</li>
+                        <li>b. Waktu penitipan 04.00 – 10.00 WIB.</li>
+                        <li>c. Tidak menerima barang berharga.</li>
+                    </ul>
+                </div>
+
+                <!-- F -->
+                <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 reveal">
+                    <h4 class="text-lg font-black text-emerald-500 mb-6 flex items-center uppercase italic">
+                        <span
+                            class="w-7 h-7 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[10px] mr-3 font-black not-italic">F</span>
+                        Pendaftaran Peserta
+                    </h4>
+
+                    <ul class="space-y-3 text-[13px] text-slate-300 leading-relaxed">
+                        <li>a. Terbuka untuk WNI & WNA (podium hanya WNI).</li>
+                        <li>b. Wajib memiliki identitas resmi.</li>
+                        <li>c. Usia <17 tahun wajib surat izin orang tua.</li>
+                        <li>d. Wajib mengisi formulir dengan lengkap.</li>
+                        <li>e. Wajib memilih kategori sesuai ketentuan.</li>
+                        <li>f. Data peserta harus benar.</li>
+                        <li>g. Informasi wajib akurat.</li>
+                        <li>h. Data tidak dapat diubah setelah konfirmasi.</li>
+                        <li>i. Pengisian form berarti menyetujui aturan.</li>
+                        <li>j. Pendaftaran bersifat final.</li>
+                        <li>k. Konfirmasi setelah pembayaran.</li>
+                        <li>l. Tidak ada refund biaya.</li>
+                    </ul>
+                </div>
+
+                <!-- G -->
+                <div class="bg-white/5 p-8 rounded-[2.5rem] border border-white/10 reveal">
+                    <h4 class="text-lg font-black text-indigo-500 mb-6 flex items-center uppercase italic">
+                        <span
+                            class="w-7 h-7 bg-indigo-500 text-white rounded-full flex items-center justify-center text-[10px] mr-3 font-black not-italic">G</span>
+                        Ketentuan Pemenang
+                    </h4>
+
+                    <ul class="space-y-3 text-[13px] text-slate-300 leading-relaxed">
+                        <li>a. Pemenang berdasarkan waktu terbaik.</li>
+                        <li>b. Wajib menggunakan BIB sesuai data.</li>
+                        <li>c. Kecurangan dapat membatalkan hasil.</li>
+                        <li>d. Hadiah tidak dapat diwakilkan.</li>
+                        <li>e. Keputusan juri bersifat final.</li>
+                        <li>f. Hadiah dapat berupa barang atau uang.</li>
+                        <li>g. Pajak hadiah ditanggung pemenang.</li>
+                        <li>h. Podium hanya untuk WNI.</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-24 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-4xl md:text-5xl font-black dark:text-white text-slate-900 mb-4 italic">FAQ <span
+                        class="gradient-text-logo">Peserta</span></h2>
+                <div class="w-20 h-1.5 bg-bedas-lime mx-auto rounded-full mt-4 mb-6"></div>
+                <p class="text-slate-500 dark:text-slate-400 mt-4 text-sm md:text-base max-w-2xl mx-auto">
+                    Pertanyaan yang sering diajukan seputar pendaftaran dan pelaksanaan lomba Big & Child Run 2026.
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto space-y-4 reveal">
+                <!-- FAQ Items -->
+                <details
+                    class="group bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-bedas-lime/30 shadow-sm overflow-hidden">
+                    <summary
+                        class="flex justify-between items-center font-black cursor-pointer text-base md:text-lg text-slate-800 dark:text-white list-none">
+                        Siapa saja yang dapat mengikuti lomba?
+                        <span
+                            class="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center transition-transform duration-300 group-open:rotate-180 group-open:bg-bedas-lime group-open:text-white">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </span>
+                    </summary>
+                    <div
+                        class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                        Lomba terbuka untuk Warga Negara Indonesia (WNI) dan Warga Negara Asing (WNA). Namun podium
+                        pemenang hanya berlaku untuk peserta WNI.
+                    </div>
+                </details>
+
+                <details
+                    class="group bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-bedas-lime/30 shadow-sm overflow-hidden">
+                    <summary
+                        class="flex justify-between items-center font-black cursor-pointer text-base md:text-lg text-slate-800 dark:text-white list-none">
+                        Apakah pendaftaran dapat dibatalkan atau dialihkan?
+                        <span
+                            class="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center transition-transform duration-300 group-open:rotate-180 group-open:bg-bedas-lime group-open:text-white">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </span>
+                    </summary>
+                    <div
+                        class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                        Tidak. Pendaftaran bersifat final, tidak dapat dialihkan kepada orang lain, tidak dapat
+                        mengganti kategori, dan tidak ada pengembalian biaya (Non-Refundable).
+                    </div>
+                </details>
+
+                <details
+                    class="group bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-bedas-lime/30 shadow-sm overflow-hidden">
+                    <summary
+                        class="flex justify-between items-center font-black cursor-pointer text-base md:text-lg text-slate-800 dark:text-white list-none">
+                        Apa saja syarat kategori lomba?
+                        <span
+                            class="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center transition-transform duration-300 group-open:rotate-180 group-open:bg-bedas-lime group-open:text-white">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </span>
+                    </summary>
+                    <div
+                        class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                        Kategori Big diutamakan untuk peserta dengan berat badan lebih dari 90 Kg. Kategori Child untuk
+                        usia 6–10 tahun dan wajib dalam pengawasan orang tua atau wali selama acara berlangsung.
+                    </div>
+                </details>
+
+                <details
+                    class="group bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-bedas-lime/30 shadow-sm overflow-hidden">
+                    <summary
+                        class="flex justify-between items-center font-black cursor-pointer text-base md:text-lg text-slate-800 dark:text-white list-none">
+                        Kapan peserta harus hadir di lokasi?
+                        <span
+                            class="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center transition-transform duration-300 group-open:rotate-180 group-open:bg-bedas-lime group-open:text-white">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </span>
+                    </summary>
+                    <div
+                        class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                        Peserta wajib hadir minimal 1 jam sebelum waktu start untuk melakukan proses persiapan,
+                        pemanasan, dan pemeriksaan perlengkapan.
+                    </div>
+                </details>
+
+                <details
+                    class="group bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-bedas-lime/30 shadow-sm overflow-hidden">
+                    <summary
+                        class="flex justify-between items-center font-black cursor-pointer text-base md:text-lg text-slate-800 dark:text-white list-none">
+                        Apa itu Racepack dan bagaimana cara mengambilnya?
+                        <span
+                            class="w-8 h-8 md:w-10 md:h-10 bg-slate-100 dark:bg-white/5 rounded-full flex items-center justify-center transition-transform duration-300 group-open:rotate-180 group-open:bg-bedas-lime group-open:text-white">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </span>
+                    </summary>
+                    <div
+                        class="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 text-slate-600 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                        Racepack terdiri dari jersey resmi dan nomor BIB. Pengambilan racepack wajib membawa bukti
+                        pendaftaran dan identitas resmi seperti KTP, SIM, atau Paspor sesuai jadwal yang diumumkan
+                        panitia.
+                    </div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Section -->
+    <section id="register" class="py-24 bg-white dark:bg-slate-950 transition-colors duration-500">
+        <div class="container mx-auto px-6">
+            <div
+                class="max-w-6xl mx-auto bg-slate-900 dark:bg-bedas-dark rounded-[4rem] p-10 md:p-20 text-white relative overflow-hidden reveal text-left">
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-bedas-lime/20 dark:bg-bedas-lime/10 blur-[120px]">
+                </div>
+                <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-bedas-pink/20 dark:bg-bedas-pink/10 blur-[120px]">
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-16 items-center relative z-10">
+                    <div class="text-left">
+                        <h2
+                            class="text-4xl md:text-6xl font-black mb-8 leading-none italic uppercase tracking-tighter text-left">
+                            Garis Finish <br><span class="text-bedas-lime uppercase">Menantimu!</span></h2>
+
+                        <div class="flex flex-col space-y-4 mb-10 max-w-sm mx-auto md:mx-0 text-left">
+                            <div class="bg-white/10 border border-white/10 p-6 rounded-3xl backdrop-blur-md text-left">
+                                <p
+                                    class="text-bedas-lime font-black text-xs uppercase tracking-widest mb-2 italic text-left">
+                                    Biaya Registrasi</p>
+                                <div class="flex justify-between items-center mb-2 pt-2 text-left">
+                                    <span class="font-bold text-sm uppercase text-left">Kategori Big</span>
+                                    <span class="text-2xl font-black text-white text-left">Rp 115.000</span>
+                                </div>
+                                <div class="flex justify-between items-center border-t border-white/5 pt-2 text-left">
+                                    <span class="font-bold text-sm uppercase text-left">Kategori Child</span>
+                                    <span class="text-2xl font-black text-white text-left">Rp 100.000</span>
+                                </div>
+                            </div>
+
+                            <!-- Surat Izin Section -->
+                            <div class="space-y-3 text-left">
+                                <a href="https://drive.google.com/file/d/1tKUIjk4mxtv-fl7xAN0zGM9OTFR5c_Mp/view?usp=sharing"
+                                    target="_blank"
+                                    class="flex items-center justify-center p-4 bg-bedas-blue/20 hover:bg-bedas-blue/40 border border-bedas-blue/30 rounded-2xl transition-all group text-left">
+                                    <i
+                                        class="fa-solid fa-file-pdf mr-3 text-bedas-blue group-hover:scale-125 transition-transform"></i>
+                                    <span class="font-bold text-xs uppercase tracking-widest text-left">Unduh Surat Izin
+                                        Orang Tua</span>
+                                </a>
+                                <p
+                                    class="text-[10px] font-black text-bedas-orange uppercase tracking-widest italic animate-pulse flex items-center justify-start text-left">
+                                    <i class="fa-solid fa-circle-exclamation mr-2"></i>
+                                    Kategori Child wajib mengunduh dan mengisi Surat Izin Orang Tua. (upload Surat Izin
+                                    Orang Tua saat mengisi form pendaftaran)
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="reg-status"
+                            class="bg-bedas-lime/10 p-6 rounded-3xl border border-bedas-lime/20 text-center shadow-lg max-w-sm mx-auto md:mx-0">
+                            <p
+                                class="text-[9px] font-black text-bedas-lime mb-2 uppercase tracking-[0.3em] italic leading-none text-center">
+                                Sistem Registrasi Online</p>
+                            <p id="status-text" class="text-2xl font-black uppercase italic leading-none text-center">
+                                BELUM DIBUKA</p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white/5 p-8 md:p-12 rounded-[3rem] border border-white/10 backdrop-blur-xl text-center">
+                        <h4
+                            class="font-black text-bedas-lime dark:text-bedas-lime mb-8 uppercase tracking-[0.4em] text-[11px] italic text-center">
+                            Waktu Mundur Penutupan Pendaftaran</h4>
+                        <div id="countdown" class="grid grid-cols-4 gap-3 md:gap-4 text-center">
+                            <div class="bg-white/5 p-4 rounded-2xl">
+                                <div id="days" class="text-2xl md:text-5xl font-black tracking-tighter text-white">00
+                                </div>
+                                <div
+                                    class="text-[9px] uppercase text-bedas-lime dark:text-bedas-lime font-black mt-2 tracking-widest leading-none">
+                                    Hari</div>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl">
+                                <div id="hours" class="text-2xl md:text-5xl font-black tracking-tighter text-white">00
+                                </div>
+                                <div
+                                    class="text-[9px] uppercase text-bedas-lime dark:text-bedas-lime font-black mt-2 tracking-widest leading-none">
+                                    Jam</div>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl">
+                                <div id="minutes" class="text-2xl md:text-5xl font-black tracking-tighter text-white">00
+                                </div>
+                                <div
+                                    class="text-[9px] uppercase text-bedas-lime dark:text-bedas-lime font-black mt-2 tracking-widest leading-none">
+                                    Mnt</div>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl">
+                                <div id="seconds" class="text-2xl md:text-5xl font-black tracking-tighter text-white">00
+                                </div>
+                                <div
+                                    class="text-[9px] uppercase text-bedas-lime dark:text-bedas-lime font-black mt-2 tracking-widest leading-none">
+                                    Det</div>
+                            </div>
+                        </div>
+
+                        <!-- NEW PROMINENT REGISTRATION BUTTONS AREA -->
+                        <div class="mt-10 space-y-6">
+                            <!-- Main Registration Button -->
+                            <button id="main-reg-btn" disabled
+                                class="group relative overflow-hidden w-full bg-slate-800 text-slate-500 font-black py-6 rounded-[2.5rem] cursor-not-allowed transition-all uppercase tracking-widest shadow-2xl text-base italic flex items-center justify-center gap-3">
+                                <span>Menunggu 1 April 2026</span>
+                            </button>
+
+                            <div class="relative py-4">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-white/10"></div>
+                                </div>
+                                <div
+                                    class="relative flex justify-center text-[10px] uppercase tracking-[0.4em] font-black text-slate-500 italic">
+                                    <span class="bg-slate-900/50 dark:bg-slate-800/50 px-4 backdrop-blur-sm">Layanan
+                                        Peserta</span>
+                                </div>
+                            </div>
+
+                            <!-- PROMINENT INTERACTION BUTTONS -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- Button Konfirmasi Pembayaran -->
+                                <a href="https://registrasi.bigandchildrun.com/upload.html" target="_blank"
+                                    class="group relative flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white/10 to-white/5 hover:from-bedas-orange hover:to-bedas-orange/80 border border-white/10 hover:border-bedas-orange/50 rounded-[2rem] transition-all duration-500 shadow-xl overflow-hidden">
+                                    <span
+                                        class="absolute inset-0 btn-shimmer group-hover:animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100"></span>
+                                    <div
+                                        class="w-12 h-12 bg-bedas-orange/20 group-hover:bg-white/20 rounded-2xl flex items-center justify-center mb-3 transition-colors text-bedas-orange group-hover:text-white text-xl">
+                                        <i class="fa-solid fa-money-bill-transfer"></i>
+                                    </div>
+                                    <span
+                                        class="text-[10px] font-black uppercase tracking-widest leading-tight group-hover:text-white transition-colors italic text-center">Konfirmasi<br>Pembayaran</span>
+                                </a>
+
+                                <!-- Button Cek Status -->
+                                <a href="https://registrasi.bigandchildrun.com/check.html" target="_blank"
+                                    class="group relative flex flex-col items-center justify-center p-6 bg-gradient-to-br from-white/10 to-white/5 hover:from-bedas-lime hover:to-bedas-lime/80 border border-white/10 hover:border-bedas-lime/50 rounded-[2rem] transition-all duration-500 shadow-xl overflow-hidden">
+                                    <span
+                                        class="absolute inset-0 btn-shimmer group-hover:animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100"></span>
+                                    <div
+                                        class="w-12 h-12 bg-bedas-lime/20 group-hover:bg-white/20 rounded-2xl flex items-center justify-center mb-3 transition-colors text-bedas-lime group-hover:text-white text-xl text-center">
+                                        <i class="fa-solid fa-magnifying-glass text-center"></i>
+                                    </div>
+                                    <span
+                                        class="text-[10px] font-black uppercase tracking-widest leading-tight group-hover:text-white transition-colors italic text-center">Cek
+                                        Status<br>Pendaftaran</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-white py-24 border-t border-white/5">
+        <div class="container mx-auto px-6 text-center md:text-left">
+            <div class="grid md:grid-cols-4 gap-16 mb-20">
+                <div class="col-span-2">
+                    <h3 class="text-4xl font-black mb-8 leading-tight italic uppercase tracking-tighter">BIG & CHILD
+                        <br> <span class="text-bedas-lime italic">RUN 2026</span>
+                    </h3>
+                    <p class="text-slate-500 max-w-sm mb-10 font-medium mx-auto md:mx-0 text-sm">Inisiatif Pemerintah
+                        Kabupaten Bandung untuk masyarakat yang lebih sehat, bahagia, dan BEDAS.</p>
+                </div>
+                <div>
+                    <h4 class="font-black text-bedas-lime mb-8 uppercase tracking-widest text-xs italic">Navigasi</h4>
+                    <ul class="space-y-5 text-slate-500 font-bold uppercase tracking-tight text-sm">
+                        <li><a href="#home" class="hover:text-white transition-colors">Beranda</a></li>
+                        <li><a href="#about" class="hover:text-white transition-colors">Kategori</a></li>
+                        <li><a href="#jersey" class="hover:text-white transition-colors">Jersey</a></li>
+                        <li><a href="#route" class="hover:text-white transition-colors">Rute</a></li>
+                        <li><a href="#rules" class="hover:text-white transition-colors">Aturan</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-black text-bedas-lime mb-8 uppercase tracking-widest text-xs italic">Kontak</h4>
+                    <p class="text-slate-500 mb-3 font-bold text-sm italic">Soreang, Kab. Bandung</p>
+                    <p class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Sekretariat Pemkab Bandung
+                    </p>
+                </div>
+            </div>
+            <div
+                class="pt-10 border-t border-white/5 text-center text-slate-600 text-[10px] font-black tracking-[0.2em] uppercase leading-relaxed">
+                &copy; 2026 PEMERINTAH KABUPATEN BANDUNG. Seluruh Hak Cipta Dilindungi.<br>
+                <span class="text-bedas-green italic tracking-widest italic uppercase">BANGKIT - EDUKATIF - DINAMIS -
+                    AGAMIS - SEJAHTERA</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // WA Toggle Function
+        function toggleWaMenu() {
+            const menu = document.getElementById('waMenu');
+            menu.classList.toggle('active');
+        }
+
+        // Close WA menu when clicking outside
+        window.addEventListener('click', function (e) {
+            const btn = document.querySelector('.wa-main-btn');
+            const menu = document.getElementById('waMenu');
+            if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.classList.remove('light', 'dark');
+        body.classList.add(savedTheme);
+        if (savedTheme === 'dark') {
+            themeIcon.classList.replace('fa-moon', 'fa-sun');
+            document.documentElement.classList.add('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            if (body.classList.contains('light')) {
+                body.classList.replace('light', 'dark');
+                document.documentElement.classList.add('dark');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.replace('dark', 'light');
+                document.documentElement.classList.remove('dark');
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Navbar Scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('main-nav');
+            if (nav) {
+                if (window.scrollY > 50) {
+                    nav.style.top = '10px';
+                    nav.style.borderRadius = '20px';
+                    nav.classList.add('shadow-2xl');
+                } else {
+                    nav.style.top = '20px';
+                    nav.style.borderRadius = '24px';
+                    nav.classList.remove('shadow-2xl');
+                }
+            }
+        });
+
+        // Preloader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const preloader = document.getElementById('preloader');
+                if (preloader) {
+                    preloader.style.opacity = '0';
+                    setTimeout(() => preloader.remove(), 600);
+                }
+            }, 800);
+        });
+
+        // Reveal animations
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, observerOptions);
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // Countdown Logic
+        (function () {
+            const regStartDate = new Date('April 1, 2026 08:00:00').getTime();
+            const regEndDate = new Date('April 12, 2026 23:59:59').getTime();
+            const registrationLink = "https://registrasi.bigandchildrun.com/";
+
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                let diff = regStartDate - now;
+                let isStarted = false;
+
+                if (diff < 0) {
+                    diff = regEndDate - now;
+                    isStarted = true;
+                }
+
+                if (diff < 0) {
+                    const countdownEl = document.getElementById('countdown');
+                    if (countdownEl) countdownEl.innerHTML = "<p class='col-span-4 text-2xl font-black text-rose-500 italic uppercase'>PENDAFTARAN DITUTUP</p>";
+                    const statusEl = document.getElementById('status-text');
+                    if (statusEl) statusEl.textContent = "KUOTA PENUH";
+
+                    const btn = document.getElementById('main-reg-btn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.classList.add('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+                        btn.textContent = "REGISTRASI BERAKHIR";
+                        if (btn.tagName === 'A') {
+                            const disabledBtn = document.createElement('button');
+                            disabledBtn.id = 'main-reg-btn';
+                            disabledBtn.disabled = true;
+                            disabledBtn.className = btn.className;
+                            disabledBtn.textContent = "REGISTRASI BERAKHIR";
+                            btn.parentNode.replaceChild(disabledBtn, btn);
+                        }
+                    }
+                    return;
+                }
+
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                if (document.getElementById('days')) {
+                    document.getElementById('days').textContent = String(d).padStart(2, '0');
+                    document.getElementById('hours').textContent = String(h).padStart(2, '0');
+                    document.getElementById('minutes').textContent = String(m).padStart(2, '0');
+                    document.getElementById('seconds').textContent = String(s).padStart(2, '0');
+                }
+
+                const btn = document.getElementById('main-reg-btn');
+                const stText = document.getElementById('status-text');
+
+                if (isStarted && btn && stText) {
+                    stText.textContent = "SEDANG DIBUKA";
+                    stText.classList.remove('text-white');
+                    stText.classList.add('text-bedas-lime');
+
+                    if (btn.tagName === 'BUTTON') {
+                        const linkBtn = document.createElement('a');
+                        linkBtn.id = 'main-reg-btn';
+                        linkBtn.href = registrationLink;
+                        linkBtn.target = "_blank";
+                        linkBtn.className = "w-full inline-block bg-bedas-green text-white font-black py-6 rounded-[2rem] transition-all uppercase tracking-widest shadow-2xl shadow-black/50 text-sm tracking-widest italic text-center hover:scale-105 bg-gradient-to-r from-bedas-green to-bedas-blue";
+                        linkBtn.textContent = "DAFTAR SEKARANG";
+                        btn.parentNode.replaceChild(linkBtn, btn);
+                    }
+                }
+            };
+
+            setInterval(updateTimer, 1000);
+            updateTimer();
+        })();
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
