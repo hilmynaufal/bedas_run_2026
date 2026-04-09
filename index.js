@@ -70,6 +70,20 @@ const upload = multer({
   },
 });
 
+// Multer untuk surat pernyataan — terima gambar + PDF, maks 10 MB
+const uploadSurat = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Format tidak didukung. Gunakan JPG, PNG, atau PDF.'));
+    }
+  },
+});
+
 // Mapping kategori lari → prefix BIB number
 function getBibPrefix(kategori) {
   const k = (kategori || '').toUpperCase();
@@ -320,6 +334,60 @@ app.post('/upload-proof', upload.single('proof'), async (req, res) => {
   res.json({ ok: true, status: 'pending_verification', proofUrl });
 });
 
+// ─── POST /upload-surat ───────────────────────────────────────────────────────
+// Terima surat pernyataan (PDF/gambar), upload ke Supabase Storage, simpan URL
+// Opsional — dipanggil fire-and-forget dari frontend setelah POST /payment berhasil
+app.post('/upload-surat', uploadSurat.single('surat'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'File surat pernyataan wajib disertakan' });
+  }
+
+  const { referenceId } = req.body;
+  if (!referenceId) {
+    return res.status(400).json({ error: 'referenceId wajib disertakan' });
+  }
+
+  // Verifikasi transaksi ada
+  const { data: trx, error: findError } = await supabase
+    .from('transactions')
+    .select('reference_id')
+    .eq('reference_id', referenceId)
+    .single();
+
+  if (findError || !trx) {
+    return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+  }
+
+  const ext = req.file.originalname.split('.').pop().toLowerCase() || 'pdf';
+  const filename = `${referenceId}_surat_${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('surat-pernyataan')
+    .upload(filename, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error('[upload-surat] Gagal upload:', uploadError.message);
+    return res.status(500).json({ error: 'Gagal mengupload surat', detail: uploadError.message });
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('surat-pernyataan')
+    .getPublicUrl(filename);
+
+  const suratUrl = urlData?.publicUrl || null;
+
+  await supabase
+    .from('transactions')
+    .update({ surat_pernyataan_url: suratUrl, updated_at: new Date().toISOString() })
+    .eq('reference_id', referenceId);
+
+  console.log(`[upload-surat] Surat diupload untuk ${referenceId}: ${suratUrl}`);
+  res.json({ ok: true, suratUrl });
+});
+
 // ─── GET /check-transaction ───────────────────────────────────────────────────
 // Cek status transaksi berdasarkan nomor HP — langsung dari DB
 app.get('/check-transaction', async (req, res) => {
@@ -373,7 +441,7 @@ app.get('/admin/transactions', requireAdmin, async (req, res) => {
 
   let query = supabase
     .from('transactions')
-    .select('reference_id, buyer_name, buyer_phone, buyer_email, nama_instansi, kategori_lari, ukuran_kaos, amount, unique_code, status, payment_proof_url, reject_reason, verified_by, verified_at, created_at, updated_at')
+    .select('reference_id, buyer_name, buyer_phone, buyer_email, nama_instansi, kategori_lari, ukuran_kaos, amount, unique_code, status, payment_proof_url, surat_pernyataan_url, reject_reason, verified_by, verified_at, created_at, updated_at')
     .order('created_at', { ascending: false });
 
   if (status && ALLOWED_STATUSES.includes(status)) {

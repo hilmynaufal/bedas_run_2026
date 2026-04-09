@@ -1108,6 +1108,10 @@
                 });
                 form.querySelectorAll('.declaration-checkbox:checked').forEach(checkbox => { formData.append(checkbox.name, 'disetujui'); });
 
+                // Capture surat pernyataan sebelum form berubah (id field API = 2772, opsional)
+                const suratEl = form.querySelector('[data-question-id="2772"]');
+                const suratFile = (suratEl && suratEl.files && suratEl.files.length > 0) ? suratEl.files[0] : null;
+
                 // Kumpulkan jawaban form sebagai plain object untuk disimpan ke Supabase
                 const formAnswers = {};
                 apiData.data.forEach(question => {
@@ -1197,8 +1201,15 @@
                         return;
                     }
 
-                    // Pendaftaran berhasil — tampilkan info transfer bank
+                    // Pendaftaran berhasil — upload surat (opsional, non-blocking) lalu tampilkan info transfer
                     if (payRes.ok && payData.referenceId) {
+                        if (suratFile) {
+                            const suratForm = new FormData();
+                            suratForm.append('referenceId', payData.referenceId);
+                            suratForm.append('surat', suratFile);
+                            fetch(`${BACKEND_URL}/upload-surat`, { method: 'POST', body: suratForm })
+                                .catch(err => console.warn('[surat] Upload opsional gagal:', err.message));
+                        }
                         showBankTransferInfo(payData);
                         return;
                     }
