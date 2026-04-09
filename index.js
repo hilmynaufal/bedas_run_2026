@@ -20,6 +20,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve frontend statis dari folder example/
+app.use(express.static(path.join(__dirname, 'example')));
+
 // Konfigurasi rekening bank transfer — isi via environment variables
 const BANK_NAME         = process.env.BANK_NAME         || 'BCA';
 const BANK_ACCOUNT_NUMBER = process.env.BANK_ACCOUNT_NUMBER || '1234567890';
