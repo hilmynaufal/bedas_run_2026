@@ -346,7 +346,7 @@ app.get('/check-transaction', async (req, res) => {
 });
 
 // ─── GET /admin/pending ───────────────────────────────────────────────────────
-// List semua transaksi yang menunggu verifikasi (butuh ADMIN_KEY)
+// List transaksi pending_verification (butuh ADMIN_KEY)
 app.get('/admin/pending', requireAdmin, async (req, res) => {
   const { data, error } = await supabase
     .from('transactions')
@@ -359,6 +359,40 @@ app.get('/admin/pending', requireAdmin, async (req, res) => {
   }
 
   res.json({ count: data.length, transactions: data });
+});
+
+// ─── GET /admin/transactions ──────────────────────────────────────────────────
+// List semua transaksi, bisa filter by status (butuh ADMIN_KEY)
+app.get('/admin/transactions', requireAdmin, async (req, res) => {
+  const { status, search } = req.query;
+  const ALLOWED_STATUSES = ['pending_payment', 'pending_verification', 'success', 'rejected', 'cancelled'];
+
+  let query = supabase
+    .from('transactions')
+    .select('reference_id, buyer_name, buyer_phone, buyer_email, kategori_lari, ukuran_kaos, amount, unique_code, status, payment_proof_url, reject_reason, verified_by, verified_at, created_at, updated_at')
+    .order('created_at', { ascending: false });
+
+  if (status && ALLOWED_STATUSES.includes(status)) {
+    query = query.eq('status', status);
+  }
+
+  if (search) {
+    query = query.or(`buyer_name.ilike.%${search}%,buyer_phone.ilike.%${search}%,reference_id.ilike.%${search}%`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    return res.status(500).json({ error: 'Gagal mengambil data', detail: error.message });
+  }
+
+  // Hitung total per status
+  const summary = {};
+  (data || []).forEach(t => {
+    summary[t.status] = (summary[t.status] || 0) + 1;
+  });
+
+  res.json({ total: data.length, summary, transactions: data });
 });
 
 // ─── POST /admin/verify ───────────────────────────────────────────────────────

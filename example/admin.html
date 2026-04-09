@@ -4,105 +4,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin — Verifikasi Pembayaran</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>Admin — Bedas Run 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
-    .proof-img { max-height: 200px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s; }
-    .proof-img:hover { transform: scale(1.03); }
-    #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; }
-    #lightbox.open { display:flex; }
-    #lightbox img { max-width:90vw; max-height:90vh; border-radius:12px; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-active { background: #0f766e; color: #fff; }
+    .tab-inactive { background: #f1f5f9; color: #64748b; }
+    .tab-inactive:hover { background: #e2e8f0; }
+    .proof-thumb { max-height: 160px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: zoom-in; }
+    #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:999; }
+    #lightbox.open { display:flex; align-items:center; justify-content:center; }
+    #lightbox img { max-width:92vw; max-height:92vh; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+    #lightbox button { position:absolute; top:20px; right:24px; background:rgba(255,255,255,0.15); border:none; color:#fff; border-radius:50%; width:40px; height:40px; font-size:20px; cursor:pointer; }
+    .status-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; }
+    tr:hover td { background: #f8fafc; }
+    .action-btn { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: opacity 0.15s; }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   </style>
 </head>
 
-<body class="min-h-screen">
+<body class="bg-slate-50 min-h-screen">
 
-  <!-- Lightbox untuk preview gambar fullscreen -->
+  <!-- Lightbox -->
   <div id="lightbox" onclick="closeLightbox()">
+    <button onclick="event.stopPropagation(); closeLightbox()">✕</button>
     <img id="lightbox-img" src="" alt="Bukti Transfer">
-  </div>
-
-  <!-- Login Screen -->
-  <div id="login-screen" class="flex items-center justify-center min-h-screen">
-    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
-      <div class="text-center mb-6">
-        <div class="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <i data-lucide="shield-check" class="w-7 h-7 text-teal-600"></i>
-        </div>
-        <h1 class="text-2xl font-extrabold text-gray-800">Admin Panel</h1>
-        <p class="text-sm text-gray-500 mt-1">Verifikasi Pembayaran Bedas Run 2026</p>
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-600 mb-1">Admin Key</label>
-        <input type="password" id="admin-key-input" placeholder="Masukkan admin key..."
-          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
-        <p id="login-error" class="text-red-500 text-xs mt-2 hidden">Admin key salah atau koneksi gagal.</p>
-        <button onclick="login()" class="mt-4 w-full py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-sm transition">
-          Masuk
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Dashboard -->
-  <div id="dashboard" class="hidden">
-    <!-- Header -->
-    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center">
-          <i data-lucide="shield-check" class="w-5 h-5 text-teal-600"></i>
-        </div>
-        <div>
-          <h1 class="font-extrabold text-gray-800 text-base">Admin — Verifikasi Pembayaran</h1>
-          <p class="text-xs text-gray-400">Bedas Run 2026</p>
-        </div>
-      </div>
-      <button onclick="logout()" class="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1 transition">
-        <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
-      </button>
-    </header>
-
-    <!-- Stats Bar -->
-    <div class="px-6 py-4 flex gap-4">
-      <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-3 flex items-center gap-3">
-        <i data-lucide="clock" class="w-5 h-5 text-yellow-600"></i>
-        <div>
-          <p class="text-xs text-yellow-700 font-semibold">Menunggu Verifikasi</p>
-          <p id="stats-pending" class="text-2xl font-extrabold text-yellow-800">—</p>
-        </div>
-      </div>
-      <button onclick="loadPending()" class="ml-auto text-sm text-teal-600 hover:text-teal-800 flex items-center gap-1 font-semibold transition">
-        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
-      </button>
-    </div>
-
-    <!-- Table -->
-    <div class="px-6 pb-10">
-      <div id="loading-state" class="text-center py-16 text-gray-400 text-sm">
-        <i data-lucide="loader-2" class="animate-spin w-8 h-8 mx-auto mb-2"></i>
-        Memuat data...
-      </div>
-      <div id="empty-state" class="text-center py-16 text-gray-400 text-sm hidden">
-        <i data-lucide="check-circle" class="w-10 h-10 mx-auto mb-2 text-teal-400"></i>
-        Tidak ada transaksi yang menunggu verifikasi.
-      </div>
-      <div id="trx-list" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 hidden"></div>
-    </div>
   </div>
 
   <!-- Reject Modal -->
   <div id="reject-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
     <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-      <h3 class="font-bold text-gray-800 mb-3">Alasan Penolakan</h3>
-      <textarea id="reject-reason-input" rows="3" placeholder="Contoh: Nominal transfer tidak sesuai / Bukti tidak jelas / ..."
+      <h3 class="font-bold text-gray-800 mb-1">Tolak Pembayaran</h3>
+      <p id="reject-modal-ref" class="text-xs text-gray-400 font-mono mb-4"></p>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Alasan Penolakan <span class="text-red-500">*</span></label>
+      <textarea id="reject-reason-input" rows="3" placeholder="Contoh: Nominal tidak sesuai, bukti tidak jelas..."
         class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"></textarea>
       <p id="reject-error" class="text-red-500 text-xs mt-1 hidden">Alasan wajib diisi.</p>
       <div class="flex gap-2 mt-4">
-        <button onclick="closeRejectModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold hover:bg-gray-50 transition">Batal</button>
-        <button onclick="confirmReject()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition">Tolak</button>
+        <button onclick="closeRejectModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold hover:bg-gray-50">Batal</button>
+        <button onclick="confirmReject()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold">Tolak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login -->
+  <div id="login-screen" class="flex items-center justify-center min-h-screen">
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm mx-4">
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="shield-check" class="w-7 h-7 text-teal-600"></i>
+        </div>
+        <h1 class="text-2xl font-extrabold text-gray-800">Admin Panel</h1>
+        <p class="text-sm text-gray-400 mt-1">Bedas Run 2026</p>
+      </div>
+      <label class="block text-sm font-semibold text-gray-600 mb-1">Admin Key</label>
+      <input type="password" id="admin-key-input" placeholder="Masukkan admin key..."
+        class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
+        onkeydown="if(event.key==='Enter') login()">
+      <p id="login-error" class="text-red-500 text-xs mt-2 hidden">Admin key salah atau koneksi gagal.</p>
+      <button onclick="login()" class="mt-4 w-full py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-sm transition">
+        Masuk
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5 text-teal-600"></i>
+          </div>
+          <div>
+            <p class="font-extrabold text-gray-800 text-sm leading-tight">Admin Panel</p>
+            <p class="text-xs text-gray-400">Bedas Run 2026</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <!-- Search -->
+          <div class="relative hidden sm:block">
+            <input type="text" id="search-input" placeholder="Cari nama / HP / BIB..." oninput="onSearch()"
+              class="pl-8 pr-3 py-2 border border-gray-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-400 w-52">
+            <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400"></i>
+          </div>
+          <button onclick="loadData()" title="Refresh" class="flex items-center gap-1.5 text-xs text-teal-600 font-semibold hover:text-teal-800 transition">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+          <button onclick="logout()" title="Keluar" class="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Summary Cards -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="summary-cards">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Mobile Search -->
+    <div class="max-w-7xl mx-auto px-4 sm:hidden pb-2">
+      <div class="relative">
+        <input type="text" id="search-input-mobile" placeholder="Cari nama / HP / BIB..." oninput="onSearch()"
+          class="pl-8 pr-3 py-2 border border-gray-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-400 w-full">
+        <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400"></i>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3">
+      <div class="flex gap-2 overflow-x-auto pb-1" id="tab-bar">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-10">
+      <div id="loading-state" class="text-center py-16 text-gray-400 text-sm">
+        <i data-lucide="loader-2" class="animate-spin w-8 h-8 mx-auto mb-2 text-teal-400"></i>
+        Memuat data...
+      </div>
+      <div id="empty-state" class="hidden text-center py-16 text-gray-400 text-sm">
+        <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-gray-300"></i>
+        Tidak ada data.
+      </div>
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hidden" id="table-wrapper">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-slate-50 border-b border-gray-200 text-xs text-gray-500 font-semibold">
+                <th class="text-left px-4 py-3 whitespace-nowrap">BIB / Ref</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Nama</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">WA / Email</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Kategori</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Transfer</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Status</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Bukti</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Daftar</th>
+                <th class="text-left px-4 py-3 whitespace-nowrap">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div id="table-footer" class="px-4 py-2.5 border-t border-gray-100 text-xs text-gray-400"></div>
       </div>
     </div>
   </div>
@@ -110,30 +163,43 @@
   <script>
     const BACKEND_URL = 'https://api.bigandchildrun.com';
     let adminKey = '';
+    let allData = [];
+    let currentStatus = 'all';
     let rejectTarget = null;
+    let searchTimer = null;
+
+    const STATUS_CONFIG = {
+      all:                  { label: 'Semua',        color: 'bg-slate-100 text-slate-600',  dot: '⚪' },
+      pending_payment:      { label: 'Belum Bayar',  color: 'bg-orange-100 text-orange-700', dot: '🟠' },
+      pending_verification: { label: 'Verifikasi',   color: 'bg-yellow-100 text-yellow-700', dot: '🟡' },
+      success:              { label: 'Sukses',        color: 'bg-green-100 text-green-700',   dot: '🟢' },
+      rejected:             { label: 'Ditolak',       color: 'bg-red-100 text-red-700',       dot: '🔴' },
+      cancelled:            { label: 'Dibatalkan',    color: 'bg-gray-100 text-gray-500',     dot: '⚫' },
+    };
 
     function login() {
       const key = document.getElementById('admin-key-input').value.trim();
       if (!key) return;
       adminKey = key;
-      loadPending();
+      loadData();
     }
 
     function logout() {
       adminKey = '';
+      allData = [];
       document.getElementById('dashboard').classList.add('hidden');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('admin-key-input').value = '';
     }
 
-    async function loadPending() {
+    async function loadData() {
       document.getElementById('loading-state').classList.remove('hidden');
       document.getElementById('empty-state').classList.add('hidden');
-      document.getElementById('trx-list').classList.add('hidden');
+      document.getElementById('table-wrapper').classList.add('hidden');
       document.getElementById('login-error').classList.add('hidden');
 
       try {
-        const res = await fetch(`${BACKEND_URL}/admin/pending`, {
+        const res = await fetch(`${BACKEND_URL}/admin/transactions`, {
           headers: { 'x-admin-key': adminKey }
         });
 
@@ -145,83 +211,172 @@
 
         const data = await res.json();
 
-        // Tampilkan dashboard jika auth berhasil
+        // Tampilkan dashboard
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         lucide.createIcons();
 
-        document.getElementById('stats-pending').textContent = data.count || 0;
+        allData = data.transactions || [];
+        renderSummaryCards(data.summary || {});
+        renderTabs(data.summary || {});
+        renderTable();
         document.getElementById('loading-state').classList.add('hidden');
 
-        if (!data.transactions || data.transactions.length === 0) {
-          document.getElementById('empty-state').classList.remove('hidden');
-          return;
-        }
-
-        renderList(data.transactions);
       } catch (err) {
         document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('login-error').textContent = 'Gagal terhubung ke server: ' + err.message;
         document.getElementById('login-error').classList.remove('hidden');
-        document.getElementById('login-error').textContent = 'Gagal menghubungi server: ' + err.message;
       }
     }
 
-    function renderList(transactions) {
-      const list = document.getElementById('trx-list');
-      list.innerHTML = '';
-      list.classList.remove('hidden');
-
-      transactions.forEach(trx => {
-        const fmt = (n) => new Intl.NumberFormat('id-ID').format(n || 0);
-        const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
-        const card = document.createElement('div');
-        card.className = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden';
-        card.id = `card-${trx.reference_id}`;
-        card.innerHTML = `
-          <div class="p-4 border-b border-gray-100">
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <p class="font-bold text-gray-800">${trx.buyer_name || '-'}</p>
-                <p class="text-xs text-gray-400 font-mono mt-0.5">${trx.reference_id}</p>
-              </div>
-              <span class="text-xs bg-yellow-100 text-yellow-700 font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">Menunggu</span>
-            </div>
-            <div class="mt-3 grid grid-cols-2 gap-1.5 text-xs text-gray-600">
-              <div><span class="text-gray-400">Kategori</span><br><strong>${trx.kategori_lari || '-'}</strong></div>
-              <div><span class="text-gray-400">Transfer</span><br><strong class="text-teal-700">Rp ${fmt(totalTransfer)}</strong></div>
-              <div><span class="text-gray-400">WA</span><br>${trx.buyer_phone || '-'}</div>
-              <div><span class="text-gray-400">Email</span><br>${trx.buyer_email || '-'}</div>
-            </div>
+    function renderSummaryCards(summary) {
+      const cards = document.getElementById('summary-cards');
+      const totalAll = Object.values(summary).reduce((a, b) => a + b, 0);
+      const items = [
+        { key: 'total',               label: 'Total',        value: totalAll,                          icon: 'users',      bg: 'bg-slate-50',   text: 'text-slate-700' },
+        { key: 'pending_payment',      label: 'Belum Bayar',  value: summary.pending_payment || 0,      icon: 'clock',      bg: 'bg-orange-50',  text: 'text-orange-700' },
+        { key: 'pending_verification', label: 'Verifikasi',   value: summary.pending_verification || 0, icon: 'search',     bg: 'bg-yellow-50',  text: 'text-yellow-700' },
+        { key: 'success',              label: 'Sukses',        value: summary.success || 0,              icon: 'check-circle', bg: 'bg-green-50', text: 'text-green-700' },
+        { key: 'rejected',             label: 'Ditolak',       value: summary.rejected || 0,             icon: 'x-circle',   bg: 'bg-red-50',     text: 'text-red-700' },
+      ];
+      cards.innerHTML = items.map(i => `
+        <div class="${i.bg} border border-gray-200 rounded-xl p-3 flex items-center gap-3">
+          <i data-lucide="${i.icon}" class="w-5 h-5 ${i.text} shrink-0"></i>
+          <div>
+            <p class="text-xs text-gray-500">${i.label}</p>
+            <p class="text-xl font-extrabold ${i.text}">${i.value}</p>
           </div>
-          ${trx.payment_proof_url ? `
-          <div class="p-4 border-b border-gray-100 text-center bg-gray-50">
-            <p class="text-xs text-gray-500 mb-2">Bukti Transfer</p>
-            <img src="${trx.payment_proof_url}" alt="Bukti" class="proof-img mx-auto" onclick="openLightbox('${trx.payment_proof_url}')">
-            <p class="text-xs text-gray-400 mt-1">Klik untuk perbesar</p>
-          </div>` : `
-          <div class="p-4 border-b border-gray-100 text-center bg-gray-50">
-            <p class="text-xs text-gray-400">Belum ada bukti transfer</p>
-          </div>`}
-          <div class="p-4 flex gap-2">
-            <button onclick="verifyAction('${trx.reference_id}', 'approve')"
-              class="flex-1 py-2.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-1.5 transition">
-              <i data-lucide="check" class="w-4 h-4"></i> Approve
-            </button>
-            <button onclick="openRejectModal('${trx.reference_id}')"
-              class="flex-1 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-xl flex items-center justify-center gap-1.5 border border-red-200 transition">
-              <i data-lucide="x" class="w-4 h-4"></i> Tolak
-            </button>
-          </div>
-        `;
-        list.appendChild(card);
-      });
+        </div>
+      `).join('');
       lucide.createIcons();
     }
 
+    function renderTabs(summary) {
+      const totalAll = Object.values(summary).reduce((a, b) => a + b, 0);
+      const tabs = [
+        { key: 'all',                  label: 'Semua',       count: totalAll },
+        { key: 'pending_verification', label: 'Verifikasi',  count: summary.pending_verification || 0 },
+        { key: 'pending_payment',      label: 'Belum Bayar', count: summary.pending_payment || 0 },
+        { key: 'success',              label: 'Sukses',       count: summary.success || 0 },
+        { key: 'rejected',             label: 'Ditolak',      count: summary.rejected || 0 },
+        { key: 'cancelled',            label: 'Dibatalkan',   count: summary.cancelled || 0 },
+      ];
+      const bar = document.getElementById('tab-bar');
+      bar.innerHTML = tabs.map(t => `
+        <button onclick="setTab('${t.key}')" id="tab-${t.key}"
+          class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition ${currentStatus === t.key ? 'tab-active' : 'tab-inactive'}">
+          ${t.label} <span class="ml-1 opacity-70">${t.count}</span>
+        </button>
+      `).join('');
+    }
+
+    function setTab(status) {
+      currentStatus = status;
+      // Update active tab styles
+      document.querySelectorAll('#tab-bar button').forEach(btn => {
+        btn.className = btn.id === `tab-${status}`
+          ? 'shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition tab-active'
+          : 'shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition tab-inactive';
+      });
+      renderTable();
+    }
+
+    function getSearchQuery() {
+      const d = document.getElementById('search-input')?.value || '';
+      const m = document.getElementById('search-input-mobile')?.value || '';
+      return (d || m).toLowerCase().trim();
+    }
+
+    function onSearch() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(renderTable, 200);
+    }
+
+    function renderTable() {
+      const q = getSearchQuery();
+      let rows = allData;
+
+      if (currentStatus !== 'all') {
+        rows = rows.filter(t => t.status === currentStatus);
+      }
+      if (q) {
+        rows = rows.filter(t =>
+          (t.buyer_name || '').toLowerCase().includes(q) ||
+          (t.buyer_phone || '').includes(q) ||
+          (t.reference_id || '').toLowerCase().includes(q)
+        );
+      }
+
+      const tbody = document.getElementById('table-body');
+      const wrapper = document.getElementById('table-wrapper');
+      const empty = document.getElementById('empty-state');
+
+      if (rows.length === 0) {
+        wrapper.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      wrapper.classList.remove('hidden');
+
+      const fmt = (n) => new Intl.NumberFormat('id-ID').format(n || 0);
+      const fmtDate = (d) => d ? new Date(d).toLocaleString('id-ID', { day:'2-digit', month:'short', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : '-';
+
+      tbody.innerHTML = rows.map(trx => {
+        const cfg = STATUS_CONFIG[trx.status] || STATUS_CONFIG.all;
+        const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
+        const canVerify = trx.status === 'pending_verification';
+
+        return `<tr class="border-b border-gray-100 align-top">
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span class="font-mono font-bold text-xs text-gray-700">${trx.reference_id || '-'}</span>
+          </td>
+          <td class="px-4 py-3">
+            <p class="font-semibold text-gray-800 text-xs whitespace-nowrap">${trx.buyer_name || '-'}</p>
+            <p class="text-gray-400 text-xs">${trx.ukuran_kaos ? 'Kaos: ' + trx.ukuran_kaos : ''}</p>
+          </td>
+          <td class="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
+            <p>${trx.buyer_phone || '-'}</p>
+            <p class="text-gray-400 text-xs">${trx.buyer_email || ''}</p>
+          </td>
+          <td class="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">${trx.kategori_lari || '-'}</td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <p class="font-bold text-teal-700 text-xs">Rp ${fmt(totalTransfer)}</p>
+            <p class="text-gray-400 text-xs">+kode ${trx.unique_code ? String(trx.unique_code).padStart(3,'0') : '-'}</p>
+          </td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            <span class="status-badge ${cfg.color}">${cfg.dot} ${cfg.label}</span>
+            ${trx.reject_reason ? `<p class="text-xs text-red-400 mt-1 max-w-[140px] truncate" title="${trx.reject_reason}">⚠ ${trx.reject_reason}</p>` : ''}
+          </td>
+          <td class="px-4 py-3">
+            ${trx.payment_proof_url
+              ? `<img src="${trx.payment_proof_url}" class="proof-thumb" onclick="openLightbox('${trx.payment_proof_url}')" alt="Bukti">`
+              : `<span class="text-xs text-gray-300">—</span>`}
+          </td>
+          <td class="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">${fmtDate(trx.created_at)}</td>
+          <td class="px-4 py-3 whitespace-nowrap">
+            ${canVerify ? `
+              <div class="flex gap-1.5">
+                <button class="action-btn bg-teal-500 text-white hover:bg-teal-600" onclick="verifyAction('${trx.reference_id}', 'approve')">
+                  ✓ Approve
+                </button>
+                <button class="action-btn bg-red-50 text-red-600 border border-red-200 hover:bg-red-100" onclick="openRejectModal('${trx.reference_id}')">
+                  ✕ Tolak
+                </button>
+              </div>
+            ` : `<span class="text-xs text-gray-300">—</span>`}
+          </td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('table-footer').textContent = `Menampilkan ${rows.length} dari ${allData.length} pendaftar`;
+    }
+
     async function verifyAction(referenceId, action, reason) {
-      const card = document.getElementById(`card-${referenceId}`);
-      const btns = card.querySelectorAll('button');
-      btns.forEach(b => b.disabled = true);
+      // Disable tombol di row ini
+      const row = [...document.querySelectorAll('#table-body tr')].find(r => r.innerHTML.includes(referenceId));
+      if (row) row.querySelectorAll('button').forEach(b => b.disabled = true);
 
       try {
         const res = await fetch(`${BACKEND_URL}/admin/verify`, {
@@ -232,28 +387,35 @@
         const data = await res.json();
 
         if (res.ok && data.ok) {
-          const badge = action === 'approve'
-            ? `<div class="p-4 text-center text-green-600 font-bold text-sm bg-green-50"><i data-lucide="check-circle" class="w-5 h-5 inline mr-1"></i>Disetujui</div>`
-            : `<div class="p-4 text-center text-red-500 font-bold text-sm bg-red-50"><i data-lucide="x-circle" class="w-5 h-5 inline mr-1"></i>Ditolak</div>`;
-          card.querySelector('.p-4.flex.gap-2').outerHTML = badge;
-          lucide.createIcons();
-          const pending = document.getElementById('stats-pending');
-          pending.textContent = Math.max(0, parseInt(pending.textContent) - 1);
+          // Update data lokal lalu re-render
+          const trx = allData.find(t => t.reference_id === referenceId);
+          if (trx) {
+            trx.status = data.status;
+            if (reason) trx.reject_reason = reason;
+          }
+          renderTable();
+          // Update summary card & tab count
+          const summary = {};
+          allData.forEach(t => { summary[t.status] = (summary[t.status] || 0) + 1; });
+          renderSummaryCards(summary);
+          renderTabs(summary);
         } else {
           alert('Gagal: ' + (data.error || 'Unknown error'));
-          btns.forEach(b => b.disabled = false);
+          if (row) row.querySelectorAll('button').forEach(b => b.disabled = false);
         }
       } catch (err) {
         alert('Error: ' + err.message);
-        btns.forEach(b => b.disabled = false);
+        if (row) row.querySelectorAll('button').forEach(b => b.disabled = false);
       }
     }
 
     function openRejectModal(referenceId) {
       rejectTarget = referenceId;
+      document.getElementById('reject-modal-ref').textContent = referenceId;
       document.getElementById('reject-reason-input').value = '';
       document.getElementById('reject-error').classList.add('hidden');
       document.getElementById('reject-modal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('reject-reason-input').focus(), 100);
     }
 
     function closeRejectModal() {
@@ -263,10 +425,7 @@
 
     function confirmReject() {
       const reason = document.getElementById('reject-reason-input').value.trim();
-      if (!reason) {
-        document.getElementById('reject-error').classList.remove('hidden');
-        return;
-      }
+      if (!reason) { document.getElementById('reject-error').classList.remove('hidden'); return; }
       closeRejectModal();
       verifyAction(rejectTarget, 'reject', reason);
     }
@@ -275,20 +434,14 @@
       document.getElementById('lightbox-img').src = url;
       document.getElementById('lightbox').classList.add('open');
     }
-
     function closeLightbox() {
       document.getElementById('lightbox').classList.remove('open');
     }
 
-    // Keyboard ESC untuk tutup lightbox / modal
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeLightbox();
-        closeRejectModal();
-      }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeLightbox(); closeRejectModal(); }
     });
 
-    // Init icons on load
     document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
   </script>
 </body>
