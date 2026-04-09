@@ -9,6 +9,8 @@
     rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -366,6 +368,36 @@
           </div>
         </div>
 
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-8">
+          <!-- Trend Chart -->
+          <div class="xl:col-span-2 bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="font-bold text-slate-800 text-sm">Trend Pendaftaran</p>
+                <p class="text-xs text-slate-400 mt-0.5">Jumlah pendaftar per hari</p>
+              </div>
+              <i data-lucide="trending-up" class="w-4 h-4 text-teal-500"></i>
+            </div>
+            <div style="height:180px; position:relative;">
+              <canvas id="trend-chart"></canvas>
+            </div>
+          </div>
+          <!-- Pie Chart -->
+          <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="font-bold text-slate-800 text-sm">Kategori</p>
+                <p class="text-xs text-slate-400 mt-0.5">Distribusi peserta</p>
+              </div>
+              <i data-lucide="pie-chart" class="w-4 h-4 text-teal-500"></i>
+            </div>
+            <div style="height:180px; position:relative;">
+              <canvas id="pie-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
         <!-- Mobile Search & Filter (Visible only on small screens) -->
         <div class="sm:hidden mb-6 flex flex-col gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
           <div class="relative">
@@ -393,11 +425,8 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <button class="action-btn btn-outline text-slate-600">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i> Export
-            </button>
-            <button class="action-btn btn-primary">
-              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add New
+            <button onclick="exportExcel()" class="action-btn btn-outline text-slate-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-colors">
+              <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export Excel
             </button>
           </div>
         </div>
@@ -523,6 +552,7 @@
         renderTabs(data.summary || {});
         renderCategoryStats();
         renderTable();
+        renderCharts();
         document.getElementById('loading-state').classList.add('hidden');
 
       } catch (err) {
@@ -794,8 +824,9 @@
           const summary = {};
           allData.forEach(t => { summary[t.status] = (summary[t.status] || 0) + 1; });
           renderSummaryCards(summary);
-          setTab(currentStatus); // Refresh tab counts
+          setTab(currentStatus);
           renderCategoryStats();
+          renderCharts();
         } else {
           alert('Gagal: ' + (data.error || 'Unknown error'));
           if (row) row.style.opacity = '1';
@@ -833,6 +864,175 @@
     }
     function closeLightbox() {
       document.getElementById('lightbox').classList.remove('open');
+    }
+
+    // ─── EXPORT EXCEL ────────────────────────────────────────────────────────────
+    function exportExcel() {
+      const q = getSearchQuery();
+      const cat = getCategoryFilter();
+      let rows = allData;
+      if (currentStatus !== 'all') rows = rows.filter(t => t.status === currentStatus);
+      if (cat !== 'all') rows = rows.filter(t => t.kategori_lari === cat);
+      if (q) rows = rows.filter(t =>
+        (t.buyer_name || '').toLowerCase().includes(q) ||
+        (t.buyer_phone || '').includes(q) ||
+        (t.reference_id || '').toLowerCase().includes(q)
+      );
+
+      const fmtDate = (d) => d ? new Date(d).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+
+      const wsData = [
+        ['BIB/Ref', 'Nama', 'Instansi', 'No. WA', 'Email', 'Kategori', 'Ukuran Kaos', 'Nominal Transfer', 'Kode Unik', 'Status', 'Ada Surat', 'Tanggal Daftar'],
+        ...rows.map(t => [
+          t.reference_id || '-',
+          t.buyer_name || '-',
+          t.nama_instansi || '-',
+          t.buyer_phone || '-',
+          t.buyer_email || '-',
+          t.kategori_lari || '-',
+          t.ukuran_kaos || '-',
+          (t.amount || 0) + (t.unique_code || 0),
+          t.unique_code || 0,
+          STATUS_CONFIG[t.status]?.label || t.status,
+          t.surat_pernyataan_url ? 'Ya' : 'Tidak',
+          fmtDate(t.created_at),
+        ])
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // Auto column width
+      const colWidths = wsData[0].map((_, ci) => ({
+        wch: Math.max(...wsData.map(r => String(r[ci] || '').length), 10)
+      }));
+      ws['!cols'] = colWidths;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Peserta');
+
+      const statusLabel = currentStatus === 'all' ? 'semua' : (STATUS_CONFIG[currentStatus]?.label || currentStatus).toLowerCase().replace(/\s+/g, '-');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `bigandchildrun-peserta-${statusLabel}-${dateStr}.xlsx`);
+    }
+
+    // ─── CHARTS ──────────────────────────────────────────────────────────────────
+    let trendChart = null;
+    let pieChart = null;
+
+    function renderCharts() {
+      renderTrendChart();
+      renderPieChart();
+    }
+
+    function renderTrendChart() {
+      const byDate = {};
+      allData.forEach(t => {
+        if (!t.created_at) return;
+        const date = t.created_at.slice(0, 10);
+        byDate[date] = (byDate[date] || 0) + 1;
+      });
+
+      const dates = Object.keys(byDate).sort();
+      const labels = dates.map(d => new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
+      const counts = dates.map(d => byDate[d]);
+
+      const ctx = document.getElementById('trend-chart').getContext('2d');
+      if (trendChart) trendChart.destroy();
+      trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Pendaftar',
+            data: counts,
+            borderColor: '#0d9488',
+            backgroundColor: 'rgba(13, 148, 136, 0.07)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#0d9488',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#94a3b8',
+              bodyColor: '#fff',
+              bodyFont: { weight: 'bold', size: 14 },
+              padding: 10,
+              displayColors: false,
+              callbacks: { title: (i) => i[0].label, label: (i) => `${i.raw} pendaftar` }
+            }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, color: '#94a3b8', font: { size: 11 } }, grid: { color: '#f1f5f9' }, border: { display: false } },
+            x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false }, border: { display: false } }
+          }
+        }
+      });
+    }
+
+    function renderPieChart() {
+      const CATEGORY_COLORS = {
+        'BIG - MAN': '#0d9488',
+        'BIG - WOMAN': '#5eead4',
+        'CHILD - BOY': '#6366f1',
+        'CHILD - GIRL': '#f97316',
+      };
+      const stats = { 'BIG - MAN': 0, 'BIG - WOMAN': 0, 'CHILD - BOY': 0, 'CHILD - GIRL': 0 };
+      allData.forEach(t => {
+        const key = t.kategori_lari ? t.kategori_lari.replace(' 2K', '') : null;
+        if (key && stats[key] !== undefined) stats[key]++;
+      });
+
+      const ctx = document.getElementById('pie-chart').getContext('2d');
+      if (pieChart) pieChart.destroy();
+      pieChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(stats),
+          datasets: [{
+            data: Object.values(stats),
+            backgroundColor: Object.keys(stats).map(k => CATEGORY_COLORS[k]),
+            borderWidth: 2,
+            borderColor: '#fff',
+            hoverOffset: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { size: 10, family: 'Plus Jakarta Sans' }, color: '#64748b', padding: 10, usePointStyle: true, pointStyleWidth: 8 }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#94a3b8',
+              bodyColor: '#fff',
+              bodyFont: { weight: 'bold' },
+              padding: 10,
+              displayColors: false,
+              callbacks: {
+                label: (i) => {
+                  const total = i.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = total > 0 ? Math.round((i.raw / total) * 100) : 0;
+                  return `${i.raw} peserta (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
     }
 
     document.addEventListener('keydown', e => {
