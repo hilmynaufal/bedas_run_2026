@@ -2,372 +2,840 @@
 <html lang="id">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Bukti Transfer — Bedas Run 2026</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .upload-drop { border: 2px dashed #d1d5db; border-radius: 12px; transition: border-color 0.2s, background 0.2s; }
-    .upload-drop:hover, .upload-drop.drag-over { border-color: #14b8a6; background: #f0fdfa; }
-    .fade-in { animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Bukti Transfer | Big & Child Run</title>
+    <meta name="description" content="Upload bukti transfer pembayaran Bedas Run 2026 Kabupaten Bandung.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary-600: #0f766e;
+            --primary-500: #14b8a6;
+            --primary-400: #2dd4bf;
+            --primary-100: #ccfbf1;
+            --primary-50: #f0fdfa;
+            --neutral-900: #1a1a1a;
+            --neutral-800: #2c2c2e;
+            --neutral-700: #3a3a3c;
+            --neutral-600: #48484a;
+            --neutral-500: #8e8e93;
+            --neutral-400: #c7c7cc;
+            --neutral-300: #d1d1d6;
+            --neutral-200: #e5e5ea;
+            --neutral-100: #f2f2f7;
+            --neutral-50: #f9f9fb;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+            --bg-primary: var(--neutral-100);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--neutral-900);
+            transition: background-color 0.3s;
+        }
+
+        /* ===== DARK THEME ===== */
+        .dark-theme { --bg-primary: #121212; }
+        .dark-theme body { color: #f0f0f0; }
+        .dark-theme .app-header {
+            background: rgba(20, 20, 20, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .dark-theme .app-title { color: white; }
+        .dark-theme .icon-button { border-color: rgba(255,255,255,0.15); color: #ccc; }
+        .dark-theme .search-hero h1 { color: white; }
+        .dark-theme .input-wrapper input {
+            background: #2c2c2e;
+            color: white;
+            border-color: #3a3a3c;
+        }
+        .dark-theme .pending-card,
+        .dark-theme .cancelled-card,
+        .dark-theme .success-card,
+        .dark-theme .upload-card {
+            background: #1e1e1e;
+            border-color: #333;
+        }
+        .dark-theme .status-message { border-color: #444; color: #888; }
+        .dark-theme .card-row { border-color: #333; }
+        .dark-theme .card-value { color: #ddd; }
+        .dark-theme .upload-drop {
+            border-color: #444;
+            background: #2c2c2e;
+        }
+        .dark-theme .upload-drop:hover { border-color: var(--primary-500); background: #1a2e2b; }
+        .dark-theme .info-block { background: #2c2c2e; border-color: #3a3a3c; }
+        .dark-theme .transfer-box { background: #1e1e1e; border-color: var(--primary-500); }
+        .dark-theme .transfer-box .amount { color: var(--primary-400); }
+
+        /* ===== LAYOUT ===== */
+        .app-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 12px 16px;
+        }
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .app-logo img { width: 34px; height: 34px; }
+        .app-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--neutral-900);
+            letter-spacing: -0.3px;
+        }
+        .icon-button {
+            width: 38px; height: 38px;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            color: var(--neutral-600);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 84px 16px 40px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease 0.2s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* ===== SEARCH HERO ===== */
+        .search-hero {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .search-hero h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--neutral-900);
+            margin-bottom: 8px;
+        }
+        .search-hero p {
+            color: var(--neutral-500);
+            font-size: 13px;
+            max-width: 320px;
+            margin: 0 auto 24px;
+            line-height: 1.6;
+        }
+        .search-form { display: flex; flex-direction: column; gap: 12px; }
+        .input-wrapper { position: relative; }
+        .input-icon {
+            position: absolute;
+            top: 50%; left: 16px;
+            transform: translateY(-50%);
+            color: var(--neutral-400);
+            pointer-events: none;
+        }
+        .input-wrapper input {
+            width: 100%;
+            padding: 15px 16px 15px 46px;
+            border: 2px solid transparent;
+            border-radius: var(--radius-xl);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            color: var(--neutral-900);
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            outline: none;
+            transition: all 0.2s;
+        }
+        .input-wrapper input:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 4px var(--primary-100);
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--neutral-900);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--radius-xl);
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .dark-theme .btn-primary { background: var(--primary-500); color: #000; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.18); }
+        .btn-primary:disabled { background: var(--neutral-400); cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* ===== STATUS PLACEHOLDER ===== */
+        .status-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--neutral-500);
+            padding: 40px 20px;
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-xl);
+            font-size: 13px;
+        }
+
+        /* ===== RESULT CARDS ===== */
+        .result-wrapper { animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pending-card, .cancelled-card, .success-card, .upload-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .pending-header {
+            background: linear-gradient(135deg, #f59e0b, #fcd34d);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+        .upload-header {
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-400));
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+        .success-header {
+            background: linear-gradient(135deg, #16a34a, #4ade80);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+        .cancelled-header {
+            background: linear-gradient(135deg, #ef4444, #fca5a5);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+        .verify-header {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+
+        .status-icon { font-size: 40px; margin-bottom: 8px; }
+        .status-title { font-size: 20px; font-weight: 800; }
+        .status-subtitle { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+
+        .card-body { padding: 20px; }
+        .card-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--neutral-100);
+            font-size: 13px;
+        }
+        .card-row:last-child { border-bottom: none; }
+        .card-label { color: var(--neutral-500); }
+        .card-value { font-weight: 600; color: var(--neutral-800); }
+
+        /* ===== BANK INFO BLOCK ===== */
+        .info-block {
+            background: var(--primary-50);
+            border: 1px solid var(--primary-100);
+            border-radius: var(--radius-lg);
+            padding: 14px;
+            margin: 12px 0;
+        }
+        .info-block-title {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-600);
+            margin-bottom: 10px;
+        }
+        .info-block .card-row { border-color: rgba(20,184,166,0.15); }
+        .info-block .card-label { color: var(--neutral-500); }
+        .info-block .card-value { color: var(--neutral-800); }
+
+        /* ===== TRANSFER BOX ===== */
+        .transfer-box {
+            background: white;
+            border: 2px solid var(--primary-500);
+            border-radius: var(--radius-xl);
+            padding: 16px;
+            text-align: center;
+            margin: 12px 0;
+            box-shadow: 0 4px 15px rgba(20,184,166,0.1);
+        }
+        .transfer-box .label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--primary-600);
+            margin-bottom: 4px;
+        }
+        .transfer-box .amount {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-600);
+            line-height: 1.1;
+        }
+        .transfer-box .sub {
+            font-size: 11px;
+            color: var(--neutral-400);
+            margin-top: 4px;
+        }
+        .transfer-box .warning {
+            font-size: 11px;
+            font-weight: 700;
+            color: #f59e0b;
+            margin-top: 6px;
+        }
+
+        /* ===== UPLOAD AREA ===== */
+        .upload-drop {
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-lg);
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            margin: 12px 0;
+        }
+        .upload-drop:hover, .upload-drop.drag-over {
+            border-color: var(--primary-500);
+            background: var(--primary-50);
+        }
+        .upload-drop p { font-size: 13px; color: var(--neutral-500); margin-top: 8px; }
+        .upload-drop small { font-size: 11px; color: var(--neutral-400); }
+
+        .preview-wrapper {
+            margin: 12px 0;
+            text-align: center;
+            display: none;
+        }
+        .preview-wrapper img {
+            max-height: 200px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--neutral-200);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .preview-wrapper .reset-link {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #ef4444;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .pay-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: var(--primary-500);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--radius-xl);
+            margin-top: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pay-btn:hover { background: var(--primary-600); transform: translateY(-1px); }
+        .pay-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .upload-status {
+            text-align: center;
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ===== REJECT NOTICE ===== */
+        .reject-notice {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-lg);
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .reject-notice .icon { color: #ef4444; flex-shrink: 0; margin-top: 1px; }
+        .reject-notice .title { font-size: 12px; font-weight: 700; color: #b91c1c; }
+        .reject-notice .reason { font-size: 12px; color: #ef4444; margin-top: 2px; }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            color: var(--primary-500);
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
 </head>
 
-<body class="min-h-screen bg-slate-50">
+<body class="light-theme">
 
-  <!-- Header -->
-  <header class="bg-white border-b border-gray-200 px-4 py-3">
-    <div class="max-w-lg mx-auto flex items-center gap-3">
-      <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center shrink-0">
-        <i data-lucide="upload-cloud" class="w-5 h-5 text-teal-600"></i>
-      </div>
-      <div>
-        <p class="font-extrabold text-gray-800 text-sm leading-tight">Upload Bukti Transfer</p>
-        <p class="text-xs text-gray-400">Bedas Run 2026</p>
-      </div>
-    </div>
-  </header>
-
-  <main class="max-w-lg mx-auto px-4 py-8">
-
-    <!-- Step 1: Input Nomor HP -->
-    <div id="step-phone" class="fade-in">
-      <div class="text-center mb-6">
-        <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
-          <i data-lucide="smartphone" class="w-8 h-8 text-teal-600"></i>
-        </div>
-        <h1 class="text-2xl font-extrabold text-gray-800">Cek Pendaftaran</h1>
-        <p class="text-sm text-gray-500 mt-1">Masukkan nomor HP yang digunakan saat mendaftar</p>
-      </div>
-
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nomor WhatsApp Aktif</label>
-        <input type="tel" id="phone-input" placeholder="Contoh: 081234567890"
-          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400"
-          onkeydown="if(event.key==='Enter') checkPhone()">
-        <p id="phone-error" class="text-red-500 text-xs mt-1.5 hidden"></p>
-        <button onclick="checkPhone()" id="check-btn"
-          class="mt-4 w-full py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2">
-          <i data-lucide="search" class="w-4 h-4"></i>
-          Cari Pendaftaran
-        </button>
-      </div>
-
-      <p class="text-center text-xs text-gray-400 mt-5">
-        Belum mendaftar? <a href="daftar.html" class="text-teal-600 font-semibold underline">Daftar sekarang</a>
-      </p>
-    </div>
-
-    <!-- Step 2: Hasil cek (diisi JS) -->
-    <div id="step-result" class="hidden"></div>
-
-  </main>
-
-  <script>
-    const BACKEND_URL = 'https://api.bigandchildrun.com';
-    const fmt = (n) => new Intl.NumberFormat('id-ID').format(n || 0);
-
-    async function checkPhone() {
-      const phone = document.getElementById('phone-input').value.trim();
-      const errEl = document.getElementById('phone-error');
-      const btn = document.getElementById('check-btn');
-
-      errEl.classList.add('hidden');
-
-      if (!phone) {
-        errEl.textContent = 'Nomor HP wajib diisi.';
-        errEl.classList.remove('hidden');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Mencari...`;
-
-      try {
-        const res = await fetch(`${BACKEND_URL}/check-transaction?phone=${encodeURIComponent(phone)}`);
-        const data = await res.json();
-
-        if (res.status === 404) {
-          errEl.textContent = 'Nomor HP tidak ditemukan. Pastikan nomor sesuai dengan saat mendaftar.';
-          errEl.classList.remove('hidden');
-          return;
-        }
-
-        if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan server.');
-
-        renderResult(data.transaction, data.bank, phone);
-      } catch (err) {
-        errEl.textContent = 'Gagal terhubung ke server: ' + err.message;
-        errEl.classList.remove('hidden');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Cari Pendaftaran`;
-      }
-    }
-
-    function renderResult(trx, bank, phone) {
-      document.getElementById('step-phone').classList.add('hidden');
-      const result = document.getElementById('step-result');
-      result.classList.remove('hidden');
-      result.className = 'fade-in';
-
-      const status = trx.status;
-      const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
-
-      if (status === 'pending_payment' || status === 'rejected') {
-        result.innerHTML = buildUploadView(trx, bank, totalTransfer);
-        lucide.createIcons();
-
-        // Drag & drop
-        const dropArea = document.getElementById('upload-drop');
-        dropArea.addEventListener('dragover', e => { e.preventDefault(); dropArea.classList.add('drag-over'); });
-        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('drag-over'));
-        dropArea.addEventListener('drop', e => {
-          e.preventDefault();
-          dropArea.classList.remove('drag-over');
-          const file = e.dataTransfer.files[0];
-          if (file) handleFileSelect(file);
-        });
-
-        document.getElementById('proof-file').addEventListener('change', function () {
-          if (this.files[0]) handleFileSelect(this.files[0]);
-        });
-
-      } else if (status === 'pending_verification') {
-        result.innerHTML = `
-          <div class="text-center py-8 fade-in">
-            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i data-lucide="clock" class="w-8 h-8 text-yellow-500"></i>
-            </div>
-            <h2 class="text-xl font-extrabold text-gray-800">Sedang Diverifikasi</h2>
-            <p class="text-sm text-gray-500 mt-2">Bukti transfer kamu sedang diperiksa panitia.<br>Proses verifikasi maks <strong>1×24 jam</strong>.</p>
-            <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm inline-block">
-              <span class="text-gray-500">No. Pendaftaran: </span>
-              <span class="font-bold font-mono">${trx.reference_id}</span>
-            </div>
-            <div class="mt-6 flex flex-col gap-2">
-              <a href="check.html" class="px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl transition">Cek Status Tiket</a>
-              <button onclick="location.reload()" class="px-5 py-2 text-sm text-gray-500 hover:text-gray-700">← Cari nomor lain</button>
-            </div>
-          </div>`;
-        lucide.createIcons();
-
-      } else if (status === 'success') {
-        result.innerHTML = `
-          <div class="text-center py-8 fade-in">
-            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i data-lucide="check-circle" class="w-8 h-8 text-green-500"></i>
-            </div>
-            <h2 class="text-xl font-extrabold text-gray-800">Pembayaran Terverifikasi!</h2>
-            <p class="text-sm text-gray-500 mt-2">Pendaftaran <strong>${trx.buyer_name || ''}</strong> sudah dikonfirmasi.</p>
-            <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm inline-block">
-              <span class="text-gray-500">No. BIB: </span>
-              <span class="font-bold font-mono">${trx.reference_id}</span>
-            </div>
-            <div class="mt-6">
-              <a href="check.html" class="px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl transition">Lihat Tiket</a>
-            </div>
-          </div>`;
-        lucide.createIcons();
-
-      } else {
-        // cancelled / unknown
-        result.innerHTML = `
-          <div class="text-center py-8 fade-in">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i data-lucide="x-circle" class="w-8 h-8 text-red-500"></i>
-            </div>
-            <h2 class="text-xl font-extrabold text-gray-800">Pendaftaran Tidak Aktif</h2>
-            <p class="text-sm text-gray-500 mt-2">Status: <strong>${status}</strong>. Silakan hubungi panitia.</p>
-            <button onclick="location.reload()" class="mt-5 px-5 py-2 text-sm text-gray-500 hover:text-gray-700">← Kembali</button>
-          </div>`;
-        lucide.createIcons();
-      }
-    }
-
-    function buildUploadView(trx, bank, totalTransfer) {
-      const isRejected = trx.status === 'rejected';
-      return `
-        <div class="fade-in space-y-4">
-          <!-- Info pendaftar -->
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-4">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center shrink-0">
-                <i data-lucide="user" class="w-5 h-5 text-teal-600"></i>
-              </div>
-              <div>
-                <p class="font-bold text-gray-800">${trx.buyer_name || '-'}</p>
-                <p class="text-xs text-gray-400">${trx.kategori_lari || '-'} · BIB: <span class="font-mono">${trx.reference_id}</span></p>
-              </div>
-            </div>
-          </div>
-
-          ${isRejected && trx.reject_reason ? `
-          <!-- Alasan ditolak -->
-          <div class="bg-red-50 border border-red-200 rounded-2xl p-4">
-            <div class="flex gap-2 items-start">
-              <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
-              <div>
-                <p class="text-sm font-bold text-red-700">Bukti Sebelumnya Ditolak</p>
-                <p class="text-xs text-red-600 mt-0.5">${trx.reject_reason}</p>
-              </div>
-            </div>
-          </div>` : ''}
-
-          <!-- Info rekening -->
-          <div class="bg-teal-50 border border-teal-200 rounded-2xl p-4">
-            <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-3">Rekening Tujuan</p>
-            <div class="space-y-2 text-sm">
-              <div class="flex justify-between">
-                <span class="text-gray-500">Bank</span>
-                <span class="font-bold text-gray-800">${bank?.name || '-'}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-500">No. Rekening</span>
-                <span class="font-bold font-mono text-gray-800">${bank?.accountNumber || '-'}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-gray-500">Atas Nama</span>
-                <span class="font-bold text-gray-800">${bank?.accountName || '-'}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Nominal -->
-          <div class="bg-white border-2 border-teal-400 rounded-2xl p-4 text-center shadow-sm">
-            <p class="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-1">Transfer TEPAT sebesar</p>
-            <p class="text-4xl font-extrabold text-teal-600">Rp ${fmt(totalTransfer)}</p>
-            <p class="text-xs text-gray-400 mt-1">
-              (Rp ${fmt(trx.amount)} + kode unik <strong>${String(trx.unique_code || 0).padStart(3, '0')}</strong>)
-            </p>
-            <p class="text-xs text-orange-500 font-semibold mt-1.5">⚠ Nominal harus TEPAT agar verifikasi berjalan</p>
-          </div>
-
-          <!-- Upload -->
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-            <p class="font-semibold text-gray-700 mb-3 text-sm">
-              ${isRejected ? 'Upload Ulang Bukti Transfer' : 'Upload Bukti Transfer'}
-            </p>
-
-            <div id="upload-drop" class="upload-drop p-6 text-center cursor-pointer" onclick="document.getElementById('proof-file').click()">
-              <i data-lucide="upload-cloud" class="w-10 h-10 text-gray-400 mx-auto mb-2"></i>
-              <p class="text-sm text-gray-500">Klik atau drag foto bukti transfer ke sini</p>
-              <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP — maks 5 MB</p>
-            </div>
-            <input type="file" id="proof-file" accept="image/*" class="hidden">
-
-            <div id="preview-wrapper" class="hidden mt-3 text-center">
-              <img id="proof-preview" class="max-h-52 mx-auto rounded-xl border border-gray-200" alt="Preview">
-              <p id="proof-name" class="text-xs text-gray-400 mt-1"></p>
-              <button onclick="resetFile()" class="text-xs text-red-400 mt-1 underline">Ganti foto</button>
-            </div>
-
-            <button id="upload-btn" onclick="doUpload('${trx.reference_id}')" disabled
-              class="mt-4 w-full py-3 rounded-xl font-bold text-white bg-teal-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-teal-600 transition text-sm">
-              Kirim Bukti Transfer
+    <header class="app-header">
+        <div class="header-inner">
+            <a href="#" class="app-logo">
+                <img src="https://bigandchildrun.com/assets/image/logo.png" alt="Logo Bedas Run">
+                <span class="app-title">Big & Child Run 2026</span>
+            </a>
+            <button class="icon-button" id="theme-toggle" aria-label="Toggle tema">
+                <i data-lucide="moon" style="width:18px;height:18px;"></i>
             </button>
-            <div id="upload-status" class="mt-3 text-center text-sm hidden"></div>
-          </div>
         </div>
-      `;
-    }
+    </header>
 
-    function handleFileSelect(file) {
-      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-      if (!allowed.includes(file.type)) {
-        alert('Format tidak didukung. Gunakan JPG, PNG, atau WEBP.');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File terlalu besar. Maksimal 5 MB.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = e => {
-        document.getElementById('proof-preview').src = e.target.result;
-        document.getElementById('proof-name').textContent = file.name;
-        document.getElementById('preview-wrapper').classList.remove('hidden');
-        document.getElementById('upload-drop').classList.add('hidden');
-        document.getElementById('upload-btn').disabled = false;
-      };
-      reader.readAsDataURL(file);
+    <div class="page-container">
 
-      // Pasang file ke input tersembunyi
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      document.getElementById('proof-file').files = dt.files;
-    }
+        <!-- Search -->
+        <section class="search-hero" id="search-section">
+            <h1>Upload Bukti Transfer</h1>
+            <p>Masukkan nomor WhatsApp yang didaftarkan untuk melanjutkan pembayaran.</p>
+            <form class="search-form" onsubmit="event.preventDefault(); checkPhone()">
+                <div class="input-wrapper">
+                    <i class="input-icon" data-lucide="smartphone" style="width:18px;height:18px;"></i>
+                    <input type="tel" id="phone-input" placeholder="Contoh: 081234567890" required>
+                </div>
+                <p id="phone-error" style="color:#ef4444;font-size:13px;display:none;text-align:left;margin-top:-4px;"></p>
+                <button type="submit" id="check-btn" class="btn-primary">
+                    <i data-lucide="search" style="width:18px;height:18px;"></i>
+                    <span>Cari Pendaftaran</span>
+                </button>
+            </form>
+        </section>
 
-    function resetFile() {
-      document.getElementById('proof-file').value = '';
-      document.getElementById('preview-wrapper').classList.add('hidden');
-      document.getElementById('upload-drop').classList.remove('hidden');
-      document.getElementById('upload-btn').disabled = true;
-    }
+        <!-- Result -->
+        <section id="result-section">
+            <div class="status-message">
+                <i data-lucide="upload-cloud" style="width:32px;height:32px;margin-bottom:10px;opacity:0.4;"></i>
+                <p>Informasi transfer akan muncul di sini.</p>
+            </div>
+        </section>
 
-    async function doUpload(referenceId) {
-      const fileInput = document.getElementById('proof-file');
-      const btn = document.getElementById('upload-btn');
-      const statusEl = document.getElementById('upload-status');
-      if (!fileInput.files.length) return;
+    </div>
 
-      btn.disabled = true;
-      btn.textContent = 'Mengupload...';
-      statusEl.classList.remove('hidden');
-      statusEl.className = 'mt-3 text-center text-sm text-gray-500';
-      statusEl.textContent = 'Mengirim bukti transfer...';
+    <script>
+        const BACKEND_URL = 'https://api.bigandchildrun.com';
+        const fmt = (n) => new Intl.NumberFormat('id-ID').format(n || 0);
 
-      try {
-        const fd = new FormData();
-        fd.append('referenceId', referenceId);
-        fd.append('proof', fileInput.files[0]);
+        // ===== THEME =====
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('bedasrun-theme') || 'light';
+            applyTheme(savedTheme);
+            themeToggle.addEventListener('click', () => {
+                const next = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+                applyTheme(next);
+                localStorage.setItem('bedasrun-theme', next);
+            });
+            document.getElementById('phone-input').focus();
+        });
 
-        const res = await fetch(`${BACKEND_URL}/upload-proof`, { method: 'POST', body: fd });
-        const data = await res.json();
-
-        if (res.ok && data.ok) {
-          document.getElementById('step-result').innerHTML = `
-            <div class="text-center py-8 fade-in">
-              <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="clock" class="w-8 h-8 text-teal-600"></i>
-              </div>
-              <h2 class="text-xl font-extrabold text-gray-800">Bukti Diterima!</h2>
-              <p class="text-sm text-gray-500 mt-2">
-                Panitia akan memverifikasi dalam <strong>1×24 jam</strong>.
-              </p>
-              <div class="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm inline-block">
-                <span class="text-gray-500">No. Pendaftaran: </span>
-                <span class="font-bold font-mono">${referenceId}</span>
-              </div>
-              <div class="mt-6">
-                <a href="check.html" class="px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl transition">
-                  Cek Status Pendaftaran
-                </a>
-              </div>
-            </div>`;
-          lucide.createIcons();
-        } else {
-          throw new Error(data.error || data.detail || 'Gagal upload');
+        function applyTheme(theme) {
+            document.body.className = theme + '-theme';
+            document.getElementById('theme-toggle').innerHTML =
+                `<i data-lucide="${theme === 'light' ? 'moon' : 'sun'}" style="width:18px;height:18px;"></i>`;
+            lucide.createIcons();
         }
-      } catch (err) {
-        statusEl.className = 'mt-3 text-center text-sm text-red-500';
-        statusEl.textContent = `Gagal: ${err.message}`;
-        btn.disabled = false;
-        btn.textContent = 'Kirim Bukti Transfer';
-      }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      // Auto-focus input HP
-      document.getElementById('phone-input').focus();
-    });
-  </script>
+        // ===== CEK NOMOR HP =====
+        async function checkPhone() {
+            const phone = document.getElementById('phone-input').value.trim();
+            const errEl = document.getElementById('phone-error');
+            const btn = document.getElementById('check-btn');
+            errEl.style.display = 'none';
+
+            if (!phone) {
+                errEl.textContent = 'Nomor HP wajib diisi.';
+                errEl.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin" style="width:18px;height:18px;"></i><span>Mencari...</span>`;
+            lucide.createIcons();
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/check-transaction?phone=${encodeURIComponent(phone)}`);
+                const data = await res.json();
+
+                if (res.status === 404) {
+                    errEl.textContent = 'Nomor HP tidak ditemukan. Pastikan nomor sesuai dengan saat mendaftar.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan server.');
+
+                renderResult(data.transaction, data.bank);
+            } catch (err) {
+                errEl.textContent = 'Gagal terhubung ke server: ' + err.message;
+                errEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="search" style="width:18px;height:18px;"></i><span>Cari Pendaftaran</span>`;
+                lucide.createIcons();
+            }
+        }
+
+        // ===== RENDER HASIL =====
+        function renderResult(trx, bank) {
+            const resultEl = document.getElementById('result-section');
+            const status = trx.status;
+            const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
+
+            if (status === 'pending_payment' || status === 'rejected') {
+                renderUploadForm(trx, bank, totalTransfer, resultEl);
+            } else if (status === 'pending_verification') {
+                renderPendingVerification(trx, resultEl);
+            } else if (status === 'success') {
+                renderSuccess(trx, resultEl);
+            } else {
+                renderCancelled(trx, resultEl);
+            }
+        }
+
+        function renderUploadForm(trx, bank, totalTransfer, container) {
+            const isRejected = trx.status === 'rejected';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'result-wrapper';
+            wrapper.innerHTML = `
+                <div class="upload-card">
+                    <div class="upload-header">
+                        <div class="status-icon">${isRejected ? '⚠️' : '🏦'}</div>
+                        <div class="status-title">${isRejected ? 'Upload Ulang Bukti' : 'Selesaikan Pembayaran'}</div>
+                        <div class="status-subtitle">${isRejected ? 'Bukti sebelumnya ditolak, silakan upload ulang' : 'Transfer dan upload bukti pembayaran'}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-row">
+                            <span class="card-label">Nama</span>
+                            <span class="card-value">${trx.buyer_name || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="card-label">Kategori</span>
+                            <span class="card-value">${trx.kategori_lari || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="card-label">No. Pendaftaran</span>
+                            <span class="card-value" style="font-family:monospace;font-size:12px;">${trx.reference_id}</span>
+                        </div>
+
+                        ${isRejected && trx.reject_reason ? `
+                        <div class="reject-notice">
+                            <i data-lucide="alert-triangle" class="icon" style="width:16px;height:16px;"></i>
+                            <div>
+                                <p class="title">Alasan Penolakan</p>
+                                <p class="reason">${trx.reject_reason}</p>
+                            </div>
+                        </div>` : ''}
+
+                        <div class="info-block">
+                            <p class="info-block-title">Rekening Tujuan</p>
+                            <div class="card-row">
+                                <span class="card-label">Bank</span>
+                                <span class="card-value">${bank?.name || '-'}</span>
+                            </div>
+                            <div class="card-row">
+                                <span class="card-label">No. Rekening</span>
+                                <span class="card-value" style="font-family:monospace;">${bank?.accountNumber || '-'}</span>
+                            </div>
+                            <div class="card-row" style="border:none;">
+                                <span class="card-label">Atas Nama</span>
+                                <span class="card-value">${bank?.accountName || '-'}</span>
+                            </div>
+                        </div>
+
+                        <div class="transfer-box">
+                            <p class="label">Transfer TEPAT sebesar</p>
+                            <p class="amount">Rp ${fmt(totalTransfer)}</p>
+                            <p class="sub">Rp ${fmt(trx.amount)} + kode unik <strong>${String(trx.unique_code || 0).padStart(3,'0')}</strong></p>
+                            <p class="warning">⚠ Nominal harus TEPAT agar verifikasi berjalan</p>
+                        </div>
+
+                        <div class="upload-drop" id="upload-drop" onclick="document.getElementById('proof-file').click()">
+                            <i data-lucide="upload-cloud" style="width:36px;height:36px;color:var(--neutral-400);"></i>
+                            <p>Klik atau drag foto bukti transfer ke sini</p>
+                            <small>JPG, PNG, WEBP — maks 5 MB</small>
+                        </div>
+                        <input type="file" id="proof-file" accept="image/*" style="display:none" onchange="handleFile(this.files[0])">
+
+                        <div class="preview-wrapper" id="preview-wrapper">
+                            <img id="proof-preview" src="" alt="Preview">
+                            <span class="reset-link" onclick="resetFile()">Ganti foto</span>
+                        </div>
+
+                        <button class="pay-btn" id="upload-btn" onclick="doUpload('${trx.reference_id}')" disabled>
+                            <i data-lucide="send" style="width:18px;height:18px;"></i>
+                            Kirim Bukti Transfer
+                        </button>
+                        <div class="upload-status" id="upload-status"></div>
+                    </div>
+                </div>
+                <a href="check.html" class="back-link">Cek status pendaftaran →</a>
+            `;
+            container.innerHTML = '';
+            container.appendChild(wrapper);
+            lucide.createIcons();
+
+            // Drag & drop
+            const drop = document.getElementById('upload-drop');
+            drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+            drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+            drop.addEventListener('drop', e => {
+                e.preventDefault();
+                drop.classList.remove('drag-over');
+                if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+            });
+        }
+
+        function renderPendingVerification(trx, container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'result-wrapper';
+            wrapper.innerHTML = `
+                <div class="pending-card">
+                    <div class="verify-header">
+                        <div class="status-icon">🔍</div>
+                        <div class="status-title">Sedang Diverifikasi</div>
+                        <div class="status-subtitle">Bukti transfer sedang diperiksa panitia</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-row">
+                            <span class="card-label">Nama</span>
+                            <span class="card-value">${trx.buyer_name || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="card-label">Kategori</span>
+                            <span class="card-value">${trx.kategori_lari || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="card-label">No. Pendaftaran</span>
+                            <span class="card-value" style="font-family:monospace;font-size:12px;">${trx.reference_id}</span>
+                        </div>
+                        <div style="background:#fef9c3;border:1px solid #fde047;border-radius:var(--radius-lg);padding:12px;margin-top:12px;text-align:center;">
+                            <p style="font-size:12px;color:#854d0e;font-weight:600;">Proses verifikasi maks <strong>1×24 jam</strong></p>
+                            <p style="font-size:11px;color:#92400e;margin-top:2px;">Refresh halaman ini untuk update status.</p>
+                        </div>
+                        ${trx.payment_proof_url ? `
+                        <div style="margin-top:12px;text-align:center;">
+                            <p style="font-size:11px;color:var(--neutral-400);margin-bottom:6px;">Bukti yang dikirim:</p>
+                            <img src="${trx.payment_proof_url}" style="max-height:120px;border-radius:var(--radius-lg);border:1px solid var(--neutral-200);" alt="Bukti Transfer">
+                        </div>` : ''}
+                    </div>
+                </div>
+                <a href="check.html" class="back-link">Cek status pendaftaran →</a>
+            `;
+            container.innerHTML = '';
+            container.appendChild(wrapper);
+            lucide.createIcons();
+        }
+
+        function renderSuccess(trx, container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'result-wrapper';
+            wrapper.innerHTML = `
+                <div class="success-card">
+                    <div class="success-header">
+                        <div class="status-icon">✅</div>
+                        <div class="status-title">Pembayaran Terverifikasi!</div>
+                        <div class="status-subtitle">Pendaftaran kamu sudah dikonfirmasi panitia</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-row">
+                            <span class="card-label">Nama</span>
+                            <span class="card-value">${trx.buyer_name || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="card-label">Kategori</span>
+                            <span class="card-value">${trx.kategori_lari || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="card-label">No. BIB</span>
+                            <span class="card-value" style="font-family:monospace;font-size:12px;">${trx.reference_id}</span>
+                        </div>
+                        <button class="pay-btn" onclick="window.location.href='check.html'" style="margin-top:16px;">
+                            <i data-lucide="ticket" style="width:18px;height:18px;"></i>
+                            Lihat e-Tiket
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = '';
+            container.appendChild(wrapper);
+            lucide.createIcons();
+        }
+
+        function renderCancelled(trx, container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'result-wrapper';
+            wrapper.innerHTML = `
+                <div class="cancelled-card">
+                    <div class="cancelled-header">
+                        <div class="status-icon">❌</div>
+                        <div class="status-title">Pendaftaran Tidak Aktif</div>
+                        <div class="status-subtitle">Status: ${trx.status}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-row">
+                            <span class="card-label">Nama</span>
+                            <span class="card-value">${trx.buyer_name || '-'}</span>
+                        </div>
+                        <div class="card-row">
+                            <span class="card-label">No. Pendaftaran</span>
+                            <span class="card-value" style="font-family:monospace;font-size:12px;">${trx.reference_id}</span>
+                        </div>
+                        <p style="font-size:12px;color:var(--neutral-500);margin-top:12px;text-align:center;">Silakan hubungi panitia untuk informasi lebih lanjut.</p>
+                    </div>
+                </div>
+                <a href="daftar.html" class="back-link">← Kembali ke halaman pendaftaran</a>
+            `;
+            container.innerHTML = '';
+            container.appendChild(wrapper);
+            lucide.createIcons();
+        }
+
+        // ===== FILE HANDLING =====
+        function handleFile(file) {
+            if (!file) return;
+            const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            if (!allowed.includes(file.type)) { alert('Format tidak didukung. Gunakan JPG, PNG, atau WEBP.'); return; }
+            if (file.size > 5 * 1024 * 1024) { alert('File terlalu besar. Maksimal 5 MB.'); return; }
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('proof-preview').src = e.target.result;
+                document.getElementById('preview-wrapper').style.display = 'block';
+                document.getElementById('upload-drop').style.display = 'none';
+                document.getElementById('upload-btn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            document.getElementById('proof-file').files = dt.files;
+        }
+
+        function resetFile() {
+            document.getElementById('proof-file').value = '';
+            document.getElementById('preview-wrapper').style.display = 'none';
+            document.getElementById('upload-drop').style.display = 'block';
+            document.getElementById('upload-btn').disabled = true;
+        }
+
+        // ===== UPLOAD =====
+        async function doUpload(referenceId) {
+            const fileInput = document.getElementById('proof-file');
+            const btn = document.getElementById('upload-btn');
+            const statusEl = document.getElementById('upload-status');
+            if (!fileInput.files.length) return;
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin" style="width:18px;height:18px;"></i> Mengupload...`;
+            lucide.createIcons();
+            statusEl.style.display = 'block';
+            statusEl.style.color = 'var(--neutral-500)';
+            statusEl.textContent = 'Mengirim bukti transfer...';
+
+            try {
+                const fd = new FormData();
+                fd.append('referenceId', referenceId);
+                fd.append('proof', fileInput.files[0]);
+
+                const res = await fetch(`${BACKEND_URL}/upload-proof`, { method: 'POST', body: fd });
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    const container = document.getElementById('result-section');
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'result-wrapper';
+                    wrapper.innerHTML = `
+                        <div class="upload-card">
+                            <div class="verify-header">
+                                <div class="status-icon">🕐</div>
+                                <div class="status-title">Bukti Diterima!</div>
+                                <div class="status-subtitle">Panitia akan memverifikasi dalam 1×24 jam</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="card-row">
+                                    <span class="card-label">No. Pendaftaran</span>
+                                    <span class="card-value" style="font-family:monospace;font-size:12px;">${referenceId}</span>
+                                </div>
+                                <button class="pay-btn" onclick="window.location.href='check.html'" style="margin-top:16px;">
+                                    <i data-lucide="search" style="width:18px;height:18px;"></i>
+                                    Cek Status Pendaftaran
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML = '';
+                    container.appendChild(wrapper);
+                    lucide.createIcons();
+                } else {
+                    throw new Error(data.error || data.detail || 'Gagal upload');
+                }
+            } catch (err) {
+                statusEl.style.color = '#ef4444';
+                statusEl.textContent = 'Gagal: ' + err.message;
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="send" style="width:18px;height:18px;"></i> Kirim Bukti Transfer`;
+                lucide.createIcons();
+            }
+        }
+    </script>
+
 </body>
-
 </html>
