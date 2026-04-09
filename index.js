@@ -73,10 +73,10 @@ const upload = multer({
 // Mapping kategori lari → prefix BIB number
 function getBibPrefix(kategori) {
   const k = (kategori || '').toUpperCase();
-  if (k.includes('BIG')   && k.includes('MAN'))   return 'BM';
-  if (k.includes('BIG')   && k.includes('WOMAN'))  return 'BW';
-  if (k.includes('CHILD') && k.includes('BOY'))    return 'CB';
+  if (k.includes('BIG')   && k.includes('WOMAN'))  return 'BW'; // harus sebelum MAN (WOMAN ⊃ MAN)
+  if (k.includes('BIG')   && k.includes('MAN'))    return 'BM';
   if (k.includes('CHILD') && k.includes('GIRL'))   return 'CG';
+  if (k.includes('CHILD') && k.includes('BOY'))    return 'CB';
   return 'XX'; // fallback jika kategori tidak dikenali
 }
 
