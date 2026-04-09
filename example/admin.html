@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Verifikasi Pembayaran</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+    .proof-img { max-height: 200px; border-radius: 8px; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.2s; }
+    .proof-img:hover { transform: scale(1.03); }
+    #lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; }
+    #lightbox.open { display:flex; }
+    #lightbox img { max-width:90vw; max-height:90vh; border-radius:12px; }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+  <!-- Lightbox untuk preview gambar fullscreen -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Bukti Transfer">
+  </div>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="flex items-center justify-center min-h-screen">
+    <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="shield-check" class="w-7 h-7 text-teal-600"></i>
+        </div>
+        <h1 class="text-2xl font-extrabold text-gray-800">Admin Panel</h1>
+        <p class="text-sm text-gray-500 mt-1">Verifikasi Pembayaran Bedas Run 2026</p>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-600 mb-1">Admin Key</label>
+        <input type="password" id="admin-key-input" placeholder="Masukkan admin key..."
+          class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
+        <p id="login-error" class="text-red-500 text-xs mt-2 hidden">Admin key salah atau koneksi gagal.</p>
+        <button onclick="login()" class="mt-4 w-full py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-sm transition">
+          Masuk
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="dashboard" class="hidden">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center">
+          <i data-lucide="shield-check" class="w-5 h-5 text-teal-600"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-gray-800 text-base">Admin — Verifikasi Pembayaran</h1>
+          <p class="text-xs text-gray-400">Bedas Run 2026</p>
+        </div>
+      </div>
+      <button onclick="logout()" class="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1 transition">
+        <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
+      </button>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="px-6 py-4 flex gap-4">
+      <div class="bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-3 flex items-center gap-3">
+        <i data-lucide="clock" class="w-5 h-5 text-yellow-600"></i>
+        <div>
+          <p class="text-xs text-yellow-700 font-semibold">Menunggu Verifikasi</p>
+          <p id="stats-pending" class="text-2xl font-extrabold text-yellow-800">—</p>
+        </div>
+      </div>
+      <button onclick="loadPending()" class="ml-auto text-sm text-teal-600 hover:text-teal-800 flex items-center gap-1 font-semibold transition">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="px-6 pb-10">
+      <div id="loading-state" class="text-center py-16 text-gray-400 text-sm">
+        <i data-lucide="loader-2" class="animate-spin w-8 h-8 mx-auto mb-2"></i>
+        Memuat data...
+      </div>
+      <div id="empty-state" class="text-center py-16 text-gray-400 text-sm hidden">
+        <i data-lucide="check-circle" class="w-10 h-10 mx-auto mb-2 text-teal-400"></i>
+        Tidak ada transaksi yang menunggu verifikasi.
+      </div>
+      <div id="trx-list" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3 hidden"></div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div id="reject-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+      <h3 class="font-bold text-gray-800 mb-3">Alasan Penolakan</h3>
+      <textarea id="reject-reason-input" rows="3" placeholder="Contoh: Nominal transfer tidak sesuai / Bukti tidak jelas / ..."
+        class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"></textarea>
+      <p id="reject-error" class="text-red-500 text-xs mt-1 hidden">Alasan wajib diisi.</p>
+      <div class="flex gap-2 mt-4">
+        <button onclick="closeRejectModal()" class="flex-1 py-2.5 rounded-xl border border-gray-300 text-sm font-semibold hover:bg-gray-50 transition">Batal</button>
+        <button onclick="confirmReject()" class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold transition">Tolak</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BACKEND_URL = 'https://api.bigandchildrun.com';
+    let adminKey = '';
+    let rejectTarget = null;
+
+    function login() {
+      const key = document.getElementById('admin-key-input').value.trim();
+      if (!key) return;
+      adminKey = key;
+      loadPending();
+    }
+
+    function logout() {
+      adminKey = '';
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('admin-key-input').value = '';
+    }
+
+    async function loadPending() {
+      document.getElementById('loading-state').classList.remove('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('trx-list').classList.add('hidden');
+      document.getElementById('login-error').classList.add('hidden');
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/admin/pending`, {
+          headers: { 'x-admin-key': adminKey }
+        });
+
+        if (res.status === 401) {
+          document.getElementById('login-error').classList.remove('hidden');
+          document.getElementById('loading-state').classList.add('hidden');
+          return;
+        }
+
+        const data = await res.json();
+
+        // Tampilkan dashboard jika auth berhasil
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        lucide.createIcons();
+
+        document.getElementById('stats-pending').textContent = data.count || 0;
+        document.getElementById('loading-state').classList.add('hidden');
+
+        if (!data.transactions || data.transactions.length === 0) {
+          document.getElementById('empty-state').classList.remove('hidden');
+          return;
+        }
+
+        renderList(data.transactions);
+      } catch (err) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('login-error').classList.remove('hidden');
+        document.getElementById('login-error').textContent = 'Gagal menghubungi server: ' + err.message;
+      }
+    }
+
+    function renderList(transactions) {
+      const list = document.getElementById('trx-list');
+      list.innerHTML = '';
+      list.classList.remove('hidden');
+
+      transactions.forEach(trx => {
+        const fmt = (n) => new Intl.NumberFormat('id-ID').format(n || 0);
+        const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden';
+        card.id = `card-${trx.reference_id}`;
+        card.innerHTML = `
+          <div class="p-4 border-b border-gray-100">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <p class="font-bold text-gray-800">${trx.buyer_name || '-'}</p>
+                <p class="text-xs text-gray-400 font-mono mt-0.5">${trx.reference_id}</p>
+              </div>
+              <span class="text-xs bg-yellow-100 text-yellow-700 font-semibold px-2 py-0.5 rounded-full whitespace-nowrap">Menunggu</span>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-1.5 text-xs text-gray-600">
+              <div><span class="text-gray-400">Kategori</span><br><strong>${trx.kategori_lari || '-'}</strong></div>
+              <div><span class="text-gray-400">Transfer</span><br><strong class="text-teal-700">Rp ${fmt(totalTransfer)}</strong></div>
+              <div><span class="text-gray-400">WA</span><br>${trx.buyer_phone || '-'}</div>
+              <div><span class="text-gray-400">Email</span><br>${trx.buyer_email || '-'}</div>
+            </div>
+          </div>
+          ${trx.payment_proof_url ? `
+          <div class="p-4 border-b border-gray-100 text-center bg-gray-50">
+            <p class="text-xs text-gray-500 mb-2">Bukti Transfer</p>
+            <img src="${trx.payment_proof_url}" alt="Bukti" class="proof-img mx-auto" onclick="openLightbox('${trx.payment_proof_url}')">
+            <p class="text-xs text-gray-400 mt-1">Klik untuk perbesar</p>
+          </div>` : `
+          <div class="p-4 border-b border-gray-100 text-center bg-gray-50">
+            <p class="text-xs text-gray-400">Belum ada bukti transfer</p>
+          </div>`}
+          <div class="p-4 flex gap-2">
+            <button onclick="verifyAction('${trx.reference_id}', 'approve')"
+              class="flex-1 py-2.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="check" class="w-4 h-4"></i> Approve
+            </button>
+            <button onclick="openRejectModal('${trx.reference_id}')"
+              class="flex-1 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-bold rounded-xl flex items-center justify-center gap-1.5 border border-red-200 transition">
+              <i data-lucide="x" class="w-4 h-4"></i> Tolak
+            </button>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    async function verifyAction(referenceId, action, reason) {
+      const card = document.getElementById(`card-${referenceId}`);
+      const btns = card.querySelectorAll('button');
+      btns.forEach(b => b.disabled = true);
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/admin/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+          body: JSON.stringify({ referenceId, action, reason, verifiedBy: 'admin' }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.ok) {
+          const badge = action === 'approve'
+            ? `<div class="p-4 text-center text-green-600 font-bold text-sm bg-green-50"><i data-lucide="check-circle" class="w-5 h-5 inline mr-1"></i>Disetujui</div>`
+            : `<div class="p-4 text-center text-red-500 font-bold text-sm bg-red-50"><i data-lucide="x-circle" class="w-5 h-5 inline mr-1"></i>Ditolak</div>`;
+          card.querySelector('.p-4.flex.gap-2').outerHTML = badge;
+          lucide.createIcons();
+          const pending = document.getElementById('stats-pending');
+          pending.textContent = Math.max(0, parseInt(pending.textContent) - 1);
+        } else {
+          alert('Gagal: ' + (data.error || 'Unknown error'));
+          btns.forEach(b => b.disabled = false);
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btns.forEach(b => b.disabled = false);
+      }
+    }
+
+    function openRejectModal(referenceId) {
+      rejectTarget = referenceId;
+      document.getElementById('reject-reason-input').value = '';
+      document.getElementById('reject-error').classList.add('hidden');
+      document.getElementById('reject-modal').classList.remove('hidden');
+    }
+
+    function closeRejectModal() {
+      rejectTarget = null;
+      document.getElementById('reject-modal').classList.add('hidden');
+    }
+
+    function confirmReject() {
+      const reason = document.getElementById('reject-reason-input').value.trim();
+      if (!reason) {
+        document.getElementById('reject-error').classList.remove('hidden');
+        return;
+      }
+      closeRejectModal();
+      verifyAction(rejectTarget, 'reject', reason);
+    }
+
+    function openLightbox(url) {
+      document.getElementById('lightbox-img').src = url;
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    // Keyboard ESC untuk tutup lightbox / modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+        closeRejectModal();
+      }
+    });
+
+    // Init icons on load
+    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+  </script>
+</body>
+
+</html>

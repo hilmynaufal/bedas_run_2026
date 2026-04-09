@@ -42,7 +42,7 @@
       border-radius: 20px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
       padding: 32px 16px;
-      max-width: 860px;
+      max-width: 900px;
       margin: 0 auto;
       overflow-x: auto;
     }
@@ -55,9 +55,8 @@
 </head>
 
 <body>
-  <h1>Flowchart Sistem Pendaftaran Big & Child Run 2026</h1>
-  <p class="sub">Alur lengkap dari pengisian form hingga tiket tersedia — termasuk validasi HP, quota, pembayaran
-    iPaymu, dan cek status</p>
+  <h1>Flowchart Sistem Pendaftaran Big &amp; Child Run 2026</h1>
+  <p class="sub">Alur lengkap dari pengisian form hingga tiket tersedia — transfer bank manual dengan verifikasi panitia</p>
 
   <div class="diagram-wrapper">
     <div class="mermaid">
@@ -68,51 +67,45 @@
 
       D --> E{Cek nomor HP\ndi database}
 
-      E -->|HP sudah ada\nstatus pending / success| F([❌ HTTP 409\nNomor HP Sudah Terdaftar\nLink ke check.html])
+      E -->|HP sudah ada\nstatus aktif| F([❌ HTTP 409\nNomor HP Sudah Terdaftar\nLink ke check.html])
 
-      E -->|HP belum terdaftar\natau status cancelled| G{Cek quota\ntotal transaksi}
+      E -->|HP belum terdaftar| G{Cek quota\ntotal transaksi}
 
       G -->|>= 1.000 transaksi| H([❌ HTTP 429\nQuota Pendaftaran Penuh])
 
-      G -->|Quota tersedia| I[Tentukan harga\nBig: Rp 115.000 · Child: Rp 100.000]
-      I --> J[Simpan transaksi ke Supabase\nstatus: pending]
-      J --> K[Forward ke iPaymu\ndengan HMAC-SHA256 Signature]
-      K --> L{Response iPaymu}
+      G -->|Quota tersedia| I[Generate BIB Number\n& Kode Unik 3 digit]
+      I --> J[Simpan ke Supabase\nstatus: pending_payment]
+      J --> K([🏦 Tampilkan Info Transfer Bank\nNama Bank · No. Rekening · Nominal + Kode Unik])
 
-      L -->|Error / Gagal| M([⚠️ HTTP 500\nGagal terhubung ke iPaymu])
-      L -->|Berhasil\ndapat SessionID & URL| N[Update record:\nsimpan session_id & ipaymu_url]
-      N --> O([🔗 Redirect user ke\nhalaman bayar iPaymu])
+      K --> L[User melakukan\ntransfer bank]
+      L --> M[User upload bukti transfer\nPOST /upload-proof]
+      M --> N[Upload ke Supabase Storage\nbucket: payment-proofs]
+      N --> O[Update status:\npending_verification]
 
-      O --> P{User membayar?}
+      O --> P([⏳ Menunggu Verifikasi Panitia\ncheck.html: status pending_verification])
 
-      P -->|Bayar ✅| Q[iPaymu POST /callback\nstatus: berhasil]
-      P -->|Expired / Batal / Gagal ❌| R[iPaymu POST /callback\nstatus: expired / batal / gagal]
-      P -->|Kembali manual| S([↩️ GET /payment/return\nRedirect ke success.html])
+      P --> Q{Admin cek di\nadmin.html}
 
-      Q --> T[Update Supabase\nstatus: success]
-      R --> U[Update Supabase\nstatus: cancelled]
+      Q -->|Preview bukti transfer\n& data pendaftar| R{Verifikasi manual}
 
-      T --> V([✅ success.html\nLink ke check.html])
-      S --> V
+      R -->|✅ Approve\nPOST /admin/verify| S[Update status: success\nSimpan verified_by & verified_at]
+      R -->|❌ Reject + alasan\nPOST /admin/verify| T[Update status: rejected\nSimpan reject_reason]
 
-      V --> W[GET /check-transaction\n?phone=xxxxxx]
-      W --> X{Status transaksi}
+      S --> U([🎟️ check.html: Tampilkan Tiket\n+ QR Code · Bisa disimpan ke galeri])
 
-      X -->|success| Y([🎟️ Tampilkan Tiket\n+ QR Code\nBisa disimpan ke galeri])
-      X -->|pending| Z([⏳ Belum Dibayar\nTampilkan link bayar iPaymu])
-      X -->|cancelled| AA([❌ Pembayaran Dibatalkan\nBisa daftar ulang])
+      T --> V([⚠️ check.html: Bukti Ditolak\nTampilkan alasan + form re-upload])
+      V --> M
 
       style A fill:#0f766e,color:#fff,stroke:none
       style F fill:#fee2e2,color:#991b1b,stroke:#fca5a5
       style H fill:#fee2e2,color:#991b1b,stroke:#fca5a5
-      style M fill:#fee2e2,color:#991b1b,stroke:#fca5a5
-      style O fill:#dbeafe,color:#1e40af,stroke:#93c5fd
-      style T fill:#14b8a6,color:#fff,stroke:none
-      style U fill:#ef4444,color:#fff,stroke:none
-      style V fill:#f0fdf4,color:#166534,stroke:#86efac
-      style Y fill:#dcfce7,color:#166534,stroke:#86efac
-      style Z fill:#fef9c3,color:#854d0e,stroke:#fde047
-      style AA fill:#fee2e2,color:#991b1b,stroke:#fca5a5
+      style K fill:#dbeafe,color:#1e40af,stroke:#93c5fd
+      style O fill:#fef9c3,color:#854d0e,stroke:#fde047
+      style P fill:#fef9c3,color:#854d0e,stroke:#fde047
+      style S fill:#14b8a6,color:#fff,stroke:none
+      style T fill:#ef4444,color:#fff,stroke:none
+      style U fill:#dcfce7,color:#166534,stroke:#86efac
+      style V fill:#fee2e2,color:#991b1b,stroke:#fca5a5
     </div>
   </div>
 

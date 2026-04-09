@@ -1,8 +1,7 @@
 require('dotenv').config();
 
 const express = require('express');
-const fetch = require('node-fetch');
-const crypto = require('crypto');
+const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
@@ -21,17 +20,16 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// iPaymu config
-const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY;
-const IPAYMU_VA = process.env.IPAYMU_VA;
-const IPAYMU_URL = 'https://my.ipaymu.com/api/v2/payment';
+// Konfigurasi rekening bank transfer — isi via environment variables
+const BANK_NAME         = process.env.BANK_NAME         || 'BCA';
+const BANK_ACCOUNT_NUMBER = process.env.BANK_ACCOUNT_NUMBER || '1234567890';
+const BANK_ACCOUNT_NAME = process.env.BANK_ACCOUNT_NAME  || 'Panitia Bedas Run 2026';
 
-//sandbox
-// const IPAYMU_API_KEY = "SANDBOXC135F30E-8A56-4577-8985-8FECF82AD6FB";
-// const IPAYMU_VA = "0000005155029599";
-// const IPAYMU_URL = 'https://sandbox.ipaymu.com/api/v2/payment';
+// Admin auth — set ADMIN_KEY di env, jangan hardcode
+const ADMIN_KEY = process.env.ADMIN_KEY || '';
 
 // Supabase config — dengan fetch timeout 8s agar fail-fast saat Supabase overload
+const fetch = require('node-fetch');
 const SUPABASE_FETCH_TIMEOUT = parseInt(process.env.SUPABASE_FETCH_TIMEOUT || '8000', 10);
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -48,15 +46,26 @@ const supabase = createClient(
   }
 );
 
-// URL API ini sendiri (untuk notifyUrl callback dari iPaymu)
-const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
-// URL frontend (untuk returnUrl & cancelUrl yang diarahkan ke UI)
+// URL frontend (untuk redirect)
 const FRONTEND_URL = (process.env.FRONTEND_URL || 'https://registrasi.bigandchildrun.com').replace(/\/$/, '');
 
 // Concurrency limiter — cegah Supabase dibanjiri koneksi serentak
-// Atur via env MAX_CONCURRENT (default 20). Request di atas batas → 503.
 let activePayments = 0;
 const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT || '15', 10);
+
+// Multer: simpan file di memori, lalu upload ke Supabase Storage
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // maks 5 MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Format file tidak didukung. Gunakan JPG, PNG, atau WEBP.'));
+    }
+  },
+});
 
 // Mapping kategori lari → prefix BIB number
 function getBibPrefix(kategori) {
@@ -86,6 +95,25 @@ async function generateBibNumber(prefix) {
   return `${prefix}${String(nextNum).padStart(4, '0')}`;
 }
 
+// Generate kode unik 3 digit (001–999) untuk membedakan nominal transfer
+function generateUniqueCode() {
+  return Math.floor(Math.random() * 999) + 1;
+}
+
+// Middleware auth admin — cek header x-admin-key
+function requireAdmin(req, res, next) {
+  if (!ADMIN_KEY) {
+    return res.status(500).json({ error: 'ADMIN_KEY belum diset di server' });
+  }
+  const key = req.headers['x-admin-key'] || req.query.adminKey;
+  if (key !== ADMIN_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
+// ─── ROUTES ──────────────────────────────────────────────────────────────────
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -105,13 +133,9 @@ app.get('/quota', async (req, res) => {
   res.json({ quota_used, quota_total: QUOTA_TOTAL, quota_available });
 });
 
+// ─── POST /payment ────────────────────────────────────────────────────────────
+// Menerima data pendaftaran, validasi, simpan ke DB, return info rekening bank
 app.post('/payment', async (req, res) => {
-  const MOCK_MODE = process.env.IPAYMU_MOCK === 'true';
-
-  if (!MOCK_MODE && (!IPAYMU_API_KEY || !IPAYMU_VA)) {
-    return res.status(500).json({ error: 'IPAYMU_API_KEY and IPAYMU_VA env variables are required' });
-  }
-
   // Tolak langsung jika sudah terlalu banyak request serentak
   if (activePayments >= MAX_CONCURRENT) {
     return res.status(503).json({
@@ -121,36 +145,26 @@ app.post('/payment', async (req, res) => {
   }
   activePayments++;
 
-  // Pastikan counter selalu dikurangi tepat sekali saat request selesai
   let released = false;
   const release = () => { if (!released) { released = true; activePayments--; } };
   res.on('finish', release);
   res.on('close', release);
 
-  const {
-    returnUrl, cancelUrl,
-    buyerName, buyerPhone, buyerEmail,
-    formData,
-  } = req.body;
-
+  const { buyerName, buyerPhone, buyerEmail, formData } = req.body;
   const fd = formData || {};
 
   // Harga berdasarkan kategori lari
   const kategori = (fd['Kategori Lari'] || '').toUpperCase();
-  const HARGA = kategori.includes('CHILD') ? 100000 : 115000; // default Big
-  const PRODUCT = ['Registrasi Bedas Run'];
-  const QTY = ['1'];
-  const PRICE = [String(HARGA)];
-  const AMOUNT = String(HARGA);
+  const HARGA = kategori.includes('CHILD') ? 100000 : 115000;
 
-  // 0. Cek duplikat nomor HP — tolak jika sudah ada transaksi pending/success
+  // 0. Cek duplikat nomor HP
   const phoneToCheck = buyerPhone || fd['Nomor Whatsapp Aktif'] || null;
   if (phoneToCheck) {
     const { data: existing } = await supabase
       .from('transactions')
       .select('id, status')
       .eq('buyer_phone', phoneToCheck)
-      .in('status', ['pending', 'success'])
+      .in('status', ['pending_payment', 'pending_verification', 'success'])
       .limit(1);
 
     if (existing && existing.length > 0) {
@@ -161,7 +175,7 @@ app.post('/payment', async (req, res) => {
     }
   }
 
-  // 0b. Cek kuota — tolak jika sudah mencapai batas 1000 transaksi
+  // 0b. Cek kuota
   const QUOTA_TOTAL = 1000;
   const { count: quotaCount, error: quotaError } = await supabase
     .from('transactions')
@@ -178,196 +192,132 @@ app.post('/payment', async (req, res) => {
     });
   }
 
-  // 0c. Generate BIB number sebagai reference_id (BM0001, BW0001, CB0001, CG0001)
+  // 0c. Generate BIB number
   const bibPrefix = getBibPrefix(fd['Kategori Lari'] || '');
   const txReferenceId = await generateBibNumber(bibPrefix);
 
-  // 1. Simpan transaksi ke Supabase dengan status pending
+  // 0d. Generate kode unik untuk nominal transfer
+  const uniqueCode = generateUniqueCode();
+  const totalTransfer = HARGA + uniqueCode;
+
+  // 1. Simpan transaksi ke Supabase dengan status pending_payment
   const { error: insertError } = await supabase
     .from('transactions')
     .insert({
-      reference_id: txReferenceId,
-      amount: parseInt(AMOUNT),
-      status: 'pending',
-      // buyer info
-      buyer_name: buyerName || fd['Nama Lengkap'] || null,
-      buyer_phone: buyerPhone || fd['Nomor Whatsapp Aktif'] || null,
-      buyer_email: buyerEmail || fd['Email'] || null,
-      // form fields
-      jenis_kelamin: fd['Jenis Kelamin'] || null,
-      tanggal_lahir: fd['Tanggal Lahir'] || null,
-      kontak_darurat: fd['No. Kontak Darurat'] || null,
-      alamat: fd['Alamat'] || null,
-      kategori_lari: fd['Kategori Lari'] || null,
-      ukuran_kaos: fd['Ukuran Kaos'] || null,
-      golongan_darah: fd['Golongan Darah'] || null,
+      reference_id:     txReferenceId,
+      amount:           HARGA,
+      unique_code:      uniqueCode,
+      status:           'pending_payment',
+      buyer_name:       buyerName || fd['Nama Lengkap'] || null,
+      buyer_phone:      buyerPhone || fd['Nomor Whatsapp Aktif'] || null,
+      buyer_email:      buyerEmail || fd['Email'] || null,
+      jenis_kelamin:    fd['Jenis Kelamin'] || null,
+      tanggal_lahir:    fd['Tanggal Lahir'] || null,
+      kontak_darurat:   fd['No. Kontak Darurat'] || null,
+      alamat:           fd['Alamat'] || null,
+      kategori_lari:    fd['Kategori Lari'] || null,
+      ukuran_kaos:      fd['Ukuran Kaos'] || null,
+      golongan_darah:   fd['Golongan Darah'] || null,
       riwayat_penyakit: fd['Riwayat Penyakit'] || null,
       surat_pernyataan: fd['Surat Pernyataan'] || null,
-      // raw answers
-      form_data: Object.keys(fd).length > 0 ? fd : null,
+      form_data:        Object.keys(fd).length > 0 ? fd : null,
     });
 
   if (insertError) {
     return res.status(500).json({ error: 'Gagal menyimpan transaksi', detail: insertError.message });
   }
 
-  // 2. Build payload iPaymu
-  const body = {
-    product: PRODUCT,
-    qty: QTY,
-    price: PRICE,
-    amount: AMOUNT,
-    returnUrl: returnUrl || `${BASE_URL}/payment/return`,
-    cancelUrl: cancelUrl || `${FRONTEND_URL}/cancel.html`,
-    notifyUrl: `${BASE_URL}/callback`,
-    paymentMethod: 'qris',
-    buyerName: buyerName || fd['Nama Lengkap'] || null,
-    buyerPhone: buyerPhone || fd['Nomor Whatsapp Aktif'] || null,
-    buyerEmail: buyerEmail || fd['Email'] || null,
-    //test
+  console.log(`[payment] Pendaftaran berhasil: ${txReferenceId}, total transfer: ${totalTransfer}`);
+
+  // 2. Return info transfer bank ke frontend
+  res.json({
+    status: 'pending_payment',
     referenceId: txReferenceId,
-    // referenceId: 'ID1234'
-  };
-
-  console.log('[payment] notifyUrl:', body.notifyUrl);
-  console.log('[payment] returnUrl:', body.returnUrl);
-  console.log('[payment] cancelUrl:', body.cancelUrl);
-  console.log('[payment] referenceId:', body.referenceId);
-  console.log('[payment] body:', body);
-
-  if (buyerName) body.buyerName = buyerName;
-  if (buyerPhone) body.buyerPhone = buyerPhone;
-  if (buyerEmail) body.buyerEmail = buyerEmail;
-
-  // 3. Generate signature
-  const bodyJson = JSON.stringify(body);
-  const bodyHash = crypto.createHash('sha256').update(bodyJson).digest('hex');
-  const stringToSign = `POST:${IPAYMU_VA}:${bodyHash}:${IPAYMU_API_KEY}`;
-  const signature = crypto.createHmac('sha256', IPAYMU_API_KEY).update(stringToSign).digest('hex');
-  const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
-
-  // Mock mode: skip iPaymu, langsung return fake response (untuk stress testing)
-  if (MOCK_MODE) {
-    await supabase
-      .from('transactions')
-      .update({
-        ipaymu_session_id: `mock-${txReferenceId}`,
-        ipaymu_url: 'https://mock-payment.test/pay',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('reference_id', txReferenceId);
-
-    return res.json({ Status: 200, Data: { Url: 'https://mock-payment.test/pay', SessionID: `mock-${txReferenceId}` } });
-  }
-
-  try {
-    // 4. Forward ke iPaymu
-    const response = await fetch(IPAYMU_URL, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        va: IPAYMU_VA,
-        signature: signature,
-        timestamp: timestamp,
-      },
-      body: bodyJson,
-    });
-
-    const data = await response.json();
-
-    // 5. Simpan session_id & url dari iPaymu ke record
-    if (data.Status === 200 && data.Data) {
-      await supabase
-        .from('transactions')
-        .update({
-          ipaymu_session_id: data.Data.SessionID || null,
-          ipaymu_url: data.Data.Url || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('reference_id', txReferenceId);
-    }
-
-    console.log('[payment] data:', data);
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    amount: HARGA,
+    uniqueCode: uniqueCode,
+    totalTransfer: totalTransfer,
+    bank: {
+      name: BANK_NAME,
+      accountNumber: BANK_ACCOUNT_NUMBER,
+      accountName: BANK_ACCOUNT_NAME,
+    },
+  });
 });
 
-// Callback dari iPaymu setelah user bayar
-app.post('/callback', async (req, res) => {
-  console.log('[callback] Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('[callback] Payload diterima:', JSON.stringify(req.body, null, 2));
-
-  const payload = { ...req.body };
-
-  // 1. Verifikasi signature dari header X-Signature
-  const receivedSignature = req.headers['x-signature'];
-
-  const sortedData = Object.keys(payload).sort().reduce((acc, key) => {
-    acc[key] = payload[key];
-    return acc;
-  }, {});
-
-  const calculatedSignature = crypto
-    .createHmac('sha256', IPAYMU_VA)
-    .update(JSON.stringify(sortedData))
-    .digest('hex');
-
-  console.log('[callback] X-Signature received  :', receivedSignature);
-  console.log('[callback] Signature calculated   :', calculatedSignature);
-
-  // Signature sementara diabaikan
-  if (calculatedSignature !== receivedSignature) {
-    console.warn('[callback] Signature tidak cocok — diabaikan sementara');
+// ─── POST /upload-proof ───────────────────────────────────────────────────────
+// Terima bukti transfer (gambar), upload ke Supabase Storage, update status
+app.post('/upload-proof', upload.single('proof'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'File bukti transfer wajib diupload' });
   }
 
-  const referenceId = payload.reference_id || payload.referenceId;
-  const trxStatus = (payload.status || '').toLowerCase();
-  console.log(`[callback] reference_id: ${referenceId} | status: ${trxStatus}`);
-
+  const referenceId = req.body.referenceId;
   if (!referenceId) {
-    return res.status(400).json({ error: 'reference_id tidak ditemukan' });
+    return res.status(400).json({ error: 'referenceId wajib disertakan' });
   }
 
-  // iPaymu status: "berhasil" = sukses, "expired"/"batal"/"gagal" = cancelled
-  let newStatus = 'pending';
-  if (trxStatus === 'berhasil') {
-    newStatus = 'success';
-  } else if (['expired', 'batal', 'gagal'].includes(trxStatus)) {
-    newStatus = 'cancelled';
+  // Cek transaksi ada dan statusnya masih boleh upload
+  const { data: trx, error: findError } = await supabase
+    .from('transactions')
+    .select('reference_id, status')
+    .eq('reference_id', referenceId)
+    .single();
+
+  if (findError || !trx) {
+    return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
   }
 
-  const { error } = await supabase
+  if (!['pending_payment', 'rejected'].includes(trx.status)) {
+    return res.status(409).json({
+      error: 'Bukti tidak dapat diupload',
+      detail: `Status transaksi saat ini: ${trx.status}`,
+    });
+  }
+
+  // Upload ke Supabase Storage bucket "payment-proofs"
+  const ext = req.file.originalname.split('.').pop() || 'jpg';
+  const filename = `${referenceId}_${Date.now()}.${ext}`;
+
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('payment-proofs')
+    .upload(filename, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    console.error('[upload-proof] Gagal upload ke Supabase Storage:', uploadError.message);
+    return res.status(500).json({ error: 'Gagal mengupload bukti', detail: uploadError.message });
+  }
+
+  // Ambil public URL
+  const { data: urlData } = supabase.storage
+    .from('payment-proofs')
+    .getPublicUrl(filename);
+
+  const proofUrl = urlData?.publicUrl || null;
+
+  // Update status → pending_verification
+  const { error: updateError } = await supabase
     .from('transactions')
     .update({
-      status: newStatus,
-      trx_id: payload.trx_id || null,
-      tipe: payload.tipe || null,
-      payment_method: payload.via || null,
-      payment_channel: payload.channel || null,
+      status: 'pending_verification',
+      payment_proof_url: proofUrl,
+      reject_reason: null, // hapus alasan reject sebelumnya jika re-upload
       updated_at: new Date().toISOString(),
     })
     .eq('reference_id', referenceId);
 
-  if (error) {
-    console.error('[callback] Gagal update Supabase:', error.message);
-    return res.status(500).json({ error: 'Gagal update status', detail: error.message });
+  if (updateError) {
+    return res.status(500).json({ error: 'Gagal update status', detail: updateError.message });
   }
 
-  console.log(`[callback] Status transaksi ${referenceId} diupdate ke: ${newStatus}`);
-  res.status(200).json({ ok: true });
+  console.log(`[upload-proof] Bukti diupload untuk ${referenceId}: ${proofUrl}`);
+  res.json({ ok: true, status: 'pending_verification', proofUrl });
 });
 
-// Return URL dari iPaymu — redirect ke success.html di domain frontend
-app.get('/payment/return', (req, res) => {
-  console.log('[return] Query params:', req.query);
-  const query = new URLSearchParams(req.query).toString();
-  res.redirect(`${FRONTEND_URL}/success.html${query ? '?' + query : ''}`);
-});
-
-// Cek status transaksi berdasarkan nomor HP
+// ─── GET /check-transaction ───────────────────────────────────────────────────
+// Cek status transaksi berdasarkan nomor HP — langsung dari DB
 app.get('/check-transaction', async (req, res) => {
   const { phone } = req.query;
 
@@ -375,7 +325,6 @@ app.get('/check-transaction', async (req, res) => {
     return res.status(400).json({ error: 'Parameter phone diperlukan' });
   }
 
-  // 1. Ambil data transaksi dari Supabase berdasarkan nomor HP
   const { data: transactions, error: dbError } = await supabase
     .from('transactions')
     .select('*')
@@ -390,77 +339,83 @@ app.get('/check-transaction', async (req, res) => {
     return res.status(404).json({ error: 'Transaksi tidak ditemukan untuk nomor HP ini' });
   }
 
-  const trx = transactions[0];
+  res.json({ transaction: transactions[0] });
+});
 
-  // 2. Jika tidak ada trx_id, kembalikan data dari DB saja
-  if (!trx.trx_id) {
-    return res.json({ source: 'db', transaction: trx });
+// ─── GET /admin/pending ───────────────────────────────────────────────────────
+// List semua transaksi yang menunggu verifikasi (butuh ADMIN_KEY)
+app.get('/admin/pending', requireAdmin, async (req, res) => {
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('reference_id, buyer_name, buyer_phone, buyer_email, kategori_lari, amount, unique_code, payment_proof_url, created_at, updated_at')
+    .eq('status', 'pending_verification')
+    .order('updated_at', { ascending: true });
+
+  if (error) {
+    return res.status(500).json({ error: 'Gagal mengambil data', detail: error.message });
   }
 
-  // 3. Cek ke iPaymu menggunakan trx_id
-  const body = {
-    transactionId: trx.trx_id,
-    account: IPAYMU_VA,
+  res.json({ count: data.length, transactions: data });
+});
+
+// ─── POST /admin/verify ───────────────────────────────────────────────────────
+// Admin approve atau reject transaksi (butuh ADMIN_KEY)
+app.post('/admin/verify', requireAdmin, async (req, res) => {
+  const { referenceId, action, reason, verifiedBy } = req.body;
+
+  if (!referenceId || !action) {
+    return res.status(400).json({ error: 'referenceId dan action wajib diisi' });
+  }
+
+  if (!['approve', 'reject'].includes(action)) {
+    return res.status(400).json({ error: 'action harus "approve" atau "reject"' });
+  }
+
+  if (action === 'reject' && !reason) {
+    return res.status(400).json({ error: 'Alasan penolakan (reason) wajib diisi saat reject' });
+  }
+
+  // Pastikan transaksi ada dan statusnya pending_verification
+  const { data: trx, error: findError } = await supabase
+    .from('transactions')
+    .select('reference_id, status')
+    .eq('reference_id', referenceId)
+    .single();
+
+  if (findError || !trx) {
+    return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+  }
+
+  if (trx.status !== 'pending_verification') {
+    return res.status(409).json({
+      error: 'Transaksi tidak dalam status pending_verification',
+      detail: `Status saat ini: ${trx.status}`,
+    });
+  }
+
+  const newStatus = action === 'approve' ? 'success' : 'rejected';
+  const updateFields = {
+    status: newStatus,
+    verified_by: verifiedBy || 'admin',
+    verified_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
-  // Signature untuk formdata: hash dari JSON body
-  const bodyJson = JSON.stringify(body);
-  const bodyHash = crypto.createHash('sha256').update(bodyJson).digest('hex');
-  const stringToSign = `POST:${IPAYMU_VA}:${bodyHash}:${IPAYMU_API_KEY}`;
-  const signature = crypto.createHmac('sha256', IPAYMU_API_KEY).update(stringToSign).digest('hex');
-  const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
-
-  // Kirim sebagai formdata
-  const formBody = new URLSearchParams(body).toString();
-
-  try {
-    const ipaymuRes = await fetch('https://my.ipaymu.com/api/v2/transaction', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        va: IPAYMU_VA,
-        signature: signature,
-        timestamp: timestamp,
-      },
-      body: formBody,
-    });
-
-    const ipaymuData = await ipaymuRes.json();
-    console.log('[check-transaction] iPaymu response:', JSON.stringify(ipaymuData));
-
-    // Sync status ke Supabase berdasarkan iPaymu Status
-    // Status 1, 6, 7 = berhasil/paid
-    if (ipaymuData.Status === 200 && ipaymuData.Data) {
-      const iStatus = ipaymuData.Data.Status;
-      const newStatus = [1, 6, 7].includes(iStatus) ? 'success' : iStatus === 0 ? 'pending' : 'cancelled';
-
-      await supabase
-        .from('transactions')
-        .update({
-          status: newStatus,
-          trx_id: String(ipaymuData.Data.TransactionId),
-          tipe: ipaymuData.Data.TypeDesc || null,
-          payment_method: ipaymuData.Data.PaymentMethod || null,
-          payment_channel: ipaymuData.Data.PaymentChannel || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('reference_id', trx.reference_id);
-
-      // Refresh data transaksi dari DB setelah update
-      const { data: updated } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('reference_id', trx.reference_id)
-        .single();
-
-      return res.json({ source: 'ipaymu', transaction: updated || trx, ipaymu: ipaymuData });
-    }
-
-    res.json({ source: 'ipaymu', transaction: trx, ipaymu: ipaymuData });
-  } catch (err) {
-    console.error('[check-transaction] Gagal hit iPaymu:', err.message);
-    res.json({ source: 'db', transaction: trx, error: 'Gagal menghubungi iPaymu' });
+  if (action === 'reject') {
+    updateFields.reject_reason = reason;
   }
+
+  const { error: updateError } = await supabase
+    .from('transactions')
+    .update(updateFields)
+    .eq('reference_id', referenceId);
+
+  if (updateError) {
+    return res.status(500).json({ error: 'Gagal update status', detail: updateError.message });
+  }
+
+  console.log(`[admin/verify] ${referenceId} → ${newStatus} by ${verifiedBy || 'admin'}`);
+  res.json({ ok: true, referenceId, status: newStatus });
 });
 
 app.listen(PORT, () => {
