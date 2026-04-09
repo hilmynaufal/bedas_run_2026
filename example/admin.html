@@ -29,10 +29,16 @@
     }
 
     .proof-thumb {
-      max-height: 160px;
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
       border-radius: 8px;
       border: 1px solid #e2e8f0;
       cursor: zoom-in;
+      transition: opacity 0.2s;
+    }
+    .proof-thumb:hover {
+      opacity: 0.8;
     }
 
     #lightbox {
@@ -162,6 +168,18 @@
           </div>
         </div>
         <div class="flex items-center gap-3">
+          <!-- Kategori Filter -->
+          <div class="hidden sm:block">
+            <select id="category-filter"
+              onchange="document.getElementById('category-filter-mobile').value=this.value; renderTable()"
+              class="py-2 pl-3 pr-8 border border-gray-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white min-w-[140px]">
+              <option value="all">Semua Kategori</option>
+              <option value="BIG - MAN 2K">BIG - MAN 2K</option>
+              <option value="BIG - WOMAN 2K">BIG - WOMAN 2K</option>
+              <option value="CHILD - BOY 2K">CHILD - BOY 2K</option>
+              <option value="CHILD - GIRL 2K">CHILD - GIRL 2K</option>
+            </select>
+          </div>
           <!-- Search -->
           <div class="relative hidden sm:block">
             <input type="text" id="search-input" placeholder="Cari nama / HP / BIB..." oninput="onSearch()"
@@ -188,13 +206,29 @@
       </div>
     </div>
 
-    <!-- Mobile Search -->
-    <div class="max-w-7xl mx-auto px-4 sm:hidden pb-2">
+    <!-- Category Stats -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pb-3">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="category-stats">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- Mobile Search & Filter -->
+    <div class="max-w-7xl mx-auto px-4 sm:hidden pb-2 flex flex-col gap-2">
       <div class="relative">
         <input type="text" id="search-input-mobile" placeholder="Cari nama / HP / BIB..." oninput="onSearch()"
           class="pl-8 pr-3 py-2 border border-gray-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-400 w-full">
         <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400"></i>
       </div>
+      <select id="category-filter-mobile"
+        onchange="document.getElementById('category-filter').value=this.value; renderTable()"
+        class="py-2 pl-3 pr-8 border border-gray-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-400 w-full bg-white">
+        <option value="all">Semua Kategori</option>
+        <option value="BIG - MAN 2K">BIG - MAN 2K</option>
+        <option value="BIG - WOMAN 2K">BIG - WOMAN 2K</option>
+        <option value="CHILD - BOY 2K">CHILD - BOY 2K</option>
+        <option value="CHILD - GIRL 2K">CHILD - GIRL 2K</option>
+      </select>
     </div>
 
     <!-- Tabs -->
@@ -298,6 +332,7 @@
         allData = data.transactions || [];
         renderSummaryCards(data.summary || {});
         renderTabs(data.summary || {});
+        renderCategoryStats();
         renderTable();
         document.getElementById('loading-state').classList.add('hidden');
 
@@ -360,10 +395,47 @@
       renderTable();
     }
 
+    function renderCategoryStats() {
+      const stats = {
+        'BIG - MAN 2K': 0,
+        'BIG - WOMAN 2K': 0,
+        'CHILD - BOY 2K': 0,
+        'CHILD - GIRIL 2K': 0
+      };
+
+      allData.forEach(t => {
+        if (t.kategori_lari && stats[t.kategori_lari] !== undefined) {
+          stats[t.kategori_lari]++;
+        } else if (t.kategori_lari) {
+          stats[t.kategori_lari] = (stats[t.kategori_lari] || 0) + 1;
+        }
+      });
+
+      const cards = document.getElementById('category-stats');
+      if (cards) {
+        cards.innerHTML = Object.keys(stats).map(k => `
+          <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 flex items-center gap-3">
+            <i data-lucide="tag" class="w-5 h-5 text-indigo-500 shrink-0"></i>
+            <div>
+              <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">${k}</p>
+              <p class="text-lg font-extrabold text-indigo-700">${stats[k]}</p>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      }
+    }
+
     function getSearchQuery() {
       const d = document.getElementById('search-input')?.value || '';
       const m = document.getElementById('search-input-mobile')?.value || '';
       return (d || m).toLowerCase().trim();
+    }
+
+    function getCategoryFilter() {
+      const d = document.getElementById('category-filter')?.value || 'all';
+      const m = document.getElementById('category-filter-mobile')?.value || 'all';
+      return d !== 'all' ? d : (m !== 'all' ? m : 'all');
     }
 
     function onSearch() {
@@ -373,10 +445,14 @@
 
     function renderTable() {
       const q = getSearchQuery();
+      const cat = getCategoryFilter();
       let rows = allData;
 
       if (currentStatus !== 'all') {
         rows = rows.filter(t => t.status === currentStatus);
+      }
+      if (cat !== 'all') {
+        rows = rows.filter(t => t.kategori_lari === cat);
       }
       if (q) {
         rows = rows.filter(t =>
@@ -440,21 +516,47 @@
           </td>
           <td class="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">${fmtDate(trx.created_at)}</td>
           <td class="px-4 py-3 whitespace-nowrap">
-            ${canVerify ? `
-              <div class="flex gap-1.5">
+            <div class="flex gap-1.5">
+              ${canVerify ? `
                 <button class="action-btn bg-teal-500 text-white hover:bg-teal-600" onclick="verifyAction('${trx.reference_id}', 'approve')">
                   ✓ Approve
                 </button>
                 <button class="action-btn bg-red-50 text-red-600 border border-red-200 hover:bg-red-100" onclick="openRejectModal('${trx.reference_id}')">
                   ✕ Tolak
                 </button>
-              </div>
-            ` : `<span class="text-xs text-gray-300">—</span>`}
+              ` : ''}
+              <button class="action-btn bg-green-500 text-white hover:bg-green-600 flex items-center gap-1" onclick="sendWA('${trx.reference_id}')" title="Kirim WhatsApp">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>WA</span>
+              </button>
+            </div>
           </td>
         </tr>`;
       }).join('');
 
       document.getElementById('table-footer').textContent = `Menampilkan ${rows.length} dari ${allData.length} pendaftar`;
+      lucide.createIcons();
+    }
+
+    function sendWA(refId) {
+      const trx = allData.find(t => t.reference_id === refId);
+      if (!trx || !trx.buyer_phone) return;
+
+      let phone = trx.buyer_phone.replace(/\D/g, '');
+      if (phone.startsWith('0')) phone = '62' + phone.substring(1);
+
+      const statusMap = {
+        pending_payment: 'Menunggu Pembayaran',
+        pending_verification: 'Menunggu Verifikasi',
+        success: 'Sukses / Terverifikasi',
+        rejected: 'Ditolak',
+        cancelled: 'Dibatalkan'
+      };
+
+      const statusLabel = statusMap[trx.status] || trx.status;
+      const message = `Halo ${trx.buyer_name},\n\nKami dari Panitia *Big & Child Run 2026*. Informasi pendaftaran Anda:\n\nRef ID: *${trx.reference_id}*\nKategori: ${trx.kategori_lari}\nStatus: *${statusLabel}*\n\nTerima kasih.`;
+
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     }
 
     async function verifyAction(referenceId, action, reason) {
@@ -483,6 +585,7 @@
           allData.forEach(t => { summary[t.status] = (summary[t.status] || 0) + 1; });
           renderSummaryCards(summary);
           renderTabs(summary);
+          renderCategoryStats();
         } else {
           alert('Gagal: ' + (data.error || 'Unknown error'));
           if (row) row.querySelectorAll('button').forEach(b => b.disabled = false);
