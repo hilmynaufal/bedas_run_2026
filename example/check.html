@@ -950,8 +950,6 @@
 
         // ===== RENDER PENDING PAYMENT (belum upload bukti) =====
         function renderPendingPayment(trx, container) {
-            const fmt = (n) => new Intl.NumberFormat('id-ID').format(n);
-            const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
             const wrapper = document.createElement('div');
             wrapper.className = 'ticket-result-wrapper';
             wrapper.innerHTML = `
@@ -959,32 +957,21 @@
                 <div class="pending-header">
                     <div class="status-icon">🏦</div>
                     <div class="status-title">Menunggu Pembayaran</div>
-                    <div class="status-subtitle">Silakan transfer dan upload bukti pembayaran</div>
+                    <div class="status-subtitle">Kamu belum melakukan upload bukti pembayaran</div>
                 </div>
                 <div class="card-body">
                     <div class="card-row"><span class="card-label">Nama</span><span class="card-value">${trx.buyer_name || '-'}</span></div>
                     <div class="card-row"><span class="card-label">Kategori</span><span class="card-value">${trx.kategori_lari || '-'}</span></div>
                     <div class="card-row"><span class="card-label">No. Pendaftaran</span><span class="card-value" style="font-size:12px;font-family:monospace;">${trx.reference_id}</span></div>
-                    ${trx.unique_code ? `
-                    <div style="margin:12px 0;background:#f0fdfa;border:1px solid #99f6e4;border-radius:10px;padding:12px;text-align:center;">
-                        <div style="font-size:11px;color:#0f766e;font-weight:600;margin-bottom:4px;">Transfer TEPAT sebesar</div>
-                        <div style="font-size:24px;font-weight:800;color:#0f766e;">Rp ${fmt(totalTransfer)}</div>
-                        <div style="font-size:11px;color:#64748b;margin-top:2px;">(Rp ${fmt(trx.amount)} + kode unik ${String(trx.unique_code).padStart(3, '0')})</div>
-                    </div>` : ''}
-                    <div style="margin-top:8px;">
-                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151;">Upload Bukti Transfer</label>
-                        <div id="check-upload-area" style="border:2px dashed #d1d5db;border-radius:10px;padding:16px;text-align:center;cursor:pointer;" onclick="document.getElementById('check-proof-file').click()">
-                            <div style="font-size:12px;color:#6b7280;">Klik untuk pilih foto bukti transfer</div>
-                        </div>
-                        <input type="file" id="check-proof-file" accept="image/*" style="display:none">
-                        <div id="check-preview-wrapper" style="display:none;margin-top:8px;">
-                            <img id="check-proof-preview" style="max-height:120px;border-radius:8px;border:1px solid #e5e7eb;display:block;margin:0 auto;" alt="Preview">
-                        </div>
-                        <button id="check-upload-btn" onclick="uploadProofFromCheck('${trx.reference_id}')" disabled
-                            style="margin-top:10px;width:100%;padding:10px;border-radius:10px;font-weight:700;font-size:13px;background:#14b8a6;color:white;border:none;cursor:pointer;opacity:0.4;">
-                            Kirim Bukti Transfer
+                    
+                    <div style="margin-top:16px;text-align:center;">
+                        <p style="font-size:13px;color:var(--neutral-600);margin-bottom:12px;line-height:1.5;">
+                            Silakan kunjungi halaman Upload Bukti Transfer untuk melihat instruksi pembayaran dan mengupload bukti transfer kamu.
+                        </p>
+                        <button class="pay-btn" onclick="window.location.href='upload.html'">
+                            <i data-lucide="upload-cloud" style="width:18px;height:18px;"></i>
+                            Halaman Upload Pembayaran
                         </button>
-                        <div id="check-upload-status" style="display:none;margin-top:8px;font-size:12px;text-align:center;"></div>
                     </div>
                 </div>
             </div>
@@ -992,57 +979,6 @@
         `;
             container.appendChild(wrapper);
             lucide.createIcons();
-
-            document.getElementById('check-proof-file').addEventListener('change', function () {
-                if (!this.files.length) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('check-proof-preview').src = e.target.result;
-                    document.getElementById('check-preview-wrapper').style.display = 'block';
-                };
-                reader.readAsDataURL(this.files[0]);
-                document.getElementById('check-upload-btn').disabled = false;
-                document.getElementById('check-upload-btn').style.opacity = '1';
-            });
-        }
-
-        async function uploadProofFromCheck(referenceId) {
-            const fileInput = document.getElementById('check-proof-file');
-            const btn = document.getElementById('check-upload-btn');
-            const statusEl = document.getElementById('check-upload-status');
-            if (!fileInput.files.length) return;
-
-            btn.disabled = true;
-            btn.textContent = 'Mengupload...';
-            statusEl.style.display = 'block';
-            statusEl.style.color = '#6b7280';
-            statusEl.textContent = 'Sedang mengupload...';
-
-            try {
-                const formData = new FormData();
-                formData.append('referenceId', referenceId);
-                formData.append('proof', fileInput.files[0]);
-
-                const res = await fetch(`${BACKEND_URL}/upload-proof`, { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (res.ok && data.ok) {
-                    const results = document.getElementById('ticket-results');
-                    results.innerHTML = `
-                        <div class="status-message">
-                            <i data-lucide="clock" style="width:30px;height:30px;margin-bottom:10px;color:#14b8a6;"></i>
-                            <p>Bukti transfer diterima! Panitia akan memverifikasi dalam 1×24 jam.</p>
-                        </div>`;
-                    lucide.createIcons();
-                } else {
-                    throw new Error(data.error || 'Gagal upload');
-                }
-            } catch (err) {
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = `Gagal: ${err.message}`;
-                btn.disabled = false;
-                btn.textContent = 'Kirim Bukti Transfer';
-            }
         }
 
         // ===== RENDER PENDING VERIFICATION (menunggu verifikasi admin) =====
@@ -1094,20 +1030,15 @@
                     <div style="margin-top:10px;background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:10px;">
                         <p style="font-size:12px;color:#991b1b;"><strong>Alasan:</strong> ${trx.reject_reason}</p>
                     </div>` : ''}
-                    <div style="margin-top:12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151;">Upload Ulang Bukti Transfer</label>
-                        <div style="border:2px dashed #fca5a5;border-radius:10px;padding:14px;text-align:center;cursor:pointer;" onclick="document.getElementById('rejected-proof-file').click()">
-                            <div style="font-size:12px;color:#6b7280;">Klik untuk pilih foto bukti transfer</div>
-                        </div>
-                        <input type="file" id="rejected-proof-file" accept="image/*" style="display:none">
-                        <div id="rejected-preview-wrapper" style="display:none;margin-top:8px;">
-                            <img id="rejected-proof-preview" style="max-height:100px;border-radius:8px;border:1px solid #e5e7eb;display:block;margin:0 auto;" alt="Preview">
-                        </div>
-                        <button id="rejected-upload-btn" onclick="uploadProofRejected('${trx.reference_id}')" disabled
-                            style="margin-top:10px;width:100%;padding:10px;border-radius:10px;font-weight:700;font-size:13px;background:#ef4444;color:white;border:none;cursor:pointer;opacity:0.4;">
-                            Kirim Ulang Bukti
+                    
+                    <div style="margin-top:16px;text-align:center;">
+                        <p style="font-size:13px;color:var(--neutral-600);margin-bottom:12px;line-height:1.5;">
+                            Silakan kunjungi halaman Upload Bukti Transfer untuk mengirim ulang foto bukti transfer yang valid.
+                        </p>
+                        <button class="pay-btn" style="background:#ef4444;" onclick="window.location.href='upload.html'">
+                            <i data-lucide="upload-cloud" style="width:18px;height:18px;"></i>
+                            Upload Ulang Bukti
                         </button>
-                        <div id="rejected-upload-status" style="display:none;margin-top:8px;font-size:12px;text-align:center;"></div>
                     </div>
                 </div>
             </div>
@@ -1115,51 +1046,6 @@
         `;
             container.appendChild(wrapper);
             lucide.createIcons();
-
-            document.getElementById('rejected-proof-file').addEventListener('change', function () {
-                if (!this.files.length) return;
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('rejected-proof-preview').src = e.target.result;
-                    document.getElementById('rejected-preview-wrapper').style.display = 'block';
-                };
-                reader.readAsDataURL(this.files[0]);
-                document.getElementById('rejected-upload-btn').disabled = false;
-                document.getElementById('rejected-upload-btn').style.opacity = '1';
-            });
-        }
-
-        async function uploadProofRejected(referenceId) {
-            const fileInput = document.getElementById('rejected-proof-file');
-            const btn = document.getElementById('rejected-upload-btn');
-            const statusEl = document.getElementById('rejected-upload-status');
-            if (!fileInput.files.length) return;
-
-            btn.disabled = true;
-            btn.textContent = 'Mengupload...';
-            statusEl.style.display = 'block';
-            statusEl.style.color = '#6b7280';
-            statusEl.textContent = 'Sedang mengupload...';
-
-            try {
-                const formData = new FormData();
-                formData.append('referenceId', referenceId);
-                formData.append('proof', fileInput.files[0]);
-
-                const res = await fetch(`${BACKEND_URL}/upload-proof`, { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (res.ok && data.ok) {
-                    location.reload();
-                } else {
-                    throw new Error(data.error || 'Gagal upload');
-                }
-            } catch (err) {
-                statusEl.style.color = '#ef4444';
-                statusEl.textContent = `Gagal: ${err.message}`;
-                btn.disabled = false;
-                btn.textContent = 'Kirim Ulang Bukti';
-            }
         }
 
         // ===== RENDER CANCELLED =====

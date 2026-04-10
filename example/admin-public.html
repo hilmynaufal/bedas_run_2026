@@ -227,71 +227,8 @@
     <img id="lightbox-img" src="" alt="Bukti Transfer">
   </div>
 
-  <!-- Reject Modal -->
-  <div id="reject-modal"
-    class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-    <div
-      class="bg-white rounded-[24px] shadow-2xl border border-slate-100 p-8 w-full max-w-sm transform transition-all">
-      <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4">
-        <i data-lucide="alert-circle" class="w-6 h-6 text-red-500"></i>
-      </div>
-      <h3 class="font-bold text-slate-800 text-lg mb-1">Tolak Pembayaran</h3>
-      <p id="reject-modal-ref"
-        class="text-xs text-slate-500 font-mono mb-6 bg-slate-50 inline-block px-2 py-1 rounded-md border border-slate-100">
-      </p>
-
-      <label class="block text-sm font-semibold text-slate-700 mb-2">Alasan Penolakan <span
-          class="text-red-500">*</span></label>
-      <textarea id="reject-reason-input" rows="3" placeholder="Contoh: Nominal tidak sesuai, bukti blur..."
-        class="w-full modern-input rounded-xl px-4 py-3 text-sm focus:outline-none resize-none"></textarea>
-      <p id="reject-error" class="text-red-500 text-xs mt-2 hidden font-medium">Alasan wajib diisi.</p>
-
-      <div class="flex gap-3 mt-6">
-        <button onclick="closeRejectModal()"
-          class="flex-1 py-2.5 rounded-xl btn-outline text-sm font-semibold">Batal</button>
-        <button onclick="confirmReject()"
-          class="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-bold shadow-sm transition-colors">Tolak</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Login -->
-  <div id="login-screen" class="flex items-center justify-center min-h-screen p-4">
-    <div
-      class="bg-white rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-8 sm:p-10 w-full max-w-sm">
-      <div class="text-center mb-8">
-        <div
-          class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-slate-100">
-          <img src="https://bigandchildrun.com/assets/image/logo.png" alt="Logo" class="h-10">
-        </div>
-        <h1 class="text-2xl font-bold text-slate-900">Admin Panel</h1>
-        <p class="text-sm text-slate-500 mt-2">Big & Child Run 2026</p>
-      </div>
-
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2">Admin Key</label>
-          <div class="relative">
-            <i data-lucide="key" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-            <input type="password" id="admin-key-input" placeholder="Masukkan admin key..."
-              class="w-full modern-input rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none"
-              onkeydown="if(event.key==='Enter') login()">
-          </div>
-          <p id="login-error" class="text-red-500 text-xs mt-2 hidden font-medium flex items-center gap-1">
-            <i data-lucide="alert-circle" class="w-3 h-3"></i> Admin key salah atau koneksi gagal.
-          </p>
-        </div>
-        <button onclick="login()"
-          class="w-full py-3 btn-primary font-bold rounded-xl text-sm transition-all flex items-center justify-center gap-2">
-          <span>Masuk Dashboard</span>
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- Dashboard Container (Mimicking the SaaS "Window") -->
-  <div id="dashboard" class="hidden max-w-[1440px] mx-auto p-2 sm:p-4 lg:p-6 min-h-screen">
+  <div id="dashboard" class="max-w-[1440px] mx-auto p-2 sm:p-4 lg:p-6 min-h-screen">
 
     <!-- The White Canvas -->
     <div
@@ -333,15 +270,17 @@
               <option value="CHILD - BOY 2K">CHILD - BOY 2K</option>
               <option value="CHILD - GIRL 2K">CHILD - GIRL 2K</option>
             </select>
+            <div class="w-[1px] h-4 bg-slate-200"></div>
+            <select id="instansi-filter"
+              onchange="document.getElementById('instansi-filter-mobile').value=this.value; renderTable()"
+              class="bg-transparent py-1.5 pl-2 pr-8 text-sm focus:outline-none text-slate-600 font-medium cursor-pointer max-w-[150px] truncate">
+              <option value="all">Semua Instansi</option>
+            </select>
           </div>
 
           <button onclick="loadData()" title="Refresh"
             class="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-teal-600 transition">
             <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-          </button>
-          <button onclick="logout()" title="Keluar"
-            class="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition">
-            <i data-lucide="log-out" class="w-4 h-4"></i>
           </button>
         </div>
       </header>
@@ -352,18 +291,28 @@
         <!-- Top Stats Row -->
         <div class="flex flex-col xl:flex-row gap-6 mb-8">
           <!-- Summary Cards (Left Side) -->
-          <div class="flex-1 grid grid-cols-2 lg:grid-cols-5 gap-4" id="summary-cards">
+          <div class="flex-1 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4" id="summary-cards">
             <!-- filled by JS -->
           </div>
 
-          <!-- Category Stats (Right Side - Small Blocks) -->
-          <div class="xl:w-64 bg-slate-50 rounded-2xl border border-slate-100 p-4">
-            <p class="text-xs font-semibold text-slate-500 mb-3 flex items-center justify-between">
-              Distribusi Kategori
-              <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-slate-400"></i>
-            </p>
-            <div class="space-y-3" id="category-stats">
-              <!-- filled by JS -->
+          <!-- Right Side Stats -->
+          <div class="xl:w-64 flex flex-col gap-4">
+            <div class="bg-slate-50 rounded-2xl border border-slate-100 p-4">
+              <p class="text-xs font-semibold text-slate-500 mb-3 flex items-center justify-between">
+                Distribusi Kategori
+                <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-slate-400"></i>
+              </p>
+              <div class="space-y-3" id="category-stats">
+                <!-- filled by JS -->
+              </div>
+            </div>
+            <div class="bg-slate-50 rounded-2xl border border-slate-100 p-4">
+              <p class="text-xs font-semibold text-slate-500 mb-3 flex items-center justify-between">
+                Instansi Teratas
+                <i data-lucide="building-2" class="w-3.5 h-3.5 text-slate-400"></i>
+              </p>
+              <div class="space-y-3 max-h-[160px] overflow-y-auto hide-scrollbar" id="instansi-stats">
+              </div>
             </div>
           </div>
         </div>
@@ -413,6 +362,11 @@
             <option value="BIG - WOMAN 2K">BIG - WOMAN 2K</option>
             <option value="CHILD - BOY 2K">CHILD - BOY 2K</option>
             <option value="CHILD - GIRL 2K">CHILD - GIRL 2K</option>
+          </select>
+          <select id="instansi-filter-mobile"
+            onchange="document.getElementById('instansi-filter').value=this.value; renderTable()"
+            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-400">
+            <option value="all">Semua Instansi</option>
           </select>
         </div>
 
@@ -509,66 +463,48 @@
       cancelled: { label: 'Dibatalkan', bg: 'bg-slate-50', text: 'text-slate-500', dot: 'bg-slate-300' },
     };
 
-    function login() {
-      const key = document.getElementById('admin-key-input').value.trim();
-      if (!key) return;
-      adminKey = key;
-      loadData();
-    }
-
-    function logout() {
-      adminKey = '';
-      allData = [];
-      document.getElementById('dashboard').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('admin-key-input').value = '';
-    }
-
     async function loadData() {
       document.getElementById('loading-state').classList.remove('hidden');
       document.getElementById('empty-state').classList.add('hidden');
       document.getElementById('table-wrapper').classList.add('hidden');
-      document.getElementById('login-error').classList.add('hidden');
 
       try {
         const res = await fetch(`${BACKEND_URL}/admin/transactions`, {
-          headers: { 'x-admin-key': adminKey }
+          headers: { 'x-admin-key': 'bigchildrun2026' }
         });
-
-        if (res.status === 401) {
-          document.getElementById('login-error').classList.remove('hidden');
-          document.getElementById('loading-state').classList.add('hidden');
-          return;
-        }
-
         const data = await res.json();
-
-        // Show dashboard
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
         lucide.createIcons();
 
         allData = data.transactions || [];
         renderSummaryCards(data.summary || {});
         renderTabs(data.summary || {});
         renderCategoryStats();
+        renderInstansiStats();
         renderTable();
         renderCharts();
         document.getElementById('loading-state').classList.add('hidden');
 
       } catch (err) {
         document.getElementById('loading-state').classList.add('hidden');
-        document.getElementById('login-error').innerHTML = `<i data-lucide="alert-circle" class="w-3 h-3"></i> Gagal terhubung: ${err.message}`;
-        document.getElementById('login-error').classList.remove('hidden');
-        lucide.createIcons();
+        alert('Gagal terhubung: ' + err.message);
       }
     }
 
     function renderSummaryCards(summary) {
       const cards = document.getElementById('summary-cards');
       const totalAll = Object.values(summary).reduce((a, b) => a + b, 0);
+      
+      let totalUang = 0;
+      allData.forEach(t => {
+        if (t.status === 'success') {
+          totalUang += (t.amount || 0) + (t.unique_code || 0);
+        }
+      });
+      const fmtUang = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalUang);
+
       const items = [
-        { key: 'total', label: 'Total Deals', value: totalAll, dot: 'bg-slate-800' },
+        { key: 'pendapatan', label: 'Pendapatan (Sukses)', value: fmtUang, dot: 'bg-emerald-500' },
+        { key: 'total', label: 'Total Pendaftar', value: totalAll, dot: 'bg-slate-800' },
         { key: 'pending_verification', label: 'Verifikasi', value: summary.pending_verification || 0, dot: 'bg-indigo-500' },
         { key: 'pending_payment', label: 'Belum Bayar', value: summary.pending_payment || 0, dot: 'bg-orange-400' },
         { key: 'success', label: 'Sukses', value: summary.success || 0, dot: 'bg-teal-500' },
@@ -576,16 +512,18 @@
       ];
 
       // Clean, white card design with dots like the reference image
-      cards.innerHTML = items.map(i => `
+      cards.innerHTML = items.map(i => {
+        const isLongText = String(i.value).length > 10;
+        return `
         <div class="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col justify-center relative overflow-hidden group hover:border-teal-200 transition-colors">
           <div class="flex items-center gap-2 mb-1.5">
             <div class="w-2 h-2 rounded-full ${i.dot}"></div>
-            <p class="text-xs font-medium text-slate-500">${i.label}</p>
+            <p class="text-[11px] font-bold text-slate-500 whitespace-nowrap">${i.label}</p>
           </div>
-          <p class="text-2xl font-bold text-slate-800">${i.value}</p>
+          <p class="${isLongText ? 'text-sm sm:text-base' : 'text-2xl'} font-bold text-slate-800 truncate" title="${i.value}">${i.value}</p>
           <div class="absolute -right-4 -bottom-4 w-16 h-16 ${i.dot} opacity-5 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
         </div>
-      `).join('');
+      `}).join('');
     }
 
     function renderTabs(summary) {
@@ -670,9 +608,54 @@
       searchTimer = setTimeout(renderTable, 200);
     }
 
+    function renderInstansiStats() {
+      const stats = {};
+      allData.forEach(t => {
+        const key = t.nama_instansi ? t.nama_instansi.trim() : 'Umum/Tidak Ada';
+        if (key) {
+          stats[key] = (stats[key] || 0) + 1;
+        }
+      });
+
+      // Sort by value descending
+      const sortedStats = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+
+      const cards = document.getElementById('instansi-stats');
+      if (cards) {
+        cards.innerHTML = sortedStats.map(([k, val]) => {
+          const total = allData.length || 1;
+          const percent = Math.round((val / total) * 100);
+          return `
+          <div class="flex items-center justify-between group">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <div class="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0 group-hover:bg-teal-500 transition-colors"></div>
+              <p class="text-[11px] font-bold text-slate-600 tracking-wider truncate" title="${k}">${k}</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0 pl-2">
+                <span class="text-xs font-bold text-slate-800">${val}</span>
+            </div>
+          </div>
+        `}).join('');
+      }
+
+      // Populate instansi filter
+      const desktopFilter = document.getElementById('instansi-filter');
+      const mobileFilter = document.getElementById('instansi-filter-mobile');
+      const optionsHTML = '<option value="all">Semua Instansi</option>' + sortedStats.sort((a,b)=>a[0].localeCompare(b[0])).map(([k]) => `<option value="${k}">${k}</option>`).join('');
+      if(desktopFilter) desktopFilter.innerHTML = optionsHTML;
+      if(mobileFilter) mobileFilter.innerHTML = optionsHTML;
+    }
+
+    function getInstansiFilter() {
+      const d = document.getElementById('instansi-filter')?.value || 'all';
+      const m = document.getElementById('instansi-filter-mobile')?.value || 'all';
+      return d !== 'all' ? d : (m !== 'all' ? m : 'all');
+    }
+
     function renderTable() {
       const q = getSearchQuery();
       const cat = getCategoryFilter();
+      const instansi = getInstansiFilter();
       let rows = allData;
 
       if (currentStatus !== 'all') {
@@ -680,6 +663,9 @@
       }
       if (cat !== 'all') {
         rows = rows.filter(t => t.kategori_lari === cat);
+      }
+      if (instansi !== 'all') {
+        rows = rows.filter(t => (t.nama_instansi ? t.nama_instansi.trim() : 'Umum/Tidak Ada') === instansi);
       }
       if (q) {
         rows = rows.filter(t =>
@@ -757,15 +743,7 @@
           </td>
           <td class="px-5 py-4 whitespace-nowrap text-right">
             <div class="flex items-center justify-end gap-2">
-              ${canVerify ? `
-                <button class="action-btn btn-outline text-teal-600 hover:text-teal-700 hover:border-teal-200 hover:bg-teal-50" onclick="verifyAction('${trx.reference_id}', 'approve')">
-                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                </button>
-                <button class="action-btn btn-outline text-red-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50" onclick="openRejectModal('${trx.reference_id}')">
-                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                </button>
-              ` : ''}
-              <button class="action-btn ${canVerify ? 'btn-outline text-slate-500' : 'btn-primary'} !px-3" onclick="sendWA('${trx.reference_id}')" title="Kirim WhatsApp">
+              <button class="action-btn btn-primary !px-3" onclick="sendWA('${trx.reference_id}')" title="Kirim WhatsApp">
                 <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
                 <span>WA</span>
               </button>
@@ -802,62 +780,7 @@
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     }
 
-    async function verifyAction(referenceId, action, reason) {
-      const row = [...document.querySelectorAll('#table-body tr')].find(r => r.innerHTML.includes(referenceId));
-      if (row) row.style.opacity = '0.5';
 
-      try {
-        const res = await fetch(`${BACKEND_URL}/admin/verify`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-          body: JSON.stringify({ referenceId, action, reason, verifiedBy: 'admin' }),
-        });
-        const data = await res.json();
-
-        if (res.ok && data.ok) {
-          const trx = allData.find(t => t.reference_id === referenceId);
-          if (trx) {
-            trx.status = data.status;
-            if (reason) trx.reject_reason = reason;
-          }
-          renderTable();
-
-          const summary = {};
-          allData.forEach(t => { summary[t.status] = (summary[t.status] || 0) + 1; });
-          renderSummaryCards(summary);
-          setTab(currentStatus);
-          renderCategoryStats();
-          renderCharts();
-        } else {
-          alert('Gagal: ' + (data.error || 'Unknown error'));
-          if (row) row.style.opacity = '1';
-        }
-      } catch (err) {
-        alert('Error: ' + err.message);
-        if (row) row.style.opacity = '1';
-      }
-    }
-
-    function openRejectModal(referenceId) {
-      rejectTarget = referenceId;
-      document.getElementById('reject-modal-ref').textContent = referenceId;
-      document.getElementById('reject-reason-input').value = '';
-      document.getElementById('reject-error').classList.add('hidden');
-      document.getElementById('reject-modal').classList.remove('hidden');
-      setTimeout(() => document.getElementById('reject-reason-input').focus(), 100);
-    }
-
-    function closeRejectModal() {
-      rejectTarget = null;
-      document.getElementById('reject-modal').classList.add('hidden');
-    }
-
-    function confirmReject() {
-      const reason = document.getElementById('reject-reason-input').value.trim();
-      if (!reason) { document.getElementById('reject-error').classList.remove('hidden'); return; }
-      closeRejectModal();
-      verifyAction(rejectTarget, 'reject', reason);
-    }
 
     function openLightbox(url) {
       document.getElementById('lightbox-img').src = url;
@@ -871,9 +794,11 @@
     function exportExcel() {
       const q = getSearchQuery();
       const cat = getCategoryFilter();
+      const instansi = getInstansiFilter();
       let rows = allData;
       if (currentStatus !== 'all') rows = rows.filter(t => t.status === currentStatus);
       if (cat !== 'all') rows = rows.filter(t => t.kategori_lari === cat);
+      if (instansi !== 'all') rows = rows.filter(t => (t.nama_instansi ? t.nama_instansi.trim() : 'Umum/Tidak Ada') === instansi);
       if (q) rows = rows.filter(t =>
         (t.buyer_name || '').toLowerCase().includes(q) ||
         (t.buyer_phone || '').includes(q) ||
@@ -1037,10 +962,13 @@
     }
 
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { closeLightbox(); closeRejectModal(); }
+      if (e.key === 'Escape') { closeLightbox(); }
     });
 
-    document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+    document.addEventListener('DOMContentLoaded', () => { 
+      lucide.createIcons();
+      loadData();
+    });
   </script>
 </body>
 
