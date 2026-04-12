@@ -527,6 +527,12 @@
                         <p class="text-xs text-orange-500 font-semibold mt-2">⚠ Nominal harus TEPAT agar verifikasi berjalan otomatis</p>
                     </div>
 
+                    <div class="text-center mb-5">
+                        <p class="text-sm font-semibold text-gray-700">
+                            Batas pendaftaran dan pembayaran sampai tanggal <strong class="text-red-500">Minggu, 12 April 2026 23:59</strong>
+                        </p>
+                    </div>
+
                     <!-- No referensi -->
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 mb-5 text-center text-sm">
                         <span class="text-gray-500">No. Pendaftaran: </span>
@@ -695,8 +701,8 @@
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return await response.json();
                 } catch (error) {
-                    console.warn("Gagal mengambil data form dari API.", error);
-                    return null;
+                    console.warn("Gagal mengambil data form dari API. Menggunakan fallback hardcode.", error);
+                    return { "pageTitle": "API Form Builder", "module": "Ref Kormi Big and Child", "title": "Pendaftaran Big and Child Run", "description": "Pendaftaran Big and Child Run Tahun 2026 Kabupaten Bandung\n", "slug": "pendaftaran-big-and-child-run", "start_date": "2026-03-30 00:00:00", "end_date": "2026-04-17 23:59:00", "total_quota": 1000, "total_responses": 1, "total_questions": 13, "data": [{ "id": 2759, "question_text": "Nama Lengkap", "question_type": "text", "question_description": "Isikan nama lengkap Anda sesuai dengan kartu identitas (KTP\/SIM).", "question_placeholder": "Contoh: Budi Santoso", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2767, "question_text": "Jenis Kelamin", "question_type": "dropdown", "question_description": "Pilih jenis kelamin Anda.", "question_placeholder": "Pilih Jenis Kelamin", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": [{ "text": "Perempuan", "value": "P" }, { "text": "Laki-Laki", "value": "L" }] }, { "id": 2768, "question_text": "Nomor Whatsapp Aktif", "question_type": "number", "question_description": "Masukkan nomor telepon yang aktif dan dapat dihubungi.", "question_placeholder": "Contoh: 081234567890", "validation_rules": { "check_unique": 1, "link_unique": "https:\/\/api.bandungkab.go.id\/api\/form\/check-unique\/2768\/{answerText}", "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2760, "question_text": "Tanggal Lahir", "question_type": "date", "question_description": "Masukkan tanggal lahir Anda (contoh: 25\/08\/1990).", "question_placeholder": "dd\/mm\/yyyy", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2769, "question_text": "Email", "question_type": "text", "question_description": "Masukkan alamat email aktif Anda. Kami akan mengirimkan informasi terkait acara ke alamat email ini.", "question_placeholder": "Contoh: budi.santoso@email.com", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2770, "question_text": "No. Kontak Darurat", "question_type": "number", "question_description": "Masukkan nomor telepon orang yang dapat dihubungi dalam keadaan darurat.", "question_placeholder": "Contoh: 087888999000", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2771, "question_text": "Alamat", "question_type": "textarea", "question_description": "Masukkan alamat lengkap tempat tinggal Anda saat ini.", "question_placeholder": "Contoh: Jl. Raya Soreang No. 123, Bandung", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2766, "question_text": "Kategori Lari", "question_type": "dropdown", "question_description": "Pilih kategori lari yang sesuai dengan kemampuan dan preferensi Anda.", "question_placeholder": "Pilih Kategori Lari", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": [{ "text": "BIG - MAN 2K", "value": "BIG - MAN 2K" }, { "text": "BIG - WOMAN 2K", "value": "BIG - WOMAN 2K" }, { "text": "CHILD - BOY 2K", "value": "CHILD - BOY 2K" }, { "text": "CHILD - GIRL 2K", "value": "CHILD - GIRL 2K" }] }, { "id": 2761, "question_text": "Ukuran Kaos", "question_type": "dropdown", "question_description": "Pilih ukuran kaos yang sesuai sesuaikan dengan size chart.", "question_placeholder": "Pilih Ukuran Kaos", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": [{ "text": "L - (6 - 7 Th)", "value": "L - (6 - 7 Th)" }, { "text": "XL - (8 - 9 Th)", "value": "XL - (8 - 9 Th)" }, { "text": "S - (2 - 3 Th)", "value": "S - (2 - 3 Th)" }, { "text": "XXL\t- (10 - 11 Th)", "value": "XXL\t- (10 - 11 Th)" }, { "text": "2XL\t- (BB: 91-100)", "value": "2XL\t- (BB: 91-100)" }, { "text": "3XL - (BB: 101-110)", "value": "3XL - (BB: 101-110)" }, { "text": "4XL - (BB: 111-120)", "value": "4XL - (BB: 111-120)" }, { "text": "M - (4 - 5 Th)", "value": "M - (4 - 5 Th)" }, { "text": "5XL - (BB: 121-130)", "value": "5XL - (BB: 121-130)" }, { "text": "6XL - (BB: 131-140)", "value": "6XL - (BB: 131-140)" }, { "text": "7XL - (BB: 141-150)", "value": "7XL - (BB: 141-150)" }, { "text": "XL - (BB: 70-80)", "value": "XL - (BB: 70-80)" }] }, { "id": 2762, "question_text": "Golongan Darah", "question_type": "dropdown", "question_description": "Pilih golongan darah Anda.", "question_placeholder": "Pilih Golongan Darah", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": [{ "text": "A", "value": "A" }, { "text": "B", "value": "B" }, { "text": "O", "value": "O" }, { "text": "AB", "value": "AB" }] }, { "id": 2765, "question_text": "Riwayat Penyakit", "question_type": "textarea", "question_description": "Ketik Riwayat Penyakit apabila Ada", "question_placeholder": "Contoh : Jantung, atau (Input Berat Badan Disini)", "validation_rules": { "check_unique": false, "link_unique": null, "required": 1, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2860, "question_text": "Nama Instansi (peserta dari unsur pemerintahan, kosongkan jika masyarakat umum)", "question_type": "text", "question_description": "Nama Instansi (peserta dari unsur pemerintahan, kosongkan jika masyarakat umum)", "question_placeholder": "Contoh: Dinas Kesehatan", "validation_rules": { "check_unique": false, "link_unique": null, "required": 0, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }, { "id": 2772, "question_text": "Surat Pernyataan", "question_type": "file", "question_description": "File Surat Pernyataan", "question_placeholder": "File", "validation_rules": { "check_unique": false, "link_unique": null, "required": 0, "min_value": null, "max_value": null, "min_length": null, "max_length": null, "regex_pattern": null }, "options": null }] };
                 }
             }
 
@@ -1075,13 +1081,6 @@
                 mobileSubmitBtn.disabled = true;
                 mobileSubmitBtn.innerHTML = loadingSpinner;
 
-                const quotaData = await fetchQuota({ forceRefresh: true }); // selalu fresh saat submit
-                if (quotaData.quota_available <= 0) {
-                    showStatusMessage('Pendaftaran Ditutup', 'Mohon Maaf Quota Pendaftaran sudah Penuh', 'users');
-                    mobileNav.classList.add('hidden');
-                    return;
-                }
-
                 if (!validateAllFieldsAndNavigate()) {
                     formElements.forEach(el => el.disabled = false);
                     mobilePrevBtn.disabled = false;
@@ -1292,13 +1291,6 @@
                     if (currentStep === totalSteps) {
                         await handleFormSubmit();
                     } else {
-                        const quotaData = await fetchQuota();
-                        if (quotaData.quota_available <= 0) {
-                            showStatusMessage('Pendaftaran Ditutup', 'Mohon Maaf Quota Pendaftaran sudah Penuh', 'users');
-                            mobileNav.classList.add('hidden');
-                            return;
-                        }
-
                         if (validateCurrentStep()) { currentStep++; updateUI(); }
                         mobileNextBtn.disabled = false; mobileNextBtn.innerHTML = ''; mobileNextBtn.textContent = originalText;
                         updateUI();
@@ -1401,17 +1393,11 @@
             }
 
             async function init() {
-                const [formApiData, quotaApiData] = await Promise.all([fetchData(), fetchQuota()]);
+                const formApiData = await fetchData();
                 apiData = formApiData;
 
                 if (!apiData || !apiData.data) {
                     showStatusMessage('Mohon tunggu beberapa saat', 'Refresh untuk reload halaman ini.', 'alert-triangle');
-                    return;
-                }
-
-                const quotaAvailable = quotaApiData.quota_available;
-                if (isNaN(quotaAvailable) || quotaAvailable <= 0) {
-                    showStatusMessage('Pendaftaran Ditutup', 'Mohon Maaf Quota Pendaftaran sudah Penuh', 'users');
                     return;
                 }
 
