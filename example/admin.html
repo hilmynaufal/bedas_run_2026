@@ -855,8 +855,9 @@
     function confirmReject() {
       const reason = document.getElementById('reject-reason-input').value.trim();
       if (!reason) { document.getElementById('reject-error').classList.remove('hidden'); return; }
+      const target = rejectTarget;
       closeRejectModal();
-      verifyAction(rejectTarget, 'reject', reason);
+      verifyAction(target, 'reject', reason);
     }
 
     function openLightbox(url) {
