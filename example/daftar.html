@@ -653,6 +653,27 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
 
+            const closeDate = new Date("2026-04-13T15:00:00+07:00");
+            if (new Date() >= closeDate) {
+                const mainContent = document.querySelector('main .max-w-3xl');
+                if (mainContent) {
+                    mainContent.innerHTML = `
+                        <div class="bg-[var(--card-bg)] p-8 sm:p-12 rounded-[var(--radius-2xl)] shadow-[var(--shadow-md)] border border-[var(--border-primary)] text-center mt-8">
+                            <div class="w-24 h-24 mx-auto mb-6">
+                                <img src="https://bigandchildrun.com/assets/image/logo.png" alt="Logo Bedas Run" class="w-full h-full object-contain">
+                            </div>
+                            <h2 class="text-3xl font-extrabold text-[var(--text-primary)] mb-4">Pendaftaran Ditutup</h2>
+                            <p class="text-[var(--text-secondary)] mb-8 text-lg">Mohon maaf, pendaftaran telah ditutup pada tanggal 13 April 2026 pukul 12.00 WIB. Terima kasih atas partisipasi dan antusiasme Anda.</p>
+                            <a href="javascript:history.back()" class="inline-flex items-center justify-center px-6 py-3 rounded-[var(--radius-lg)] font-bold text-white bg-gradient-to-r from-[var(--neutral-700)] to-[var(--neutral-900)] hover:opacity-90 transition-opacity">
+                                Kembali
+                            </a>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                }
+                return;
+            }
+
             Offline.options = { checks: { xhr: { url: 'https://httpbin.org/get' } } };
 
             const API_URL = "https://api.bandungkab.go.id/api/form/format/pendaftaran-big-and-child-run";

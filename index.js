@@ -5,6 +5,7 @@ const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+const xlsx = require('xlsx');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,9 +25,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'example')));
 
 // Konfigurasi rekening bank transfer — isi via environment variables
-const BANK_NAME         = process.env.BANK_NAME         || 'BCA';
+const BANK_NAME = process.env.BANK_NAME || 'BCA';
 const BANK_ACCOUNT_NUMBER = process.env.BANK_ACCOUNT_NUMBER || '1234567890';
-const BANK_ACCOUNT_NAME = process.env.BANK_ACCOUNT_NAME  || 'Panitia Bedas Run 2026';
+const BANK_ACCOUNT_NAME = process.env.BANK_ACCOUNT_NAME || 'Panitia Bedas Run 2026';
 
 // Admin auth — set ADMIN_KEY di env, jangan hardcode
 const ADMIN_KEY = process.env.ADMIN_KEY || '';
@@ -84,13 +85,31 @@ const uploadSurat = multer({
   },
 });
 
+// Multer untuk excel bulk insert
+const uploadExcel = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/csv'
+    ];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Format tidak didukung. Gunakan file Excel (.xls, .xlsx) atau CSV.'));
+    }
+  }
+});
+
 // Mapping kategori lari → prefix BIB number
 function getBibPrefix(kategori) {
   const k = (kategori || '').toUpperCase();
-  if (k.includes('BIG')   && k.includes('WOMAN'))  return 'BW'; // harus sebelum MAN (WOMAN ⊃ MAN)
-  if (k.includes('BIG')   && k.includes('MAN'))    return 'BM';
-  if (k.includes('CHILD') && k.includes('GIRL'))   return 'CG';
-  if (k.includes('CHILD') && k.includes('BOY'))    return 'CB';
+  if (k.includes('BIG') && k.includes('WOMAN')) return 'BW'; // harus sebelum MAN (WOMAN ⊃ MAN)
+  if (k.includes('BIG') && k.includes('MAN')) return 'BM';
+  if (k.includes('CHILD') && k.includes('GIRL')) return 'CG';
+  if (k.includes('CHILD') && k.includes('BOY')) return 'CB';
   return 'XX'; // fallback jika kategori tidak dikenali
 }
 
@@ -221,24 +240,24 @@ app.post('/payment', async (req, res) => {
   const { error: insertError } = await supabase
     .from('transactions')
     .insert({
-      reference_id:     txReferenceId,
-      amount:           HARGA,
-      unique_code:      uniqueCode,
-      status:           'pending_payment',
-      buyer_name:       buyerName || fd['Nama Lengkap'] || null,
-      buyer_phone:      buyerPhone || fd['Nomor Whatsapp Aktif'] || null,
-      buyer_email:      buyerEmail || fd['Email'] || null,
-      jenis_kelamin:    fd['Jenis Kelamin'] || null,
-      tanggal_lahir:    fd['Tanggal Lahir'] || null,
-      kontak_darurat:   fd['No. Kontak Darurat'] || null,
-      alamat:           fd['Alamat'] || null,
-      kategori_lari:    fd['Kategori Lari'] || null,
-      ukuran_kaos:      fd['Ukuran Kaos'] || null,
-      golongan_darah:   fd['Golongan Darah'] || null,
+      reference_id: txReferenceId,
+      amount: HARGA,
+      unique_code: uniqueCode,
+      status: 'pending_payment',
+      buyer_name: buyerName || fd['Nama Lengkap'] || null,
+      buyer_phone: buyerPhone || fd['Nomor Whatsapp Aktif'] || null,
+      buyer_email: buyerEmail || fd['Email'] || null,
+      jenis_kelamin: fd['Jenis Kelamin'] || null,
+      tanggal_lahir: fd['Tanggal Lahir'] || null,
+      kontak_darurat: fd['No. Kontak Darurat'] || null,
+      alamat: fd['Alamat'] || null,
+      kategori_lari: fd['Kategori Lari'] || null,
+      ukuran_kaos: fd['Ukuran Kaos'] || null,
+      golongan_darah: fd['Golongan Darah'] || null,
       riwayat_penyakit: fd['Riwayat Penyakit'] || null,
       surat_pernyataan: fd['Surat Pernyataan'] || null,
-      nama_instansi:    fd['Nama Instansi (peserta dari unsur pemerintahan, kosongkan jika masyarakat umum)'] || null,
-      form_data:        Object.keys(fd).length > 0 ? fd : null,
+      nama_instansi: fd['Nama Instansi (peserta dari unsur pemerintahan, kosongkan jika masyarakat umum)'] || null,
+      form_data: Object.keys(fd).length > 0 ? fd : null,
     });
 
   if (insertError) {
@@ -525,6 +544,129 @@ app.post('/admin/verify', requireAdmin, async (req, res) => {
 
   console.log(`[admin/verify] ${referenceId} → ${newStatus} by ${verifiedBy || 'admin'}`);
   res.json({ ok: true, referenceId, status: newStatus });
+});
+
+// ─── POST /admin/bulk-insert ──────────────────────────────────────────────────
+// Admin bulk insert data pendaftaran menggunakan Excel/CSV (butuh ADMIN_KEY)
+app.post('/admin/bulk-insert', requireAdmin, uploadExcel.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'File Excel/CSV wajib diunggah' });
+  }
+
+  try {
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = xlsx.utils.sheet_to_json(sheet, { defval: '' });
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'File kosong atau tidak memiliki data' });
+    }
+
+    const maxRows = 500; // batasi demi keamanan & performa db
+    if (rows.length > maxRows) {
+      return res.status(400).json({ error: `Terlalu banyak baris. Maksimal ${maxRows} per upload.` });
+    }
+
+    let successCount = 0;
+    let failedCount = 0;
+    const errors = [];
+
+    // Proses secara berurutan untuk menjamin generate BIB aman (tidak race condition)
+    for (let i = 0; i < rows.length; i++) {
+      const rw = rows[i];
+      // Cari nama/hp, fleksibel lowercase/uppercase karena kolom excel bervariasi
+      const getCol = (possibleNames) => {
+        const key = Object.keys(rw).find(k => possibleNames.some(pn => k.toLowerCase().includes(pn.toLowerCase())));
+        return key ? rw[key] : '';
+      };
+
+      const name = getCol(['nama', 'name']) || '-';
+      const phoneRaw = getCol(['whatsapp', 'wa', 'hp', 'phone', 'telepon']) || '';
+      const email = getCol(['email']) || '';
+      
+      const formD = {};
+      Object.keys(rw).forEach(k => {
+        formD[k] = rw[k] || '';
+      });
+
+      const phone = String(phoneRaw).trim();
+      if (!phone) {
+        failedCount++;
+        errors.push(`Baris ${i + 2}: Nomor WhatsApp kosong.`);
+        continue;
+      }
+
+      // 1. Cek duplikat no HP
+      const { data: existing } = await supabase
+        .from('transactions')
+        .select('id, status')
+        .eq('buyer_phone', phone)
+        .in('status', ['pending_payment', 'pending_verification', 'success'])
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        failedCount++;
+        errors.push(`Baris ${i + 2} (${name}): Nomor HP ${phone} sudah ada (Status: ${existing[0].status})`);
+        continue;
+      }
+
+      const kategoriVal = getCol(['kategori lari', 'kategori']) || 'Lainnya';
+      const bibPrefix = getBibPrefix(kategoriVal);
+      const txReferenceId = await generateBibNumber(bibPrefix);
+
+      const HARGA = kategoriVal.toUpperCase().includes('CHILD') ? 100000 : 115000;
+      const uniqueCode = generateUniqueCode();
+
+      // Default status = success jika insert dari admin, asumsi sudah lunas kolektif.
+      // Jika butuh bisa diatur jadi pending_payment.
+      const rowStatus = getCol(['status']) || 'success';
+
+      const { error: insErr } = await supabase
+        .from('transactions')
+        .insert({
+          reference_id: txReferenceId,
+          amount: HARGA,
+          unique_code: uniqueCode,
+          status: rowStatus,
+          buyer_name: name,
+          buyer_phone: phone,
+          buyer_email: email,
+          jenis_kelamin: getCol(['jenis kelamin', 'gender']),
+          tanggal_lahir: getCol(['tanggal lahir', 'tgl lahir', 'dob']),
+          kontak_darurat: getCol(['kontak darurat', 'emergency']),
+          alamat: getCol(['alamat', 'address']),
+          kategori_lari: kategoriVal,
+          ukuran_kaos: getCol(['ukuran kaos', 'ukuran baju', 'size']),
+          golongan_darah: getCol(['golongan darah', 'goldar']),
+          riwayat_penyakit: getCol(['riwayat penyakit']),
+          nama_instansi: getCol(['instansi']),
+          form_data: formD,
+          verified_by: 'admin_bulk',
+          verified_at: rowStatus === 'success' ? new Date().toISOString() : null
+        });
+
+      if (insErr) {
+        failedCount++;
+        errors.push(`Baris ${i + 2} (${name}): DB Error - ${insErr.message}`);
+      } else {
+        successCount++;
+      }
+    }
+
+    res.json({
+      ok: true,
+      summary: {
+        total: rows.length,
+        success: successCount,
+        failed: failedCount,
+        errors: errors
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: 'Gagal memproses file Excel', detail: err.message });
+  }
 });
 
 app.listen(PORT, () => {

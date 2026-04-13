@@ -425,6 +425,11 @@
           </div>
 
           <div class="flex items-center gap-2">
+            <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+            <button onclick="document.getElementById('excel-upload').click()"
+              class="action-btn btn-outline text-slate-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-colors">
+              <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Import Excel
+            </button>
             <button onclick="exportExcel()"
               class="action-btn btn-outline text-slate-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-colors">
               <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export Excel
@@ -1040,6 +1045,51 @@
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { closeLightbox(); closeRejectModal(); }
     });
+
+    async function handleExcelUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!confirm(`Anda yakin ingin melakukan bulk insert data dari ${file.name}?`)) {
+        event.target.value = '';
+        return;
+      }
+
+      document.getElementById('loading-state').classList.remove('hidden');
+      document.getElementById('table-wrapper').classList.add('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/admin/bulk-insert`, {
+          method: 'POST',
+          headers: { 'x-admin-key': adminKey },
+          body: formData
+        });
+        
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Terjadi kesalahan');
+
+        let msg = `Bulk insert selesai!\nSukses: ${result.summary.success}\nGagal: ${result.summary.failed}`;
+        if (result.summary.errors && result.summary.errors.length > 0) {
+          msg += `\n\nCatatan:\n${result.summary.errors.slice(0, 7).join('\n')}`;
+          if (result.summary.errors.length > 7) {
+            msg += `\n...dan ${result.summary.errors.length - 7} error lainnya.`;
+          }
+        }
+        
+        alert(msg);
+        loadData();
+      } catch (err) {
+        alert('Gagal import: ' + err.message);
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('table-wrapper').classList.remove('hidden');
+      } finally {
+        event.target.value = ''; // reset input
+      }
+    }
 
     document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
   </script>

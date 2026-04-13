@@ -690,6 +690,37 @@
                 applyTheme(next);
                 localStorage.setItem('bedasrun-theme', next);
             });
+
+            const closeDate = new Date("2026-04-13T15:00:00+07:00");
+            if (new Date() >= closeDate) {
+                document.querySelector('.page-container').innerHTML = `
+                    <style>
+                        .closed-card { background: white; padding: 40px 24px; border-radius: var(--radius-2xl); border: 1px solid var(--neutral-200); text-align: center; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); animation: slideUp 0.4s ease-out; }
+                        .closed-icon-wrapper { width: 90px; height: 90px; margin: 0 auto 20px; }
+                        .closed-title { font-size: 24px; font-weight: 800; color: var(--neutral-900); margin-bottom: 12px; letter-spacing: -0.5px; }
+                        .closed-desc { color: var(--neutral-500); margin-bottom: 28px; line-height: 1.6; font-size: 14px; }
+                        .closed-btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 28px; border-radius: var(--radius-xl); font-weight: 700; color: white; background: var(--neutral-900); text-decoration: none; font-size: 15px; transition: all 0.2s; }
+                        
+                        .dark-theme .closed-card { background: #1e1e1e; border-color: #333; }
+                        .dark-theme .closed-title { color: white; }
+                        .dark-theme .closed-desc { color: #aaa; }
+                        .dark-theme .closed-btn { background: var(--primary-500); color: #000; }
+                    </style>
+                    <div class="closed-card">
+                        <div class="closed-icon-wrapper">
+                            <img src="https://bigandchildrun.com/assets/image/logo.png" alt="Logo Bedas Run" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        <h2 class="closed-title">Sistem Ditutup</h2>
+                        <p class="closed-desc">Pendaftaran dan upload pembayaran telah resmi ditutup pada 13 April 2026 pukul 12.00 WIB. Terima kasih atas partisipasi Anda.</p>
+                        <a href="javascript:history.back()" class="closed-btn">
+                            Kembali
+                        </a>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
             document.getElementById('phone-input').focus();
         });
 
