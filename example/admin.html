@@ -431,6 +431,10 @@
               class="action-btn btn-outline text-slate-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-colors">
               <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Import Excel
             </button>
+            <button onclick="exportRawSuccessExcel()"
+              class="action-btn btn-outline text-teal-600 border-teal-200 hover:border-teal-400 hover:bg-teal-50 transition-colors">
+              <i data-lucide="database" class="w-3.5 h-3.5"></i> Raw Success
+            </button>
             <button onclick="exportExcel()"
               class="action-btn btn-outline text-slate-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-colors">
               <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export Excel
@@ -896,6 +900,37 @@
     }
 
     // ─── EXPORT EXCEL ────────────────────────────────────────────────────────────
+    function exportRawSuccessExcel() {
+      const rows = allData.filter(t => t.status === 'success');
+      if (rows.length === 0) {
+        alert('Tidak ada data success untuk di-export.');
+        return;
+      }
+
+      const allKeys = new Set();
+      rows.forEach(r => Object.keys(r).forEach(k => allKeys.add(k)));
+      const headers = Array.from(allKeys);
+
+      const wsData = [
+        headers,
+        ...rows.map(t => headers.map(h => {
+           let val = t[h];
+           if (val === null || val === undefined) return '';
+           if (typeof val === 'object') return JSON.stringify(val);
+           return val;
+        }))
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      const colWidths = headers.map(() => ({ wch: 15 }));
+      ws['!cols'] = colWidths;
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Raw Success');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `bigandchildrun-raw-success-${dateStr}.xlsx`);
+    }
+
     function exportExcel() {
       const q = getSearchQuery();
       const cat = getCategoryFilter();

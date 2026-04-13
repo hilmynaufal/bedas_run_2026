@@ -460,7 +460,7 @@ app.get('/admin/transactions', requireAdmin, async (req, res) => {
 
   let query = supabase
     .from('transactions')
-    .select('reference_id, buyer_name, buyer_phone, buyer_email, nama_instansi, kategori_lari, ukuran_kaos, amount, unique_code, status, payment_proof_url, surat_pernyataan_url, reject_reason, verified_by, verified_at, created_at, updated_at')
+    .select('*')
     .order('created_at', { ascending: false });
 
   if (status && ALLOWED_STATUSES.includes(status)) {
@@ -584,7 +584,7 @@ app.post('/admin/bulk-insert', requireAdmin, uploadExcel.single('file'), async (
       const name = getCol(['nama', 'name']) || '-';
       const phoneRaw = getCol(['whatsapp', 'wa', 'hp', 'phone', 'telepon']) || '';
       const email = getCol(['email']) || '';
-      
+
       const formD = {};
       Object.keys(rw).forEach(k => {
         formD[k] = rw[k] || '';
