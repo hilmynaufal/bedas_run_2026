@@ -325,7 +325,7 @@
             </div>
             <div class="w-[1px] h-4 bg-slate-200"></div>
             <select id="category-filter"
-              onchange="document.getElementById('category-filter-mobile').value=this.value; renderTable()"
+              onchange="document.getElementById('category-filter-mobile').value=this.value; renderTable(true)"
               class="bg-transparent py-1.5 pl-2 pr-8 text-sm focus:outline-none text-slate-600 font-medium cursor-pointer">
               <option value="all">Semua Kategori</option>
               <option value="BIG - MAN 2K">BIG - MAN 2K</option>
@@ -406,7 +406,7 @@
               class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-teal-400">
           </div>
           <select id="category-filter-mobile"
-            onchange="document.getElementById('category-filter').value=this.value; renderTable()"
+            onchange="document.getElementById('category-filter').value=this.value; renderTable(true)"
             class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-400">
             <option value="all">Semua Kategori</option>
             <option value="BIG - MAN 2K">BIG - MAN 2K</option>
@@ -425,7 +425,8 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+            <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv" class="hidden"
+              onchange="handleExcelUpload(event)">
             <button onclick="document.getElementById('excel-upload').click()"
               class="action-btn btn-outline text-slate-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-colors">
               <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i> Import Excel
@@ -503,6 +504,8 @@
     let currentStatus = 'all';
     let rejectTarget = null;
     let searchTimer = null;
+    let currentPage = 1;
+    const ITEMS_PER_PAGE = 50;
 
     // SaaS style status colors (softer backgrounds, distinct dots)
     const STATUS_CONFIG = {
@@ -557,7 +560,7 @@
         renderSummaryCards(data.summary || {});
         renderTabs(data.summary || {});
         renderCategoryStats();
-        renderTable();
+        renderTable(true);
         renderCharts();
         document.getElementById('loading-state').classList.add('hidden');
 
@@ -620,7 +623,7 @@
         rejected: allData.filter(t => t.status === 'rejected').length,
         cancelled: allData.filter(t => t.status === 'cancelled').length,
       });
-      renderTable();
+      renderTable(true);
     }
 
     function renderCategoryStats() {
@@ -672,10 +675,16 @@
 
     function onSearch() {
       clearTimeout(searchTimer);
-      searchTimer = setTimeout(renderTable, 200);
+      searchTimer = setTimeout(() => renderTable(true), 200);
     }
 
-    function renderTable() {
+    function changePage(p) {
+      currentPage = p;
+      renderTable();
+    }
+
+    function renderTable(resetPage = false) {
+      if (resetPage) currentPage = 1;
       const q = getSearchQuery();
       const cat = getCategoryFilter();
       let rows = allData;
@@ -707,9 +716,16 @@
       empty.classList.add('hidden');
       wrapper.classList.remove('hidden');
 
+      const totalPages = Math.ceil(rows.length / ITEMS_PER_PAGE);
+      if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+      const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+      const endIdx = startIdx + ITEMS_PER_PAGE;
+      const paginatedRows = rows.slice(startIdx, endIdx);
+
       const fmt = (n) => new Intl.NumberFormat('id-ID').format(n || 0);
 
-      tbody.innerHTML = rows.map(trx => {
+      tbody.innerHTML = paginatedRows.map(trx => {
         const cfg = STATUS_CONFIG[trx.status] || STATUS_CONFIG.all;
         const totalTransfer = (trx.amount || 0) + (trx.unique_code || 0);
         const canVerify = trx.status === 'pending_verification';
@@ -780,8 +796,14 @@
       }).join('');
 
       document.getElementById('table-footer').innerHTML = `
-        <span>Total <strong class="text-slate-700">${rows.length}</strong> entri ditampilkan</span>
-        <span>Terakhir diperbarui: ${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+        <div class="flex items-center gap-4">
+          <span>Menampilkan <strong class="text-slate-700">${rows.length > 0 ? startIdx + 1 : 0}-${Math.min(endIdx, rows.length)}</strong> dari <strong class="text-slate-700">${rows.length}</strong> entri</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="changePage(currentPage - 1)" class="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-50 transition-colors" ${currentPage === 1 ? 'disabled' : ''}><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <span class="font-medium px-2 text-slate-500">Hal ${currentPage} / ${totalPages || 1}</span>
+            <button onclick="changePage(currentPage + 1)" class="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-50 transition-colors" ${currentPage === totalPages || totalPages === 0 ? 'disabled' : ''}><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        </div>
       `;
       lucide.createIcons();
     }
@@ -1068,7 +1090,7 @@
           headers: { 'x-admin-key': adminKey },
           body: formData
         });
-        
+
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || 'Terjadi kesalahan');
 
@@ -1079,7 +1101,7 @@
             msg += `\n...dan ${result.summary.errors.length - 7} error lainnya.`;
           }
         }
-        
+
         alert(msg);
         loadData();
       } catch (err) {
