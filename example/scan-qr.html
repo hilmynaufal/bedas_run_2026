@@ -486,12 +486,18 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 16px;">
-                    <button id="claim-btn" class="btn btn-primary" style="display: none;">
-                        <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
-                        <span>Tandai Telah Diambil</span>
-                    </button>
-                    <button id="reset-btn" class="btn btn-outline" style="margin-top: 12px;">
+                <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; gap: 12px;">
+                        <button id="claim-self-btn" class="btn btn-primary" style="display: none; flex: 1; font-size: 13px; padding: 12px 8px;">
+                            <i data-lucide="user-check" style="width:18px;height:18px;"></i>
+                            <span>Oleh Pendaftar</span>
+                        </button>
+                        <button id="claim-wali-btn" class="btn btn-outline" style="display: none; flex: 1; font-size: 13px; padding: 12px 8px;">
+                            <i data-lucide="users" style="width:18px;height:18px;"></i>
+                            <span>Diwalikan</span>
+                        </button>
+                    </div>
+                    <button id="reset-btn" class="btn btn-dark" style="margin-top: 4px;">
                         <span>Reset & Scan Lagi</span>
                     </button>
                 </div>
@@ -550,7 +556,8 @@
             document.getElementById('reset-btn').addEventListener('click', resetScanner);
 
             // Action: Claim
-            document.getElementById('claim-btn').addEventListener('click', claimRacepack);
+            document.getElementById('claim-self-btn').addEventListener('click', () => claimRacepack('self'));
+            document.getElementById('claim-wali-btn').addEventListener('click', () => claimRacepack('wali'));
         });
 
         function applyTheme(theme) {
@@ -666,12 +673,14 @@
             document.getElementById('res-kaos').textContent = trx.ukuran_kaos || '-';
 
             const badgeElement = document.getElementById('badge-status');
-            const claimBtn = document.getElementById('claim-btn');
+            const claimSelfBtn = document.getElementById('claim-self-btn');
+            const claimWaliBtn = document.getElementById('claim-wali-btn');
 
             if (trx.status !== 'success') {
                 badgeElement.className = 'badge badge-danger';
                 badgeElement.innerHTML = `<i data-lucide="x-circle"></i>Status Pendaftaran Belum Lunas (${trx.status})`;
-                claimBtn.style.display = 'none';
+                claimSelfBtn.style.display = 'none';
+                claimWaliBtn.style.display = 'none';
             } 
             else if (trx.is_racepack_claimed) {
                 // Sudah diklaim
@@ -685,13 +694,15 @@
                         <span style="font-size:11px; opacity:0.8; font-weight:500;">Oleh: ${trx.racepack_claimed_by || '-'} pada ${waktuAmbil}</span>
                     </div>
                 `;
-                claimBtn.style.display = 'none';
+                claimSelfBtn.style.display = 'none';
+                claimWaliBtn.style.display = 'none';
             } 
             else {
                 // Bisa diklaim
                 badgeElement.className = 'badge badge-success';
                 badgeElement.innerHTML = `<i data-lucide="check-circle-2"></i>SIAP DIAMBIL`;
-                claimBtn.style.display = 'inline-flex';
+                claimSelfBtn.style.display = 'inline-flex';
+                claimWaliBtn.style.display = 'inline-flex';
             }
 
             lucide.createIcons();
@@ -708,14 +719,22 @@
             }
         }
 
-        async function claimRacepack() {
-            const adminName = prompt("Nama Admin/Panitia: (Opsional)", "Panitia 1");
-            if(adminName === null) return; // cancelled prompt
+        async function claimRacepack(mode) {
+            let adminName = 'Peserta Pendaftar';
+            
+            if (mode === 'wali') {
+                adminName = prompt("Diterima oleh: (Opsional)", "");
+                if (adminName === null) return; // cancelled prompt
+                if (adminName.trim() === '') adminName = 'Wali Peserta';
+            }
 
-            const btn = document.getElementById('claim-btn');
+            const btn = document.getElementById(mode === 'self' ? 'claim-self-btn' : 'claim-wali-btn');
+            const otherBtn = document.getElementById(mode === 'self' ? 'claim-wali-btn' : 'claim-self-btn');
+            
             const originalBtn = btn.innerHTML;
             btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i><span>Memproses...</span>`;
             btn.disabled = true;
+            otherBtn.disabled = true;
             lucide.createIcons();
 
             try {
@@ -728,7 +747,7 @@
                     },
                     body: JSON.stringify({
                         referenceId: currentBib,
-                        adminName: adminName || 'Admin'
+                        adminName: adminName
                     })
                 });
 
@@ -738,6 +757,7 @@
                     alert(data.error || 'Gagal menandai diambil.');
                     btn.innerHTML = originalBtn;
                     btn.disabled = false;
+                    otherBtn.disabled = false;
                     return;
                 }
 
@@ -751,6 +771,7 @@
                 console.error(e);
                 btn.innerHTML = originalBtn;
                 btn.disabled = false;
+                otherBtn.disabled = false;
             }
         }
 
