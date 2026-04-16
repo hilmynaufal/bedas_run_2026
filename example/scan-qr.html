@@ -636,7 +636,7 @@
 
                 if (!res.ok) {
                     alert(data.error || 'Data peserta tidak ditemukan.');
-                    if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.resume();
+                    if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
                     return;
                 }
 
@@ -645,7 +645,7 @@
             } catch(e) {
                 alert('Gagal menghubungi server server.');
                 console.error(e);
-                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.resume();
+                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) html5QrcodeScanner.resume();
             } finally {
                 searchBtnDiv.innerHTML = originalBtnHtml;
                 lucide.createIcons();
@@ -703,7 +703,7 @@
             document.getElementById('result-section').style.display = 'none';
             document.querySelector('.scan-container').style.display = 'flex';
             
-            if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) {
+            if(html5QrcodeScanner && html5QrcodeScanner.getState() === 3) {
                html5QrcodeScanner.resume();
             }
         }
