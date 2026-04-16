@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Scan Racepack | Big & Child Run</title>
+    <meta name="description" content="Sistem validasi dan pengambilan racepack peserta.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- QR Code Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        :root {
+            --primary-600: #0f766e;
+            --primary-500: #14b8a6;
+            --primary-400: #2dd4bf;
+            --primary-100: #ccfbf1;
+            --primary-50: #f0fdfa;
+            --neutral-900: #1a1a1a;
+            --neutral-800: #2c2c2e;
+            --neutral-700: #3a3a3c;
+            --neutral-600: #48484a;
+            --neutral-500: #8e8e93;
+            --neutral-400: #c7c7cc;
+            --neutral-300: #d1d1d6;
+            --neutral-200: #e5e5ea;
+            --neutral-100: #f2f2f7;
+            --neutral-50: #f9f9fb;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+            --bg-primary: var(--neutral-100);
+            
+            --success-500: #10b981;
+            --danger-500: #ef4444;
+            --warning-500: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--neutral-900);
+            transition: background-color 0.3s;
+        }
+
+        /* ===== DARK THEME ===== */
+        .dark-theme {
+            --bg-primary: #121212;
+            --neutral-900: #ffffff;
+            --neutral-800: #e5e5ea;
+            --neutral-700: #d1d1d6;
+            --neutral-600: #8e8e93;
+            --neutral-100: #1e1e1e;
+            --neutral-50: #1a1a1a;
+            --neutral-200: #2c2c2e;
+            --neutral-300: #3a3a3c;
+        }
+
+        .dark-theme body {
+            color: #f0f0f0;
+        }
+
+        .dark-theme .app-header {
+            background: rgba(20, 20, 20, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .dark-theme .app-title {
+            color: white;
+        }
+
+        .dark-theme .icon-button {
+            border-color: rgba(255, 255, 255, 0.15);
+            color: #ccc;
+        }
+
+        .dark-theme .glass-card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            color: white;
+        }
+
+        .dark-theme .input-wrapper input {
+            background: #2c2c2e;
+            color: white;
+            border-color: #3a3a3c;
+        }
+
+        /* ===== LAYOUT ===== */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 12px 16px;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .app-logo img {
+            width: 34px;
+            height: 34px;
+        }
+
+        .app-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--neutral-900);
+            letter-spacing: -0.3px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            color: var(--neutral-600);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 84px 16px 40px 16px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .header-section h1 {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .header-section p {
+            font-size: 14px;
+            color: var(--neutral-500);
+        }
+
+        .glass-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            border: 1px solid var(--neutral-200);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== INPUTS & BUTTONS ===== */
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            color: var(--neutral-400);
+            pointer-events: none;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            border: 2px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-500);
+            color: white;
+            box-shadow: 0 8px 16px rgba(20, 184, 166, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-600);
+            transform: translateY(-2px);
+        }
+
+        .btn-dark {
+            background: var(--neutral-900);
+            color: white;
+        }
+
+        .dark-theme .btn-dark {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--neutral-200);
+            color: var(--neutral-700);
+        }
+
+        .dark-theme .btn-outline {
+            border-color: #333;
+            color: #fff;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ===== SCANNER AREA ===== */
+        #qr-reader {
+            width: 100%;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 2px solid var(--neutral-200);
+            background: #000;
+        }
+        
+        #qr-reader video {
+            object-fit: cover;
+            border-radius: inherit;
+        }
+
+        .dark-theme #qr-reader {
+            border-color: #333;
+        }
+
+        .scan-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--neutral-500);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        .dark-theme .divider::before, .dark-theme .divider::after {
+            border-bottom-color: var(--neutral-700);
+        }
+
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+
+        /* ===== RESULT CARD ===== */
+        .result-wrapper {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 14px;
+            text-align: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .badge-warning { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+
+        .dark-theme .badge-success { background: rgba(22, 101, 52, 0.3); color: #4ade80; border-color: rgba(74, 222, 128, 0.2); }
+        .dark-theme .badge-danger { background: rgba(153, 27, 27, 0.3); color: #f87171; border-color: rgba(248, 113, 113, 0.2); }
+        .dark-theme .badge-warning { background: rgba(133, 77, 14, 0.3); color: #facc15; border-color: rgba(250, 204, 21, 0.2); }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: var(--neutral-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--neutral-100);
+        }
+
+        .dark-theme .info-item {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.05);
+        }
+
+        .info-label {
+            color: var(--neutral-500);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            font-weight: 800;
+            font-size: 14px;
+            text-align: right;
+            max-width: 60%;
+            word-wrap: break-word;
+        }
+
+        .info-value.highlight {
+            color: var(--primary-500);
+            font-size: 18px;
+        }
+        
+    </style>
+</head>
+
+<body class="light-theme">
+
+    <header class="app-header">
+        <div class="header-inner">
+            <a href="#" class="app-logo">
+                <img id="header-logo" src="https://bigandchildrun.com/assets/image/logo.png" alt="Logo Bedas Run">
+                <span class="app-title">Admin Scanner</span>
+            </a>
+            <button class="icon-button" id="theme-toggle" aria-label="Toggle tema">
+                <i data-lucide="moon" style="width:18px;height:18px;"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="page-container">
+
+        <!-- AUTH SECTION -->
+        <div id="auth-section" class="glass-card">
+            <div class="header-section" style="margin-bottom: 20px;">
+                <i data-lucide="lock" style="width:40px;height:40px;margin:0 auto 12px;color:var(--primary-500);"></i>
+                <h2>Verifikasi Admin</h2>
+                <p>Masukkan admin key untuk mengakses fitur scanner.</p>
+            </div>
+            <div class="input-wrapper">
+                <i class="input-icon" data-lucide="key"></i>
+                <input type="password" id="admin-key-input" placeholder="Admin Key" />
+            </div>
+            <button class="btn btn-primary" id="login-btn">
+                <span>Login Scanner</span>
+            </button>
+        </div>
+
+        <!-- MAIN SCANNER SECTION -->
+        <div id="scanner-section" style="display: none;">
+            
+            <div class="header-section">
+                <h1>Scan Racepack</h1>
+                <p>Arahkan kamera ke QR Code e-tiket peserta.</p>
+            </div>
+
+            <div class="glass-card scan-container">
+                <div id="qr-reader"></div>
+
+                <div class="divider">ATAU CARI MANUAL</div>
+
+                <form id="search-form">
+                    <div class="input-wrapper">
+                        <i class="input-icon" data-lucide="hash"></i>
+                        <input type="text" id="bib-input" placeholder="Masukkan No. BIB (cth: BM0001)" required style="text-transform: uppercase;">
+                    </div>
+                    <button type="submit" id="search-btn" class="btn btn-dark">
+                        <i data-lucide="search" style="width:18px;height:18px;"></i>
+                        <span>Cari Data</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- HASIL / RESULT SECTION -->
+            <div class="glass-card result-wrapper" id="result-section">
+                <div id="badge-status"></div>
+                
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">No. BIB</span>
+                        <span class="info-value highlight" id="res-bib">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Nama Peserta</span>
+                        <span class="info-value" id="res-name">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Kategori Lari</span>
+                        <span class="info-value" id="res-kat">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ukuran Kaos</span>
+                        <span class="info-value" id="res-kaos">-</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <button id="claim-btn" class="btn btn-primary" style="display: none;">
+                        <i data-lucide="check-circle" style="width:20px;height:20px;"></i>
+                        <span>Tandai Telah Diambil</span>
+                    </button>
+                    <button id="reset-btn" class="btn btn-outline" style="margin-top: 12px;">
+                        <span>Reset & Scan Lagi</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- AUDIO BEEP FOR SCANNER -->
+    <audio id="beep-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <script>
+        const BACKEND_URL = 'https://api.bigandchildrun.com'; // Ubah sesuai env asli atau biarkan jika prod
+
+        let adminKey = localStorage.getItem('bedas_admin_key') || '';
+        let html5QrcodeScanner;
+        let currentBib = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // Theme Management
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('bedasrun-theme') || 'light';
+            applyTheme(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const next = document.body.classList.contains('light-theme') ? 'dark' : 'light';
+                applyTheme(next);
+                localStorage.setItem('bedasrun-theme', next);
+            });
+
+            // Auth Check
+            if (adminKey) {
+                showScanner();
+            }
+
+            // Auth Login
+            document.getElementById('login-btn').addEventListener('click', () => {
+                const key = document.getElementById('admin-key-input').value;
+                if (!key) return alert('Key tidak boleh kosong!');
+                adminKey = key;
+                localStorage.setItem('bedas_admin_key', adminKey);
+                showScanner();
+            });
+
+            // Form Search Manual
+            document.getElementById('search-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const bib = document.getElementById('bib-input').value.trim().toUpperCase();
+                if (bib) processBibNumber(bib);
+            });
+
+            // Action: Reset
+            document.getElementById('reset-btn').addEventListener('click', resetScanner);
+
+            // Action: Claim
+            document.getElementById('claim-btn').addEventListener('click', claimRacepack);
+        });
+
+        function applyTheme(theme) {
+            document.body.className = theme + '-theme';
+            document.getElementById('theme-toggle').innerHTML = `<i data-lucide="${theme === 'light' ? 'moon' : 'sun'}" style="width:18px;height:18px;"></i>`;
+            lucide.createIcons();
+        }
+
+        function showScanner() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('scanner-section').style.display = 'block';
+            
+            initScanner();
+        }
+
+        function initScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "qr-reader",
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                /* verbose= */ false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Decoded text expected to be JSON string from e-tiket
+            try {
+                // Mainkan suara beep
+                const beep = document.getElementById('beep-sound');
+                beep.currentTime = 0;
+                beep.play().catch(e => {});
+
+                // Hentikan sementara scanner supaya tidak terbaca double
+                html5QrcodeScanner.pause(true);
+
+                let data;
+                try {
+                    data = JSON.parse(decodedText);
+                } catch(err) {
+                    // Jika bukan JSON, mungkin langsung teks BIB
+                    data = { ref: decodedText.trim() };
+                }
+
+                if (data && data.ref) {
+                    processBibNumber(data.ref);
+                } else {
+                    alert('QR Code tidak valid atau bukan e-tiket acara ini.');
+                    html5QrcodeScanner.resume();
+                }
+
+            } catch (error) {
+                console.error("Scan Error", error);
+                html5QrcodeScanner.resume();
+            }
+        }
+
+        function onScanFailure(error) {
+            // silent fail, terus mencari QR
+        }
+
+        async function processBibNumber(bib) {
+            // Tampilkan loading di button manual jika dari input
+            const searchBtnDiv = document.getElementById('search-btn');
+            const originalBtnHtml = searchBtnDiv.innerHTML;
+            searchBtnDiv.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i><span>Memuat...</span>`;
+            lucide.createIcons();
+            
+            try {
+                // Fetch data dari API backend baru
+                const url = BACKEND_URL.includes('localhost') ? 'http://localhost:3000' : BACKEND_URL;
+                const res = await fetch(`${url}/admin/scan/${bib}`, {
+                    headers: { 'x-admin-key': adminKey }
+                });
+
+                const data = await res.json();
+
+                if (res.status === 401) {
+                    alert('Admin Key Salah atau Sesi Berakhir.');
+                    localStorage.removeItem('bedas_admin_key');
+                    location.reload();
+                    return;
+                }
+
+                if (!res.ok) {
+                    alert(data.error || 'Data peserta tidak ditemukan.');
+                    if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.resume();
+                    return;
+                }
+
+                showResult(data.transaction);
+
+            } catch(e) {
+                alert('Gagal menghubungi server server.');
+                console.error(e);
+                if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) html5QrcodeScanner.resume();
+            } finally {
+                searchBtnDiv.innerHTML = originalBtnHtml;
+                lucide.createIcons();
+            }
+        }
+
+        function showResult(trx) {
+            currentBib = trx.reference_id;
+
+            // Sembunyikan form list dan tampilkan hasil
+            document.querySelector('.scan-container').style.display = 'none';
+            const resSection = document.getElementById('result-section');
+            resSection.style.display = 'flex';
+
+            document.getElementById('res-bib').textContent = trx.reference_id;
+            document.getElementById('res-name').textContent = trx.buyer_name;
+            document.getElementById('res-kat').textContent = trx.kategori_lari || '-';
+            document.getElementById('res-kaos').textContent = trx.ukuran_kaos || '-';
+
+            const badgeElement = document.getElementById('badge-status');
+            const claimBtn = document.getElementById('claim-btn');
+
+            if (trx.status !== 'success') {
+                badgeElement.className = 'badge badge-danger';
+                badgeElement.innerHTML = `<i data-lucide="x-circle"></i>Status Pendaftaran Belum Lunas (${trx.status})`;
+                claimBtn.style.display = 'none';
+            } 
+            else if (trx.is_racepack_claimed) {
+                // Sudah diklaim
+                const waktuAmbil = trx.racepack_claimed_at ? new Date(trx.racepack_claimed_at).toLocaleString('id-ID') : '-';
+                badgeElement.className = 'badge badge-warning';
+                badgeElement.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:4px">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <i data-lucide="alert-triangle"></i><span>SUDAH DIAMBIL</span>
+                        </div>
+                        <span style="font-size:11px; opacity:0.8; font-weight:500;">Oleh: ${trx.racepack_claimed_by || '-'} pada ${waktuAmbil}</span>
+                    </div>
+                `;
+                claimBtn.style.display = 'none';
+            } 
+            else {
+                // Bisa diklaim
+                badgeElement.className = 'badge badge-success';
+                badgeElement.innerHTML = `<i data-lucide="check-circle-2"></i>SIAP DIAMBIL`;
+                claimBtn.style.display = 'inline-flex';
+            }
+
+            lucide.createIcons();
+        }
+
+        function resetScanner() {
+            currentBib = null;
+            document.getElementById('bib-input').value = '';
+            document.getElementById('result-section').style.display = 'none';
+            document.querySelector('.scan-container').style.display = 'flex';
+            
+            if(html5QrcodeScanner && html5QrcodeScanner.getState() === 2) {
+               html5QrcodeScanner.resume();
+            }
+        }
+
+        async function claimRacepack() {
+            const adminName = prompt("Nama Admin/Panitia: (Opsional)", "Panitia 1");
+            if(adminName === null) return; // cancelled prompt
+
+            const btn = document.getElementById('claim-btn');
+            const originalBtn = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i><span>Memproses...</span>`;
+            btn.disabled = true;
+            lucide.createIcons();
+
+            try {
+                const url = BACKEND_URL.includes('localhost') ? 'http://localhost:3000' : BACKEND_URL;
+                const res = await fetch(`${url}/admin/racepack/claim`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'x-admin-key': adminKey
+                    },
+                    body: JSON.stringify({
+                        referenceId: currentBib,
+                        adminName: adminName || 'Admin'
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert(data.error || 'Gagal menandai diambil.');
+                    btn.innerHTML = originalBtn;
+                    btn.disabled = false;
+                    return;
+                }
+
+                alert('SUKSES: Racepack berhasil ditandai telah diambil!');
+                
+                // Segarkan bagian result agar badge status berubah menjadi "SUDAH DIAMBIL"
+                processBibNumber(currentBib);
+
+            } catch(e) {
+                alert('Terjadi kesalahan jaringan.');
+                console.error(e);
+                btn.innerHTML = originalBtn;
+                btn.disabled = false;
+            }
+        }
+
+    </script>
+</body>
+
+</html>

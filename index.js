@@ -669,6 +669,78 @@ app.post('/admin/bulk-insert', requireAdmin, uploadExcel.single('file'), async (
   }
 });
 
+// ─── GET /admin/scan/:ref ─────────────────────────────────────────────────────
+// Mengambil detail pendaftaran untuk discan admin saat pengambilan racepack
+app.get('/admin/scan/:ref', requireAdmin, async (req, res) => {
+  const { ref } = req.params;
+
+  const { data: trx, error: dbError } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('reference_id', ref)
+    .single();
+
+  if (dbError || !trx) {
+    return res.status(404).json({ error: 'Transaksi tidak ditemukan', detail: dbError ? dbError.message : 'Not Found' });
+  }
+
+  res.json({ transaction: trx });
+});
+
+// ─── POST /admin/racepack/claim ───────────────────────────────────────────────
+// Menandai tiket/racepack peserta bahwa telah diambil
+app.post('/admin/racepack/claim', requireAdmin, async (req, res) => {
+  const { referenceId, adminName } = req.body;
+
+  if (!referenceId) {
+    return res.status(400).json({ error: 'referenceId wajib disertakan' });
+  }
+
+  // 1. Ambil transaksi
+  const { data: trx, error: findError } = await supabase
+    .from('transactions')
+    .select('reference_id, status, is_racepack_claimed')
+    .eq('reference_id', referenceId)
+    .single();
+
+  if (findError || !trx) {
+    return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+  }
+
+  // Cek apakah status success (sudah lunas & terverifikasi)
+  if (trx.status !== 'success') {
+    return res.status(400).json({ 
+      error: 'Peserta belum lunas', 
+      detail: `Status pendaftaran: ${trx.status}` 
+    });
+  }
+
+  // Cek apakah sudah pernah diklaim
+  if (trx.is_racepack_claimed) {
+    return res.status(400).json({ 
+      error: 'Racepack sudah diambil', 
+      detail: 'Racepack untuk BIB ini sudah ditandai telah di-claim sebelumnya.' 
+    });
+  }
+
+  const { error: updateError } = await supabase
+    .from('transactions')
+    .update({
+      is_racepack_claimed: true,
+      racepack_claimed_at: new Date().toISOString(),
+      racepack_claimed_by: adminName || 'Admin Scanner',
+      updated_at: new Date().toISOString()
+    })
+    .eq('reference_id', referenceId);
+
+  if (updateError) {
+    return res.status(500).json({ error: 'Gagal memperbarui status racepack', detail: updateError.message });
+  }
+
+  console.log(`[admin/racepack/claim] Racepack sukses diklaim: ${referenceId}`);
+  res.json({ ok: true, referenceId, message: 'Berhasil ditandai telah diambil!' });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
