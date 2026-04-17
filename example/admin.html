@@ -796,6 +796,12 @@
                   <i data-lucide="x" class="w-3.5 h-3.5"></i>
                 </button>
               ` : ''}
+              ${(trx.status === 'success' && !trx.is_racepack_claimed) ? `
+                <button class="action-btn btn-outline text-green-600 hover:text-green-700 hover:border-green-200 hover:bg-green-50 !px-3" onclick="claimRacepackAdmin('${trx.reference_id}')" title="Tandai Racepack Diambil">
+                  <i data-lucide="package-check" class="w-3.5 h-3.5"></i>
+                  <span>Ambil</span>
+                </button>
+              ` : ''}
               <button class="action-btn ${canVerify ? 'btn-outline text-slate-500' : 'btn-primary'} !px-3" onclick="sendWA('${trx.reference_id}')" title="Kirim WhatsApp">
                 <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
                 <span>WA</span>
@@ -903,6 +909,40 @@
     }
     function closeLightbox() {
       document.getElementById('lightbox').classList.remove('open');
+    }
+
+    async function claimRacepackAdmin(referenceId) {
+      if (!confirm(`Tandai racepack untuk ref ${referenceId} sebagai sudah diambil?`)) return;
+      
+      const adminName = prompt("Nama pengambil (kosongkan jika diambil sendiri):", "");
+      if (adminName === null) return; // dibatalkan
+      const finalName = adminName.trim() === '' ? 'Peserta Pendaftar (Manual Web)' : adminName;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/admin/racepack/claim`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-admin-key': adminKey
+            },
+            body: JSON.stringify({
+                referenceId: referenceId,
+                adminName: finalName
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            alert(data.error || 'Gagal menandai diambil.');
+            return;
+        }
+
+        alert('SUKSES: Racepack berhasil ditandai telah diambil!');
+        loadData(); // Memuat ulang data untuk memperbarui UI
+      } catch(e) {
+        alert('Terjadi kesalahan jaringan.');
+        console.error(e);
+      }
     }
 
     // ─── EXPORT EXCEL ────────────────────────────────────────────────────────────
