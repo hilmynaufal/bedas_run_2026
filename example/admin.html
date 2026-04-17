@@ -316,24 +316,7 @@
         </div>
 
         <div class="flex items-center gap-3 w-full sm:w-auto">
-          <!-- Search & Filter Area (Desktop) -->
-          <div class="hidden sm:flex items-center gap-2 bg-slate-50 p-1 rounded-xl border border-slate-100">
-            <div class="relative">
-              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-              <input type="text" id="search-input" placeholder="Cari data..." oninput="onSearch()"
-                class="bg-transparent pl-9 pr-3 py-1.5 text-sm w-48 focus:outline-none text-slate-700 placeholder-slate-400">
-            </div>
-            <div class="w-[1px] h-4 bg-slate-200"></div>
-            <select id="category-filter"
-              onchange="document.getElementById('category-filter-mobile').value=this.value; renderTable(true)"
-              class="bg-transparent py-1.5 pl-2 pr-8 text-sm focus:outline-none text-slate-600 font-medium cursor-pointer">
-              <option value="all">Semua Kategori</option>
-              <option value="BIG - MAN 2K">BIG - MAN 2K</option>
-              <option value="BIG - WOMAN 2K">BIG - WOMAN 2K</option>
-              <option value="CHILD - BOY 2K">CHILD - BOY 2K</option>
-              <option value="CHILD - GIRL 2K">CHILD - GIRL 2K</option>
-            </select>
-          </div>
+          <!-- Search moved down above table -->
 
           <button onclick="loadData()" title="Refresh"
             class="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-teal-600 transition">
@@ -369,7 +352,7 @@
         </div>
 
         <!-- Charts Row -->
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
           <!-- Trend Chart -->
           <div class="xl:col-span-2 bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
             <div class="flex items-center justify-between mb-4">
@@ -396,18 +379,31 @@
               <canvas id="pie-chart"></canvas>
             </div>
           </div>
+          <!-- Racepack Chart -->
+          <div class="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="font-bold text-slate-800 text-sm">Status Racepack</p>
+                <p class="text-xs text-slate-400 mt-0.5">Pengambilan peserta</p>
+              </div>
+              <i data-lucide="package" class="w-4 h-4 text-teal-500"></i>
+            </div>
+            <div style="height:180px; position:relative;">
+              <canvas id="racepack-chart"></canvas>
+            </div>
+          </div>
         </div>
 
-        <!-- Mobile Search & Filter (Visible only on small screens) -->
-        <div class="sm:hidden mb-6 flex flex-col gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-          <div class="relative">
+        <!-- Search & Filter Area (Unified) -->
+        <div class="mb-4 flex flex-col sm:flex-row gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <div class="relative flex-1">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-            <input type="text" id="search-input-mobile" placeholder="Cari nama, ref, WA..." oninput="onSearch()"
-              class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-teal-400">
+            <input type="text" id="search-input" placeholder="Cari nama, ref, WA..." oninput="onSearch()"
+              class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-teal-400 focus:shadow-sm transition-all text-slate-700">
           </div>
-          <select id="category-filter-mobile"
-            onchange="document.getElementById('category-filter').value=this.value; renderTable(true)"
-            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-400">
+          <select id="category-filter"
+            onchange="renderTable(true)"
+            class="w-full sm:w-48 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-teal-400 focus:shadow-sm transition-all text-slate-600 font-medium cursor-pointer">
             <option value="all">Semua Kategori</option>
             <option value="BIG - MAN 2K">BIG - MAN 2K</option>
             <option value="BIG - WOMAN 2K">BIG - WOMAN 2K</option>
@@ -667,15 +663,11 @@
     }
 
     function getSearchQuery() {
-      const d = document.getElementById('search-input')?.value || '';
-      const m = document.getElementById('search-input-mobile')?.value || '';
-      return (d || m).toLowerCase().trim();
+      return (document.getElementById('search-input')?.value || '').toLowerCase().trim();
     }
 
     function getCategoryFilter() {
-      const d = document.getElementById('category-filter')?.value || 'all';
-      const m = document.getElementById('category-filter-mobile')?.value || 'all';
-      return d !== 'all' ? d : (m !== 'all' ? m : 'all');
+      return document.getElementById('category-filter')?.value || 'all';
     }
 
     function onSearch() {
@@ -1029,10 +1021,65 @@
     // ─── CHARTS ──────────────────────────────────────────────────────────────────
     let trendChart = null;
     let pieChart = null;
+    let racepackChart = null;
 
     function renderCharts() {
       renderTrendChart();
       renderPieChart();
+      renderRacepackChart();
+    }
+
+    function renderRacepackChart() {
+      const stats = { 'Sudah Diambil': 0, 'Belum Diambil': 0 };
+      const successData = allData.filter(t => t.status === 'success');
+      
+      successData.forEach(t => {
+        if (t.is_racepack_claimed) stats['Sudah Diambil']++;
+        else stats['Belum Diambil']++;
+      });
+
+      const ctx = document.getElementById('racepack-chart').getContext('2d');
+      if (racepackChart) racepackChart.destroy();
+      
+      racepackChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(stats),
+          datasets: [{
+            data: Object.values(stats),
+            backgroundColor: ['#22c55e', '#cbd5e1'],
+            borderWidth: 2,
+            borderColor: '#fff',
+            hoverOffset: 6,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { font: { size: 10, family: 'Plus Jakarta Sans' }, color: '#64748b', padding: 10, usePointStyle: true, pointStyleWidth: 8 }
+            },
+            tooltip: {
+              backgroundColor: '#0f172a',
+              titleColor: '#94a3b8',
+              bodyColor: '#fff',
+              bodyFont: { weight: 'bold' },
+              padding: 10,
+              displayColors: false,
+              callbacks: {
+                label: (i) => {
+                  const total = i.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = total > 0 ? Math.round((i.raw / total) * 100) : 0;
+                  return `${i.raw} peserta (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
     }
 
     function renderTrendChart() {
